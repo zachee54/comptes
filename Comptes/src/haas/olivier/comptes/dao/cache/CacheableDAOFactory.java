@@ -1,0 +1,124 @@
+package haas.olivier.comptes.dao.cache;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import haas.olivier.comptes.Banque;
+import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.Ecriture;
+import haas.olivier.comptes.Permanent;
+import haas.olivier.comptes.dao.CompteDAO;
+import haas.olivier.comptes.dao.DAOFactory;
+import haas.olivier.util.Month;
+
+/**
+ * L'interface des sources de données conçues pour fonctionner avec un cache.
+ * 
+ * @author Olivier HAAS
+ */
+public interface CacheableDAOFactory extends Closeable {
+
+	/**
+	 * Renvoie toutes les banques enregistrées dans la source. 
+	 * 
+	 * @throws IOException
+	 */
+	Iterator<Banque> getBanques() throws IOException;
+	
+	/**
+	 * Renvoie tous les comptes. 
+	 * 
+	 * @throws IOException
+	 */
+	Iterator<Compte> getComptes() throws IOException;
+	
+	/**
+	 * Renvoie toutes les écritures.
+	 * 
+	 * @param cDAO	L'objet d'accès aux comptes. Il est utilisé pour récupérer
+	 * 				les instances de <code>Compte</code>, indispensables pour
+	 * 				instancier les <code>Ecriture</code>s.
+	 * 
+	 * @throws IOException
+	 */
+	Iterator<Ecriture> getEcritures(CompteDAO cDAO) throws IOException;
+	
+	/**
+	 * Renvoie toutes les opérations permanentes.
+	* 
+	* @param cache	Le cache d'opérations permanentes qui appelle ce
+	* 				constructeur. Cela permet, au cours de l'énumération des
+	* 				<code>Permanent</code>s, de récupérer l'un d'eux déjà
+	* 				instancié (utile pour les opérations dépendant d'une autre).
+	* 
+	* @param cDAO	L'objet d'accès aux comptes. Il est utilisé pour récupérer
+	* 				les instances de <code>Compte</code>, indispensables pour
+	* 				instancier les <code>Permanent</code>s.
+	* 
+	 * @throws IOException
+	*/
+	Iterator<Permanent> getPermanents(CachePermanentDAO cache,
+			CompteDAO cDAO) throws IOException;
+	
+	/**
+	 * Renvoie les historiques des comptes. 
+	 * 
+	 * @throws IOException
+	 */
+	Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getHistorique()
+			throws IOException;
+	
+	/**
+	 * Renvoie les soldes à vue.
+	 * 
+	 * @throws IOException
+	 */
+	Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getSoldesAVue()
+			throws IOException;
+	
+	/**
+	 * Renvoie les moyennes glissantes.
+	 * 
+	 * @throws IOException
+	 */
+	Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getMoyennes()
+			throws IOException;
+	
+	/**
+	 * Renvoie un objet d'accès aux propriétés. 
+	 * 
+	 * @throws IOException
+	 */
+	CacheablePropertiesDAO getProperties() throws IOException;
+	
+	/**
+	 * Sauvegarde les données.
+	 * 
+	 * @param factory	L'objet d'accès aux données à sauvegarder.
+	 * 
+	 * @throws IOException
+	 */
+	void save(DAOFactory factory) throws IOException;
+	
+	/**
+	 * Renvoie le type de modèle pour affichage utilisateur.
+	 */
+	String getName();
+	
+	/**
+	 * Renvoie le nom de la source pour affichage utilisateur.
+	 */
+	String getSource();
+	
+	/**
+	 * Renvoie le nom complet de la source.
+	 */
+	String getSourceFullName();
+	
+	/**
+	 * Indique si la source de données peut être sauvegardée en l'état.
+	 */
+	boolean canBeSaved();
+}

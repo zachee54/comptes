@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.2" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <class id="1" language="java" name="haas.olivier.comptes.dao.csv.AbstractCsvLayer" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/csv/AbstractCsvLayer.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="203" width="179" x="1763" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="2" language="java" name="haas.olivier.comptes.dao.csv.CsvDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/csv/CsvDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="833" width="385" x="1061" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="3" language="java" name="haas.olivier.comptes.dao.csv.CsvCompteDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/csv/CsvCompteDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="257" width="218" x="1763" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="haas.olivier.comptes.dao.csv.CsvEcritureDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/csv/CsvEcritureDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="311" width="237" x="1486" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="5" language="java" name="haas.olivier.comptes.dao.csv.CsvSuiviDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/csv/CsvSuiviDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="221" width="338" x="2021" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="6" language="java" name="haas.olivier.comptes.dao.cache.CacheableDAOFactory" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheableDAOFactory.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="293" width="385" x="1061" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="7" language="java" name="haas.olivier.comptes.dao.xml.JaxbBanqueDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/xml/JaxbBanqueDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="185" width="236" x="41" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="8" language="java" name="haas.olivier.comptes.dao.xml.JaxbPermanentDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/xml/JaxbPermanentDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="293" width="371" x="317" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="9" language="java" name="haas.olivier.comptes.dao.xml.JaxbPropertiesDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/xml/JaxbPropertiesDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="203" width="293" x="728" y="910"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="10" language="java" name="haas.olivier.comptes.dao.xml.PermanentOrdener" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/xml/PermanentOrdener.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="167" width="228" x="317" y="1261"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <association id="11">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="12" name="it">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="13" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="14">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="6"/>  
+  </realization>  
+  <dependency id="15">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <dependency id="16">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <dependency id="17">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <generalization id="18">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="1"/>  
+  </generalization>  
+  <generalization id="19">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="1"/>  
+  </generalization>  
+  <dependency id="20">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="21">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <dependency id="22">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <generalization id="23">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="1"/>  
+  </generalization>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

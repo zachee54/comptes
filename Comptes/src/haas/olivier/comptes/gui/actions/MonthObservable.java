@@ -1,0 +1,86 @@
+package haas.olivier.comptes.gui.actions;
+
+import haas.olivier.util.Month;
+import haas.olivier.util.Observable;
+
+import java.util.Date;
+
+/**
+ * Un modèle observable de changements de mois ou de dates. Bien que les
+ * changements de données impactent toute l'application, chaque instance a ses
+ * propres observateurs. Cela permet de ne mettre à jour que les observateurs
+ * dont on a besoin. En contrepartie, il faut penser à mettre à jour les autres
+ * avant de s'en servir.
+ * 
+ * @author Olivier Haas
+ */
+public class MonthObservable extends Observable<MonthObserver> {
+
+	/**
+	 * Le mois sélectionné. Par défaut, le mois en cours. Ce mois est le même
+	 * pour toute l'application.
+	 */
+	private static Month month = new Month();
+
+	/**
+	 * La date sélectionnée. Par défaut, aucune date (juste un mois). Cette date
+	 * est la même pour toute l'application.
+	 */
+	private static Date date = null;
+
+	/** @return Le mois actuellement sélectionné. */
+	public static Month getMonth() {
+		return month;
+	}
+
+	/**
+	 * @return La date actuellement sélectionnée, ou null si la sélection porte
+	 *         sur un mois sans précision du jour.
+	 */
+	public static Date getDate() {
+		return date;
+	}
+
+	/** Notifie aux observateurs le mois actuel. */
+	private void notifyMonth() {
+		for (MonthObserver observer : observers) {
+			observer.monthChanged(month); // Notifier le mois
+		}
+	}// notifyMonth
+
+	/** Notifie aux observateurs la date actuelle. */
+	private void notifyDate() {
+		for (MonthObserver observer : observers) {
+			observer.dateChanged(date); // Notifier la date
+		}
+	}// notifyDate
+
+	/**
+	 * Notifie tous les observateurs en leur indiquant le mois ou la date
+	 * actuelle, sans les modifier. Utile pour forcer les observateurs à se
+	 * mettre à jour.
+	 */
+	public void notifyObservers() {
+
+		// Si une date est sélectionnée
+		if (date != null) {
+			notifyDate(); // Notifier la date
+		} else {
+			notifyMonth(); // Notifier le mois
+		}// if date null
+	}// notifyObservers
+
+	/** Modifie le mois sélectionné et notifie les observateurs. */
+	public void setMonth(Month newMonth) {
+		month = newMonth; // Nouveau mois
+		date = null; // Supprimer la date s'il y en a une
+		notifyMonth(); // Notifie le nouveau mois
+	}// setMonth
+
+	/** Modifie la date sélectionnée et notifie les observateurs. */
+	public void setDate(Date newDate) {
+		date = newDate; // Nouvelle date
+		month = new Month(newDate); // Ça paraît bête, mais certaines gens...
+		notifyDate(); // Notifier les observateurs
+	}// setDate
+}// class

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:haas.olivier.comptes.properties" xmlns:props="urn:haas.olivier.comptes.properties"
+	elementFormDefault="qualified">
+
+	<!-- Liste des propriétés -->
+	<xs:element name="properties">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="diagrams">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="diagram" type="props:diagram"
+								minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Définition des propriétés d'un diagramme -->
+	<xs:complexType name="diagram">
+		<xs:sequence>
+		
+			<!-- Identifiant d'une série -->
+			<xs:element name="serie" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:int">
+							<xs:attribute name="hidden" type="xs:boolean" />
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" />
+	</xs:complexType>
+</xs:schema>
