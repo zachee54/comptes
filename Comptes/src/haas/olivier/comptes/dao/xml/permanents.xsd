@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:haas.olivier.comptes.permanents"
+	xmlns:perm="urn:haas.olivier.comptes.permanents"
+	elementFormDefault="qualified">
+
+	<xs:element name="permanents">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="permanent" type="perm:permanent"
+					minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Une opération permanente -->
+	<xs:complexType name="permanent">
+		<xs:sequence>
+			<xs:element name="libelle" type="xs:string" />
+			<xs:element name="tiers" type="xs:string" />
+			<xs:element name="debit" type="xs:int" />
+			<xs:element name="credit" type="xs:int" />
+			<xs:element name="pointage" type="xs:boolean" />
+			<xs:element name="jours" type="perm:jours" />
+
+			<!-- Renseignements pour les opérations à montants prédéfinis -->
+			<xs:element name="montants" type="perm:montants"
+				minOccurs="0" />
+
+			<!-- Renseignements pour les opérations proportionnelles à une autre -->
+			<xs:element name="dependance" minOccurs="0">
+				<xs:complexType>
+					<xs:attribute name="id" type="xs:int" />
+					<xs:attribute name="taux" type="xs:double" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:int" />
+		<xs:attribute name="nom" type="xs:string" />
+	</xs:complexType>
+
+	<!-- Des numéros de jours attachés chacun à un mois -->
+	<xs:complexType name="jours">
+		<xs:sequence>
+			<xs:element name="jour" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:int">
+							<xs:attribute name="annee" type="xs:int" />
+							<xs:attribute name="mois" type="perm:mois" />
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Des montants attachés chacun à un mois -->
+	<xs:complexType name="montants">
+		<xs:sequence>
+			<xs:element name="montant" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:decimal">
+							<xs:attribute name="annee" type="xs:int" />
+							<xs:attribute name="mois" type="perm:mois" />
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Un numéro de mois calendaire -->
+	<xs:simpleType name="mois">
+		<xs:restriction base="xs:int">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="12" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
