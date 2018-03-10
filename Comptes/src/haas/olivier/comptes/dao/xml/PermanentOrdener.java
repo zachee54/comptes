@@ -10,35 +10,43 @@ import haas.olivier.comptes.dao.xml.jaxb.perm.Permanent;
 import haas.olivier.comptes.dao.xml.jaxb.perm.Permanent.Dependance;
 import haas.olivier.util.ReadOnlyIterator;
 
-/** Un itérateur qui réordonne les opérations permanentes JAXB de façon à
+/**
+ * Un itérateur qui réordonne les opérations permanentes JAXB de façon à
  * traiter les opérations dépendantes après leurs dépendances.
  *
  * @author Olivier HAAS
  */
 class PermanentOrdener extends ReadOnlyIterator<Permanent> {
 
-	/** Les identifiants des opérations déjà parcourues. */
-	private final Set<Integer> ids = new HashSet<Integer>();
+	/**
+	 * Les identifiants des opérations déjà parcourues.
+	 */
+	private final Set<Integer> ids = new HashSet<>();
 	
-	/** Les opérations dépendantes en attente de leurs dépendances. */
-	private final List<Permanent> dependants = new ArrayList<Permanent>();
+	/**
+	 * Les opérations dépendantes en attente de leurs dépendances.
+	 */
+	private final List<Permanent> dependants = new ArrayList<>();
 	
-	/** L'itérateur d'origine. */
+	/**
+	 * L'itérateur d'origine.
+	 */
 	private final Iterator<Permanent> it;
 	
-	/** Construit un itérateur qui réordonne les opérations permanentes JAXB
+	/**
+	 * Construit un itérateur qui réordonne les opérations permanentes JAXB
 	 * pour respecter l'ordre des dépendances.
 	 * 
 	 * @param it	Un itérateur d'opérations permanentes JAXB.
 	 */
-	PermanentOrdener(Iterator<Permanent> it) {
+	public PermanentOrdener(Iterator<Permanent> it) {
 		this.it = it;
-	}// constructeur
+	}
 	
 	@Override
 	public boolean hasNext() {
 		return it.hasNext() || !dependants.isEmpty();
-	}// hasNext
+	}
 
 	@Override
 	public Permanent next() {
@@ -60,8 +68,8 @@ class PermanentOrdener extends ReadOnlyIterator<Permanent> {
 			} else {
 				// Opération dépendante et dépendance indisponible
 				dependants.add(next);
-			}// if
-		}// while
+			}
+		}
 		
 		// Trouver une opération dépendante pouvant être traitée maintenant
 		for (int i=0; i<dependants.size(); i++) {
@@ -71,10 +79,10 @@ class PermanentOrdener extends ReadOnlyIterator<Permanent> {
 			if (ids.contains(p.getDependance().getId())) {
 				dependants.remove(i);
 				return p;
-			}// if
-		}// for
+			}
+		}
 		
 		throw new RuntimeException(
 				"Problème de dépendance des opérations permanentes : dépendance absente ou boucle entre les dépendances.");
-	}// next
+	}
 }

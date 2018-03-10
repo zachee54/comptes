@@ -28,7 +28,8 @@ import haas.olivier.comptes.dao.xml.jaxb.props.Properties;
 import haas.olivier.comptes.dao.xml.jaxb.props.Properties.Diagrams;
 import haas.olivier.diagram.DiagramMemento;
 
-/** Une classe d'accès aux propriétés, au format XML.
+/**
+ * Une classe d'accès aux propriétés, au format XML.
  * <p>
  * Cette classe utilise le framework JAXB.
  *
@@ -36,7 +37,8 @@ import haas.olivier.diagram.DiagramMemento;
  */
 public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 
-	/** Sauvegarde des propriétés vers un flux XML.
+	/**
+	 * Sauvegarde des propriétés vers un flux XML.
 	 * 
 	 * @param propsDAO	L'objet d'accès aux propriétés à écrire.
 	 * @param out		Le flux XML.
@@ -71,10 +73,11 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 		} catch (Exception e) {
 			throw new IOException(
 					"Impossible d'écrire les propriétés", e);
-		}// try
-	}// save
+		}
+	}
 	
-	/** Renvoie le schéma XML des propriétés. 
+	/**
+	 * Renvoie le schéma XML des propriétés. 
 	 * 
 	 * @throws SAXException
 	 */
@@ -84,9 +87,10 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 				.newSchema(new StreamSource(
 						JaxbPropertiesDAO.class
 						.getResourceAsStream("properties.xsd")));
-	}// getSchema
+	}
 	
-	/** Instancie les objets JAXB représentant les propriétés des diagrammes.
+	/**
+	 * Instancie les objets JAXB représentant les propriétés des diagrammes.
 	 * 
 	 * @param propsDAO	L'objet d'accès aux propriétés.
 	 * @return			Les propriétés des diagrammes.
@@ -99,11 +103,12 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 					prepareDiagram(propsDAO.getDiagramProperties(name));
 			diagramProps.setName(name);
 			diagramList.add(diagramProps);
-		}// for
+		}
 		return diagrams;
-	}// createDiagrams
+	}
 	
-	/** Instancie un objet d'une classe JAXB représentant les propriétés d'un
+	/**
+	 * Instancie un objet d'une classe JAXB représentant les propriétés d'un
 	 * diagramme.
 	 * 
 	 * @param memento	Un memento des propriétés du diagramme.
@@ -118,14 +123,17 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 			serieProps.setValue(id);
 			serieProps.setHidden(memento.isHidden(id));
 			seriesProps.add(serieProps);
-		}// for
+		}
 		return diagramProps;
-	}// prepareBanque
+	}
 	
-	/** Les propriétés au format JAXB désérialisés. */
+	/**
+	 * Les propriétés au format JAXB désérialisés.
+	 */
 	private final Properties properties;
 	
-	/** Construit un objet d'accès aux propriétés au format XML.
+	/**
+	 * Construit un objet d'accès aux propriétés au format XML.
 	 * 
 	 * @param in	Un flux XML contenant les propriétés.
 	 * 
@@ -150,8 +158,8 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 			
 		} catch (Exception e) {
 			throw new IOException("Impossible de lire les propriétés", e);
-		}// try
-	}// constructeur
+		}
+	}
 	
 	@Override
 	public Map<String, DiagramMemento> getDiagramProperties() {
@@ -159,9 +167,10 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 		for (Diagram diagramProps : properties.getDiagrams().getDiagram())
 			mementos.put(diagramProps.getName(), getMemento(diagramProps));
 		return mementos;
-	}// getDiagramProperties
+	}
 	
-	/** Instancie un memento des propriétés d'un diagramme à partir de la classe
+	/**
+	 * Instancie un memento des propriétés d'un diagramme à partir de la classe
 	 * JAXB désérialisée.
 	 * 
 	 * @param diagramProps	La classe JAXB des propriétés d'un diagramme
@@ -179,5 +188,5 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 				hidden.add(id);
 		}
 		return new DiagramMemento(diagramProps.getName(), ids, hidden);
-	}// getMemento
+	}
 }

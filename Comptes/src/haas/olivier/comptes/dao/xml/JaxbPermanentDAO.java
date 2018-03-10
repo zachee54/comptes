@@ -36,7 +36,8 @@ import haas.olivier.comptes.dao.xml.jaxb.perm.Permanents;
 import haas.olivier.util.Month;
 import haas.olivier.util.ReadOnlyIterator;
 
-/** Une classe d'accès aux données des opérations permanentes au format XML.
+/**
+ * Une classe d'accès aux données des opérations permanentes au format XML.
  * <p>
  * Cette classe utilise le framework JAXB.
  *
@@ -45,7 +46,8 @@ import haas.olivier.util.ReadOnlyIterator;
 public class JaxbPermanentDAO
 extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	
-	/** Sauvegarde des opérations permanentes vers un flux XML.
+	/**
+	 * Sauvegarde des opérations permanentes vers un flux XML.
 	 * 
 	 * @param it	Un itérateur des opérations permanentes à écrire.
 	 * @param out	Le flux XML.
@@ -84,10 +86,11 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		} catch (Exception e) {
 			throw new IOException(
 					"Impossible d'écrire les opérations permanentes", e);
-		}// try
-	}// save
+		}
+	}
 	
-	/** Renvoie le schéma XML des opérations permanentes. 
+	/**
+	 * Renvoie le schéma XML des opérations permanentes. 
 	 * 
 	 * @throws SAXException
 	 */
@@ -97,9 +100,10 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 				.newSchema(new StreamSource(
 						JaxbPermanentDAO.class
 						.getResourceAsStream("permanents.xsd")));
-	}// getSchema
+	}
 	
-	/** Instancie un objet d'une classe JAXB représentant une opération
+	/**
+	 * Instancie un objet d'une classe JAXB représentant une opération
 	 * permanente.
 	 * 
 	 * @param p	L'opération permanente à représenter.
@@ -125,12 +129,13 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			
 		} else if (p instanceof PermanentProport) {
 			result.setDependance(prepareDependance(((PermanentProport) p)));
-		}// if
+		}
 		
 		return result;
-	}// preparePermanent
+	}
 	
-	/** Instancie un objet d'une classe JAXB représentant les numéros des jours.
+	/**
+	 * Instancie un objet d'une classe JAXB représentant les numéros des jours.
 	 * 
 	 * @param jours	La map des numéros de jours selon le mois.
 	 * 
@@ -154,12 +159,13 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			
 			// Ajouter à l'objet rassemblant les jours
 			listJours.add(jour);
-		}// for
+		}
 		
 		return result;
-	}// prepareJours
+	}
 	
-	/** Instancie un objet d'une classe JAXB représentant les montants.
+	/**
+	 * Instancie un objet d'une classe JAXB représentant les montants.
 	 * 
 	 * @param montants	La map des montants selon le mois.
 	 * 
@@ -183,12 +189,13 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			
 			// Ajouter à l'objet rassemblant les montants
 			listMontants.add(montant);
-		}// for
+		}
 		
 		return result;
-	}// prepareMontants
+	}
 	
-	/** Instancie un objet d'une classe JAXB représentant la dépendance à une
+	/**
+	 * Instancie un objet d'une classe JAXB représentant la dépendance à une
 	 * autre opération permanente.
 	 * 
 	 * @param p	L'opération permanente dépendante d'une autre.
@@ -200,18 +207,25 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		result.setId(p.dependance.id);
 		result.setTaux(p.taux.doubleValue());
 		return result;
-	}// prepareDependance
+	}
 	
-	/** L'itérateur parcourant les objets JAXB désérialisés. */
+	/**
+	 * L'itérateur parcourant les objets JAXB désérialisés.
+	 */
 	private final PermanentOrdener it;
 	
-	/** Le cache des opérations permanentes déjà instanciées. */
+	/**
+	 * Le cache des opérations permanentes déjà instanciées.
+	 */
 	private final CachePermanentDAO cache;
 	
-	/** Les comptes, classés par identifiant. */
+	/**
+	 * Les comptes, classés par identifiant.
+	 */
 	private final Map<Integer, Compte> comptesById;
 	
-	/** Construit un objet d'accès aux opérations permanentes à partir d'un flux
+	/**
+	 * Construit un objet d'accès aux opérations permanentes à partir d'un flux
 	 * XML.
 	 * <p>
 	 * Cette classe utilise le framework JAXB.
@@ -247,13 +261,13 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		} catch (Exception e) {
 			throw new IOException(
 					"Impossible de lire les opérations permanentes", e);
-		}// try
-	}// constructeur
+		}
+	}
 	
 	@Override
 	public boolean hasNext() {
 		return it.hasNext();
-	}// hasNext
+	}
 
 	@Override
 	public haas.olivier.comptes.Permanent next() {
@@ -277,7 +291,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			if (montants != null) {
 				return new PermanentFixe(id, nom, debit, credit, libelle, tiers,
 						pointer, jours, readMontants(montants));
-			}// if montants prédéfinis
+			}
 				
 			// Cas des opérations dépendantes
 			Dependance dependance = p.getDependance();
@@ -285,13 +299,13 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 				return new PermanentProport(id, nom, debit, credit, libelle,
 						tiers, pointer, jours, cache.get(dependance.getId()),
 						new BigDecimal(dependance.getTaux().toString()));
-			}// if
+			}
 			
 			// Cas des opérations qui soldent un compte bancaire
 			if (debit instanceof CompteBancaire) {
 				return new PermanentSoldeur(id, nom, (CompteBancaire) debit,
 						credit, libelle, tiers, pointer, jours);
-			}// if
+			}
 			
 			// Aucun : type inconnu
 			throw new IOException("Impossible de déterminer le type de " +
@@ -302,10 +316,11 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 					id == null
 					? "une opération permanente"
 					: "l'opération permanente n°" + id, e);
-		}// try
-	}// next
+		}
+	}
 	
-	/** Lit les jours JAXB et le splace dans une map.
+	/**
+	 * Lit les jours JAXB et le splace dans une map.
 	 * 
 	 * @param jours	L'instance JAXB des jours
 	 * 
@@ -317,11 +332,12 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			result.put(
 					new Month(jour.getAnnee(), jour.getMois()),
 					jour.getValue());
-		}// for
+		}
 		return result;
-	}// readJours
+	}
 
-	/** Lit les montants JAXB et les place dans une map.
+	/**
+	 * Lit les montants JAXB et les place dans une map.
 	 * 
 	 * @param montants	L'instance JAXB des montants.
 	 * 
@@ -333,7 +349,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			result.put(
 					new Month(montant.getAnnee(), montant.getMois()),
 					montant.getValue());
-		}// for
+		}
 		return result;
-	}// readMontants
+	}
 }
