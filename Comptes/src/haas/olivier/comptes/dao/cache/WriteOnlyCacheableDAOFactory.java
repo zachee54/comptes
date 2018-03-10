@@ -56,14 +56,14 @@ public class WriteOnlyCacheableDAOFactory implements CacheableDAOFactory {
 	}
 
 	@Override
-	public Iterator<Ecriture> getEcritures(CompteDAO cDAO) throws IOException {
-		return readFactory.getEcritures(cDAO);
+	public Iterator<Ecriture> getEcritures() throws IOException {
+		return readFactory.getEcritures();
 	}
 
 	@Override
-	public Iterator<Permanent> getPermanents(CachePermanentDAO cache,
-			CompteDAO cDAO) throws IOException {
-		return readFactory.getPermanents(cache, cDAO);
+	public Iterator<Permanent> getPermanents(CachePermanentDAO cache)
+			throws IOException {
+		return readFactory.getPermanents(cache);
 	}
 
 	@Override
@@ -87,9 +87,9 @@ public class WriteOnlyCacheableDAOFactory implements CacheableDAOFactory {
 	}
 
 	@Override
-	public void save(DAOFactory factory) throws IOException {
+	public void save(CacheDAOFactory cache) throws IOException {
 		// Sauvegarder dans la source réelle
-		writeFactory.save(factory);
+		writeFactory.save(cache);
 	}
 
 	/**

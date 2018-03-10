@@ -49,7 +49,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 * Renvoie un itérateur vide.
 	 */
 	@Override
-	public Iterator<Ecriture> getEcritures(CompteDAO cDAO) throws IOException {
+	public Iterator<Ecriture> getEcritures() throws IOException {
 		return Collections.emptyIterator();
 	}
 
@@ -57,8 +57,8 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 * Renvoie un itérateur vide.
 	 */
 	@Override
-	public Iterator<Permanent> getPermanents(CachePermanentDAO cache,
-			CompteDAO cDAO) throws IOException {
+	public Iterator<Permanent> getPermanents(CachePermanentDAO cache)
+			throws IOException {
 		return Collections.emptyIterator();
 	}
 
@@ -108,7 +108,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 * 			Dans tous les cas.
 	 */
 	@Override
-	public void save(DAOFactory factory) {
+	public void save(CacheDAOFactory cache) {
 		throw new UnsupportedOperationException(
 				"Pas de source de données définie");
 	}
