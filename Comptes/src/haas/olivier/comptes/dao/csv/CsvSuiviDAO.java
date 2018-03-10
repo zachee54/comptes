@@ -2,6 +2,7 @@ package haas.olivier.comptes.dao.csv;
 
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
+import haas.olivier.comptes.dao.cache.Solde;
 import haas.olivier.util.Month;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,8 +24,7 @@ import com.csvreader.CsvWriter;
  * 
  * @author Olivier HAAS
  */
-class CsvSuiviDAO
-extends AbstractCsvLayer<Entry<Month, Entry<Compte, BigDecimal>>> {
+class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 
 	/**
 	 * Nom de l'en-tête de la colonne contenant les mois.
@@ -92,7 +92,7 @@ extends AbstractCsvLayer<Entry<Month, Entry<Compte, BigDecimal>>> {
 			headers[n++] = id.toString();
 		writer.writeRecord(headers);
 	}
-
+	
 	/**
 	 * Les en-têtes du fichier.
 	 */
@@ -121,7 +121,7 @@ extends AbstractCsvLayer<Entry<Month, Entry<Compte, BigDecimal>>> {
 	 * 
 	 * @throws IOException
 	 */
-	CsvSuiviDAO(CsvReader reader) throws IOException {
+	public CsvSuiviDAO(CsvReader reader) throws IOException {
 		super(reader);
 		
 		// Mémoriser les en-têtes
@@ -154,9 +154,8 @@ extends AbstractCsvLayer<Entry<Month, Entry<Compte, BigDecimal>>> {
 	 * valeur suivante <b>dans la même ligne</b> ou, s'il n'y a plus rien à
 	 * lire, au début de la prochaine ligne contenant une valeur.
 	 */
-	protected Entry<Month, Entry<Integer, BigDecimal>> readNext(
-			CsvReader reader)
-					throws NumberFormatException, ParseException, IOException {
+	protected Solde readNext(CsvReader reader)
+			throws NumberFormatException, ParseException, IOException {
 		
 		// Trouver la prochaine colonne non vide dans cette ligne
 		String text = null;						// Texte lu
@@ -180,12 +179,8 @@ extends AbstractCsvLayer<Entry<Month, Entry<Compte, BigDecimal>>> {
 		if (mois == null)
 			mois = new Month(CsvDAO.DF.parse(reader.get(colMois)));
 		
-		// Renvoyer la valeur trouvée, avec son mois et le compte correspondants
-		return new SimpleImmutableEntry<>(
-				mois,							// Mois
-				new SimpleImmutableEntry<>(
-						Integer.parseInt(		// Identifiant du compte
-								headers[col]),
-						CsvDAO.parseAmount(text)));	// Montant du suivi
+		// Renvoyer le solde trouvé, avec son mois et le compte correspondants
+		return new Solde(mois, Integer.parseInt(headers[col]),
+						CsvDAO.parseAmount(text));
 	}
 }

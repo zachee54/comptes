@@ -41,6 +41,7 @@ import haas.olivier.comptes.dao.PropertiesDAO;
 import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
 import haas.olivier.comptes.dao.cache.CacheablePropertiesDAO;
+import haas.olivier.comptes.dao.cache.Solde;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
 import haas.olivier.comptes.dao.cache.WriteOnlyCacheableDAOFactory;
@@ -272,19 +273,19 @@ public class CsvDAO implements CacheableDAOFactory {
 	}
 
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getHistorique()
+	public Iterator<Solde> getHistorique()
 			throws IOException {
 		return getSuivi(HISTORIQUE);
 	}
 
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getSoldesAVue()
+	public Iterator<Solde> getSoldesAVue()
 			throws IOException {
 		return getSuivi(SOLDES);
 	}
 
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getMoyennes()
+	public Iterator<Solde> getMoyennes()
 			throws IOException {
 		return getSuivi(MOYENNES);
 	}
@@ -297,9 +298,8 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @throws IOException
 	 */
-	private Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getSuivi(
-			String entryName) throws IOException {
-		return  new CsvSuiviDAO(getReader(entryName));
+	private Iterator<Solde> getSuivi(String entryName) throws IOException {
+		return new CsvSuiviDAO(getReader(entryName));
 	}
 	
 	@Override

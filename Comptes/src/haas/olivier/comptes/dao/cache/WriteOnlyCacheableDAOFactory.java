@@ -4,14 +4,8 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.dao.CompteDAO;
-import haas.olivier.comptes.dao.DAOFactory;
-import haas.olivier.util.Month;
-
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Iterator;
-import java.util.Map.Entry;
 
 /**
  * Un <i>wrapper</i> de <code>CacheableDAOFactory</code> autorisant uniquement
@@ -73,20 +67,17 @@ public class WriteOnlyCacheableDAOFactory implements CacheableDAOFactory {
 	}
 
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getHistorique()
-			throws IOException {
+	public Iterator<Solde> getHistorique() throws IOException {
 		return readFactory.getHistorique();
 	}
 
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getSoldesAVue()
-			throws IOException {
+	public Iterator<Solde> getSoldesAVue() throws IOException {
 		return readFactory.getSoldesAVue();
 	}
 
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getMoyennes()
-			throws IOException {
+	public Iterator<Solde> getMoyennes() throws IOException {
 		return readFactory.getMoyennes();
 	}
 

@@ -133,6 +133,7 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 		super(reader);
 	}
 
+	// FIXME Retenir les identifiants des comptes au fur et à mesure de la lecture
 	@Override
 	protected Compte readNext(CsvReader reader)
 			throws NumberFormatException, IOException {
