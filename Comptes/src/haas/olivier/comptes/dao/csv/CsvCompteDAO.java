@@ -20,12 +20,39 @@ import haas.olivier.comptes.TypeCompte;
 class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 
 	/**
-	 * Noms des champs CSV.
+	 * Nom du champ CSV contenant l'identifiant du compte.
 	 */
-	private static final String HEADER_ID = "id", HEADER_NOM = "nom", 
-			HEADER_TYPE = "type", HEADER_OUV = "ouverture",
-			HEADER_CLOTURE = "cloture", HEADER_NUM = "numero",
-			HEADER_COLOR = "couleur";
+	private static final String HEADER_ID = "id";
+	
+	/**
+	 * Nom du champ CSV contenant le nom du compte.
+	 */
+	private static final String HEADER_NOM = "nom";
+	
+	/**
+	 * Nom du champ CSV contenant le type du compte.
+	 */
+	private static final String HEADER_TYPE = "type";
+	
+	/**
+	 * Nom du champ CSV contenant la date d'ouverture du compte.
+	 */
+	private static final String HEADER_OUV = "ouverture";
+	
+	/**
+	 * Nom du champ CSV contenant la date de clôture.
+	 */
+	private static final String HEADER_CLOTURE = "cloture";
+	
+	/**
+	 * Nom du champ CSV contenant le numéro du compte.
+	 */
+	private static final String HEADER_NUM = "numero";
+	
+	/**
+	 * Nom du champ CSV contenant la couleur du compte.
+	 */
+	private static final String HEADER_COLOR = "couleur";
 
 	/**
 	 * Contenu-type des en-têtes.
@@ -87,6 +114,9 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 					Long num = c.getNumero();
 					value = (num == null) ? "" : num.toString();
 					break;
+				
+				default:
+					break;
 				}
 				writer.write(value);
 			}
@@ -117,15 +147,16 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 				if (t.id == typeLu) {
 					type = t;
 					break;
-				}// if type
-			}// for type
+				}
+			}
 			if (type == null) {
 				throw new IOException(
 						"Type illisible : " + typeLu + " (compte "
 								+ reader.get(HEADER_NOM) + " n°" + id + ")");
-			}// if type null
+			}
 			
 		} catch (Exception e) {
+			
 			// Nouvelle implémentation à conserver
 			TypeCompte.valueOf(reader.get(HEADER_TYPE));
 		}

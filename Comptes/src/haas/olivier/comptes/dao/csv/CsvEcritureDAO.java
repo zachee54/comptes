@@ -13,25 +13,67 @@ import java.util.Iterator;
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
 
-/** Un objet d'accès aux écritures au format CSV.
+/**
+ * Un objet d'accès aux écritures au format CSV.
  * 
  * @author Olivier HAAS
  */
 class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 
-	/** Les noms des champs CSV. */
-	private static final String HEADER_ID = "id", HEADER_DATE = "date",
-			HEADER_POINTAGE = "pointage", HEADER_DEBIT = "debit",
-			HEADER_CREDIT = "credit", HEADER_LIB = "commentaire",
-			HEADER_TIERS = "tiers", HEADER_CHEQUE = "cheque",
-			HEADER_MONTANT = "montant";
+	/**
+	 * Le nom du champ CSV contenant l'identifiant de l'écriture.
+	 */
+	private static final String HEADER_ID = "id";
 	
-	/** La disposition par défaut des colonnes. */
-	private static final String[] STANDARD_HEADERS = {HEADER_ID, HEADER_DATE,
-		HEADER_POINTAGE, HEADER_DEBIT, HEADER_CREDIT, HEADER_LIB, HEADER_TIERS,
-		HEADER_CHEQUE, HEADER_MONTANT};
+	/**
+	 * Le nom du champ CSV contenant la date de l'écriture.
+	 */
+	private static final String HEADER_DATE = "date";
+	
+	/**
+	 * Le nom du champ CSV contenant la date de pointage.
+	 */
+	private static final String HEADER_POINTAGE = "pointage";
+	
+	/**
+	 * Le nom du champ CSV contenant l'identifiant du compte débité.
+	 */
+	private static final String HEADER_DEBIT = "debit";
+	
+	/**
+	 * Le nom du champ CSV contenant l'identifiant du compte crédité.
+	 */
+	private static final String HEADER_CREDIT = "credit";
+	
+	/**
+	 * Le nom du champ CSV contenant le libellé de l'écriture.
+	 */
+	private static final String HEADER_LIB = "commentaire";
+	
+	/**
+	 * Le nom du champ CSV contenant le nom du tiers.
+	 */
+	private static final String HEADER_TIERS = "tiers";
+	
+	/**
+	 * Le nom du champ CSV contenant le numéro du chèque.
+	 */
+	private static final String HEADER_CHEQUE = "cheque";
+	
+	/**
+	 * Le nom du champ CSV contenant le montant de l'écriture.
+	 */
+	private static final String HEADER_MONTANT = "montant";
+	
+	/**
+	 * La disposition par défaut des colonnes.
+	 */
+	private static final String[] STANDARD_HEADERS =
+		{HEADER_ID, HEADER_DATE, HEADER_POINTAGE, HEADER_DEBIT, HEADER_CREDIT,
+				HEADER_LIB, HEADER_TIERS, HEADER_CHEQUE, HEADER_MONTANT};
 
-	/** Sauvegarde les éléments.
+	/**
+	 * Sauvegarde les éléments.
 	 * 
 	 * @param elements	Un itérateur des écritures à sauvegarder.
 	 * @param writer	Un flux CSV.
@@ -70,17 +112,23 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 					value = (e.cheque == null
 					? "" : e.cheque.toString());
 					break;
-				}// switch header
+					
+				default:
+					break;
+				}
 				writer.write(value);				// Écrire la valeur
-			}// for header
+			}
 			writer.endRecord();						// Écrire la fin de ligne
-		}// while elements
-	}// save
+		}
+	}
 
-	/** L'objet d'accès aux comptes. */
+	/**
+	 * L'objet d'accès aux comptes.
+	 */
 	private final CompteDAO cDAO;
 	
-	/** Construit un objet d'accès aux écritures au format CSV.
+	/**
+	 * Construit un objet d'accès aux écritures au format CSV.
 	 * 
 	 * @param reader	Le lecteur CSV à utiliser.
 	 * @param cDAO		L'objet d'accès aux comptes. Il est utilisé pour
@@ -92,7 +140,7 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	CsvEcritureDAO(CsvReader reader, CompteDAO cDAO) throws IOException {
 		super(reader);
 		this.cDAO = cDAO;
-	}// constructeur
+	}
 
 	@Override
 	protected Ecriture readNext(CsvReader reader)
@@ -127,7 +175,7 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 				|EcritureMissingArgumentException e) {
 			throw new IOException(
 					"Impossible d'instancier l'écriture n°" + idText, e);
-		}// try
-	}// getNext
+		}
+	}
 	
 }
