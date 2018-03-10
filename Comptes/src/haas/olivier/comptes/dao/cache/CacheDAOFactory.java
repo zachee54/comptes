@@ -8,7 +8,6 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.PermanentDAO;
 import haas.olivier.comptes.dao.PropertiesDAO;
-import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
 
 /**
@@ -126,17 +125,17 @@ public class CacheDAOFactory extends DAOFactory {
 	}
 
 	@Override
-	public SuiviDAO getHistoriqueDAO() {
+	public CacheSuiviDAO getHistoriqueDAO() {
 		return hDAO;
 	}
 
 	@Override
-	public SuiviDAO getSoldeAVueDAO() {
+	public CacheSuiviDAO getSoldeAVueDAO() {
 		return sDAO;
 	}
 
 	@Override
-	public SuiviDAO getMoyenneDAO() {
+	public CacheSuiviDAO getMoyenneDAO() {
 		return mDAO;
 	}
 
