@@ -19,7 +19,8 @@ import haas.olivier.comptes.dao.xml.jaxb.banq.Banque;
 import haas.olivier.comptes.dao.xml.jaxb.banq.Banques;
 import haas.olivier.util.ReadOnlyIterator;
 
-/** Une classe d'accès aux données des banques, au format XML.
+/**
+ * Une classe d'accès aux données des banques, au format XML.
  * <p>
  * Cette classe utilise le framework JAXB.
  *
@@ -28,7 +29,8 @@ import haas.olivier.util.ReadOnlyIterator;
 public class JaxbBanqueDAO
 extends ReadOnlyIterator<haas.olivier.comptes.Banque> {
 
-	/** Sauvegarde des banques vers un flux XML.
+	/**
+	 * Sauvegarde des banques vers un flux XML.
 	 * 
 	 * @param it	Un itérateur des banques à écrire.
 	 * @param out	Le flux XML.
@@ -67,10 +69,11 @@ extends ReadOnlyIterator<haas.olivier.comptes.Banque> {
 		} catch (Exception e) {
 			throw new IOException(
 					"Impossible d'écrire les banques", e);
-		}// try
-	}// save
+		}
+	}
 	
-	/** Renvoie le schéma XML des banques. 
+	/**
+	 * Renvoie le schéma XML des banques. 
 	 * 
 	 * @throws SAXException
 	 */
@@ -80,9 +83,10 @@ extends ReadOnlyIterator<haas.olivier.comptes.Banque> {
 				.newSchema(new StreamSource(
 						JaxbBanqueDAO.class
 						.getResourceAsStream("banques.xsd")));
-	}// getSchema
+	}
 	
-	/** Instancie un objet d'une classe JAXB représentant une banque.
+	/**
+	 * Instancie un objet d'une classe JAXB représentant une banque.
 	 * 
 	 * @param b	La banque à représenter.
 	 * 
@@ -94,12 +98,15 @@ extends ReadOnlyIterator<haas.olivier.comptes.Banque> {
 		banque.setNom(b.nom);
 		banque.setValue(b.getBytes());
 		return banque;
-	}// prepareBanque
+	}
 	
-	/** L'itérateur parcourant les objets JAXB désérialisés. */
+	/**
+	 * L'itérateur parcourant les objets JAXB désérialisés.
+	 */
 	private final Iterator<Banque> it;
 	
-	/** Construit un objet d'accès aux données des banques au format XML.
+	/**
+	 * Construit un objet d'accès aux données des banques au format XML.
 	 * 
 	 * @param in	Un flux XML contenant les données des banques.
 	 * 
@@ -128,18 +135,18 @@ extends ReadOnlyIterator<haas.olivier.comptes.Banque> {
 		} catch (Exception e) {
 			throw new IOException(
 					"Impossible de lire les banques", e);
-		}// try
-	}// constructeur
+		}
+	}
 
 	@Override
 	public boolean hasNext() {
 		return it.hasNext();
-	}// hasNext
+	}
 
 	@Override
 	public haas.olivier.comptes.Banque next() {
 		Banque banque = it.next();
 		return new haas.olivier.comptes.Banque(
 				banque.getId(), banque.getNom(), banque.getValue());
-	}// next
+	}
 }
