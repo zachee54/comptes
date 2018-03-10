@@ -7,7 +7,6 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.dao.DAOFactory;
 
 /**
  * L'interface des sources de données conçues pour fonctionner avec un cache.
@@ -81,11 +80,11 @@ public interface CacheableDAOFactory extends Closeable {
 	/**
 	 * Sauvegarde les données.
 	 * 
-	 * @param factory	L'objet d'accès aux données à sauvegarder.
+	 * @param cache	Le cache à sauvegarder.
 	 * 
 	 * @throws IOException
 	 */
-	void save(DAOFactory factory) throws IOException;
+	void save(CacheDAOFactory cache) throws IOException;
 	
 	/**
 	 * Renvoie le type de modèle pour affichage utilisateur.
