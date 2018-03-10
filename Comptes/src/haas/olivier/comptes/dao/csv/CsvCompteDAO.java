@@ -2,7 +2,9 @@ package haas.olivier.comptes.dao.csv;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -17,7 +19,7 @@ import haas.olivier.comptes.TypeCompte;
  * 
  * @author Olivier HAAS
  */
-class CsvCompteDAO extends AbstractCsvLayer<Compte> {
+class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 
 	/**
 	 * Nom du champ CSV contenant l'identifiant du compte.
@@ -133,10 +135,31 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 		super(reader);
 	}
 
-	// FIXME Retenir les identifiants des comptes au fur et à mesure de la lecture
+	/**
+	 * Lit les comptes à partir d'un flux CSV et les renvoie classés par
+	 * identifiant.
+	 * 
+	 * @param reader	Le flux CSV contenant les informations des comptes.
+	 * @return			Les comptes, classés par identifiant.
+	 * 
+	 * @throws IOException
+	 */
+	static Map<Integer, Compte> loadComptes(CsvReader reader)
+			throws IOException {
+		Map<Integer, Compte> comptesById = new HashMap<>();
+		CsvCompteDAO compteDAO = new CsvCompteDAO(reader);
+		
+		compteDAO.forEachRemaining(
+				idAndCompte ->
+				comptesById.put(idAndCompte.getKey(), idAndCompte.getValue()));
+		
+		compteDAO.close();
+		return comptesById;
+	}
+
 	@Override
-	protected Compte readNext(CsvReader reader)
-			throws NumberFormatException, IOException {
+	protected Entry<Integer, Compte> readNext(CsvReader reader)
+			throws IOException {
 		Integer id = Integer.valueOf(reader.get(HEADER_ID));
 
 		// Déterminer le type de compte
@@ -192,6 +215,6 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 		if (textClot != "")								// Si non vide
 			c.setCloture(CsvDAO.parseDate(textClot));	// Définir
 		
-		return c;
+		return new SimpleEntry<>(id, c);
 	}
 }

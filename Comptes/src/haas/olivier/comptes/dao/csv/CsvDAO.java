@@ -51,10 +51,17 @@ import haas.olivier.comptes.dao.xml.JaxbPropertiesDAO;
 import haas.olivier.util.Month;
 
 /**
- * Une couche lisant des données au format CSV en vue de leur mise en cache, et
- * les enregistrant dans une archive ZIP.<br>
- * Par exception, les banques et les opérations permanentes sont enregistrées en
- * XML dans l'archive ZIP.
+ * Une couche du modèle lisant et écrivant à la volée des données au format CSV
+ * compressé.
+ * <p>
+ * Drrière ce principe général, certaines données sont traitées un peu
+ * différemment :<ul>
+ * <li> du point de vue du stockage, les banques et les opérations permanentes
+ * 		sont enregistrées en XML dans l'archive ZIP, et non pas en CSV ;
+ * <li>	du point de vue du processus de lecture, les comptes sont mis en cache
+ * 		de façon interne pour permettre aux autres données d'y accéder par
+ * 		identifiant.
+ * </ul>
  *
  * @author Olivier HAAS
  */
@@ -209,6 +216,14 @@ public class CsvDAO implements CacheableDAOFactory {
 	private final File file;
 	
 	/**
+	 * Les comptes, classés par identifiant.
+	 * <p>
+	 * Il s'agit d'un mini-cache nécessaire car la plupart des flux dépendent
+	 * des identifiants des comptes.
+	 */
+	private final Map<Integer, Compte> comptesById;
+	
+	/**
 	 * Construit un objet d'accès aux données utilisant des données CSV et XML
 	 * dans un fichier ZIP.
 	 * 
@@ -221,9 +236,10 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * @throws ZipException
 	 * 				En cas d'erreur relative au format ZIP.
 	 */
-	private CsvDAO(File file) throws ZipException, IOException {
+	private CsvDAO(File file) throws IOException {
 		this.file = file;
 		zip = file.exists() ? new ZipFile(file) : null;
+		comptesById = CsvCompteDAO.loadComptes(getReader(COMPTES));
 	}
 	
 	/**
@@ -258,18 +274,19 @@ public class CsvDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Compte> getComptes() throws IOException {
-		return new CsvCompteDAO(getReader(COMPTES));
+		return comptesById.values().iterator();
 	}
 
 	@Override
-	public Iterator<Ecriture> getEcritures(CompteDAO cDAO) throws IOException {
-		return new CsvEcritureDAO(getReader(ECRITURES), cDAO);
+	public Iterator<Ecriture> getEcritures() throws IOException {
+		return new CsvEcritureDAO(getReader(ECRITURES), comptesById);
 	}
 
 	@Override
-	public Iterator<Permanent> getPermanents(CachePermanentDAO cache,
-			CompteDAO cDAO) throws IOException {
-		return new JaxbPermanentDAO(getZipInputStream(PERMANENTS), cache, cDAO);
+	public Iterator<Permanent> getPermanents(CachePermanentDAO cache)
+			throws IOException {
+		return new JaxbPermanentDAO(
+				getZipInputStream(PERMANENTS), cache, comptesById);
 	}
 
 	@Override
@@ -299,7 +316,7 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * @throws IOException
 	 */
 	private Iterator<Solde> getSuivi(String entryName) throws IOException {
-		return new CsvSuiviDAO(getReader(entryName));
+		return new CsvSuiviDAO(getReader(entryName), comptesById);
 	}
 	
 	@Override
