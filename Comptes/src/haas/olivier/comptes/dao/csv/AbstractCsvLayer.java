@@ -11,7 +11,8 @@ import com.csvreader.CsvReader;
 
 import haas.olivier.util.ReadOnlyIterator;
 
-/** Une couche d'accès aux données CSV.
+/**
+ * Une couche d'accès aux données CSV.
  * <p>
  * Cette couche s'intercale entre le cache et le fichier CSV.
  * <p>
@@ -27,19 +28,25 @@ import haas.olivier.util.ReadOnlyIterator;
 abstract class AbstractCsvLayer<T> extends ReadOnlyIterator<T>
 implements Closeable {
 
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(AbstractCsvLayer.class.getName());
 	
-	/** Le lecteur CSV. */
+	/**
+	 * Le lecteur CSV.
+	 */
 	protected final CsvReader reader;
 	
-	/** Le prochain objet à renvoyer (ou <code>null</code> s'il a déjà été
+	/**
+	 * Le prochain objet à renvoyer (ou <code>null</code> s'il a déjà été
 	 * renvoyé, ou s'il n'y a plus rien à renvoyer).
 	 */
 	protected T next;
 	
-	/** Construit une couche d'accès aux données CSV.
+	/**
+	 * Construit une couche d'accès aux données CSV.
 	 * 
 	 * @param reader	Le lecteur CSV permettant de lire les données.<br>
 	 * 					S'il est <code>null</code>, la classe ne fait rien
@@ -53,7 +60,7 @@ implements Closeable {
 		// Lire les en-têtes
 		if (reader != null)
 			reader.readHeaders();
-	}// constructeur
+	}
 
 	@Override
 	public boolean hasNext() {
@@ -61,14 +68,16 @@ implements Closeable {
 		// Selon qu'il y a ou non un élément déjà prêt
 		if (next == null) {					// Pas d'élément tout prêt
 			try {
-				/* S'il y a quelque chose à lire (reader non null), pas terminé
+				
+				/*
+				 * S'il y a quelque chose à lire (reader non null), pas terminé
 				 * (readRecord renvoie true) et pas fermé (sinon IOException) ?
 				 */
 				if (reader != null && reader.readRecord()) {
 					next = readNext(reader);// Charger l'élément suivant
 				} else {					// Fin du fichier
 					close();				// Fermer le flux
-				}// if
+				}
 				
 				// Renvoyer le résultat (dire s'il y a un élément)
 				return next != null;
@@ -81,7 +90,7 @@ implements Closeable {
 				
 			} catch (IOException e) {		// Lecteur fermé ou autre erreur
 				LOGGER.log(Level.SEVERE, "Erreur pendant la lecture", e);
-			}// try
+			}
 			
 			// Code exécuté uniquement en cas d'exception
 			close();						// Fermer les ressources
@@ -89,8 +98,8 @@ implements Closeable {
 			
 		} else {							// S'il y a un élément tout prêt
 			return true;					// C'est oui
-		}// if
-	}// hasNext
+		}
+	}
 
 	@Override
 	public T next() {
@@ -103,10 +112,11 @@ implements Closeable {
 			
 		} else {							// Plus rien à renvoyer
 			throw new NoSuchElementException();
-		}// if
-	}// next
+		}
+	}
 	
-	/** Instancie l'élément suivant à partir de la ligne en cours du lecteur
+	/**
+	 * Instancie l'élément suivant à partir de la ligne en cours du lecteur
 	 * {@link #reader}.
 	 * 
 	 * @param reader	Le lecteur CSV.
@@ -122,8 +132,10 @@ implements Closeable {
 	protected abstract T readNext(CsvReader reader)
 			throws NumberFormatException, ParseException, IOException;
 	
-	/** Ferme les ressources. */
+	/**
+	 * Ferme les ressources.
+	 */
 	public void close() {
 		if (reader != null) reader.close();
-	}// close
+	}
 }
