@@ -4,17 +4,11 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.dao.CompteDAO;
-import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.diagram.DiagramMemento;
-import haas.olivier.util.Month;
-
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 /**Une source de données fictive, ne contenant aucune donnée.<br>
@@ -72,8 +66,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 * Renvoie un itérateur vide.
 	 */
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getHistorique()
-			throws IOException {
+	public Iterator<Solde> getHistorique() throws IOException {
 		return Collections.emptyIterator();
 	}
 
@@ -81,8 +74,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 * Renvoie un itérateur vide.
 	 */
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getSoldesAVue()
-			throws IOException {
+	public Iterator<Solde> getSoldesAVue() throws IOException {
 		return Collections.emptyIterator();
 	}
 
@@ -90,8 +82,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 * Renvoie un itérateur vide.
 	 */
 	@Override
-	public Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getMoyennes()
-			throws IOException {
+	public Iterator<Solde> getMoyennes() throws IOException {
 		return Collections.emptyIterator();
 	}
 
