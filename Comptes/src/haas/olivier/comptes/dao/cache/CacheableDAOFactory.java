@@ -2,16 +2,13 @@ package haas.olivier.comptes.dao.cache;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.DAOFactory;
-import haas.olivier.util.Month;
 
 /**
  * L'interface des sources de données conçues pour fonctionner avec un cache.
@@ -67,24 +64,21 @@ public interface CacheableDAOFactory extends Closeable {
 	 * 
 	 * @throws IOException
 	 */
-	Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getHistorique()
-			throws IOException;
+	Iterator<Solde> getHistorique() throws IOException;
 	
 	/**
 	 * Renvoie les soldes à vue.
 	 * 
 	 * @throws IOException
 	 */
-	Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getSoldesAVue()
-			throws IOException;
+	Iterator<Solde> getSoldesAVue() throws IOException;
 	
 	/**
 	 * Renvoie les moyennes glissantes.
 	 * 
 	 * @throws IOException
 	 */
-	Iterator<Entry<Month, Entry<Compte, BigDecimal>>> getMoyennes()
-			throws IOException;
+	Iterator<Solde> getMoyennes() throws IOException;
 	
 	/**
 	 * Renvoie un objet d'accès aux propriétés. 
