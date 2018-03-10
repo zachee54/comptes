@@ -7,7 +7,6 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.DAOFactory;
 
 /**
@@ -34,13 +33,9 @@ public interface CacheableDAOFactory extends Closeable {
 	/**
 	 * Renvoie toutes les écritures.
 	 * 
-	 * @param cDAO	L'objet d'accès aux comptes. Il est utilisé pour récupérer
-	 * 				les instances de <code>Compte</code>, indispensables pour
-	 * 				instancier les <code>Ecriture</code>s.
-	 * 
 	 * @throws IOException
 	 */
-	Iterator<Ecriture> getEcritures(CompteDAO cDAO) throws IOException;
+	Iterator<Ecriture> getEcritures() throws IOException;
 	
 	/**
 	 * Renvoie toutes les opérations permanentes.
@@ -50,14 +45,10 @@ public interface CacheableDAOFactory extends Closeable {
 	* 				<code>Permanent</code>s, de récupérer l'un d'eux déjà
 	* 				instancié (utile pour les opérations dépendant d'une autre).
 	* 
-	* @param cDAO	L'objet d'accès aux comptes. Il est utilisé pour récupérer
-	* 				les instances de <code>Compte</code>, indispensables pour
-	* 				instancier les <code>Permanent</code>s.
-	* 
 	 * @throws IOException
 	*/
-	Iterator<Permanent> getPermanents(CachePermanentDAO cache,
-			CompteDAO cDAO) throws IOException;
+	Iterator<Permanent> getPermanents(CachePermanentDAO cache)
+			throws IOException;
 	
 	/**
 	 * Renvoie les historiques des comptes. 

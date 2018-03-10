@@ -54,7 +54,7 @@ public class CachePermanentDAO implements PermanentDAO {
 	 */
 	CachePermanentDAO(CacheableDAOFactory factory, CompteDAO cDAO)
 			throws IOException {
-		Iterator<Permanent> perm = factory.getPermanents(this, cDAO);
+		Iterator<Permanent> perm = factory.getPermanents(this);
 		while (perm.hasNext()) {
 			Permanent p = perm.next();		// L'opération permanente
 			permanents.put(p.id, p);		// Ajouter l'opération permanente

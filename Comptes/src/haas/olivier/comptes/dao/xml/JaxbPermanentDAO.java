@@ -21,7 +21,6 @@ import javax.xml.validation.SchemaFactory;
 import org.xml.sax.SAXException;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
 import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
@@ -209,8 +208,8 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	/** Le cache des opérations permanentes déjà instanciées. */
 	private final CachePermanentDAO cache;
 	
-	/** Un objet d'accès aux comptes. */
-	private final CompteDAO dao;
+	/** Les comptes, classés par identifiant. */
+	private final Map<Integer, Compte> comptesById;
 	
 	/** Construit un objet d'accès aux opérations permanentes à partir d'un flux
 	 * XML.
@@ -220,14 +219,14 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	 * @param in	Le flux XML contenant les opérations permanentes.
 	 * @param cache	Un cache d'opérations permanentes, pour permettre de
 	 * 				récupérer des instances lues précédemment.
-	 * @param dao	Un objet d'accès aux comptes.
+	 * @param comptesById	Les comptes, classés par identifiant.
 	 * 
 	 * @throws IOException
 	 */
-	public JaxbPermanentDAO(InputStream in, CachePermanentDAO cache, CompteDAO dao)
-			throws IOException {
+	public JaxbPermanentDAO(InputStream in, CachePermanentDAO cache,
+			Map<Integer, Compte> comptesById) throws IOException {
 		this.cache = cache;
-		this.dao = dao;
+		this.comptesById = comptesById;
 		try {
 			// Le Unmarshaller
 			Unmarshaller unmarshaller =
@@ -268,8 +267,8 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 			String nom = p.getNom();
 			String libelle = p.getLibelle();
 			String tiers = p.getTiers();
-			Compte credit = dao.get(p.getCredit());
-			Compte debit = dao.get(p.getDebit());
+			Compte credit = comptesById.get(p.getCredit());
+			Compte debit = comptesById.get(p.getDebit());
 			boolean pointer = p.isPointage();
 			Map<Month, Integer> jours = readJours(p.getJours());
 			Montants montants = p.getMontants();

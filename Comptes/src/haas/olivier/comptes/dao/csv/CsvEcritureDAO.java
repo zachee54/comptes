@@ -1,5 +1,6 @@
 package haas.olivier.comptes.dao.csv;
 
+import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.EcritureMissingArgumentException;
 import haas.olivier.comptes.InconsistentArgumentsException;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
@@ -125,21 +127,20 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	/**
 	 * L'objet d'accès aux comptes.
 	 */
-	private final CompteDAO cDAO;
+	private final Map<Integer, Compte> comptesById;
 	
 	/**
 	 * Construit un objet d'accès aux écritures au format CSV.
 	 * 
-	 * @param reader	Le lecteur CSV à utiliser.
-	 * @param cDAO		L'objet d'accès aux comptes. Il est utilisé pour
-	 * 					référencer les objets <code>Compte</code> dans les
-	 * 					instances <code>Ecriture</code>.
+	 * @param reader		Le lecteur CSV à utiliser.
+	 * @param comptesById	Les comptes, classés par identifiant.
 	 * 
 	 * @throws IOException
 	 */
-	CsvEcritureDAO(CsvReader reader, CompteDAO cDAO) throws IOException {
+	CsvEcritureDAO(CsvReader reader, Map<Integer, Compte> comptesById)
+			throws IOException {
 		super(reader);
-		this.cDAO = cDAO;
+		this.comptesById = comptesById;
 	}
 
 	@Override
@@ -164,8 +165,10 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 					Integer.parseInt(idText),
 					CsvDAO.DF.parse(reader.get(HEADER_DATE)),
 					pointage,
-					cDAO.get(Integer.parseInt(reader.get(HEADER_DEBIT))),
-					cDAO.get(Integer.parseInt(reader.get(HEADER_CREDIT))),
+					comptesById.get(
+							Integer.parseInt(reader.get(HEADER_DEBIT))),
+					comptesById.get(
+							Integer.parseInt(reader.get(HEADER_CREDIT))),
 					CsvDAO.parseAmount(reader.get(HEADER_MONTANT)),
 					reader.get(HEADER_LIB),
 					reader.get(HEADER_TIERS),

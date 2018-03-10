@@ -82,6 +82,7 @@ implements Closeable {
 				// Renvoyer le résultat (dire s'il y a un élément)
 				return next != null;
 				
+				// FIXME Ne pas attraper les exceptions non vérifiées
 			} catch (NumberFormatException e) {// Pb de format numérique
 				LOGGER.log(Level.SEVERE, "Erreur de format numérique", e);
 				

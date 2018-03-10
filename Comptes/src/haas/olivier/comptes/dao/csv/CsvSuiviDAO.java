@@ -5,17 +5,8 @@ import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
 import haas.olivier.comptes.dao.cache.Solde;
 import haas.olivier.util.Month;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
 
@@ -94,6 +85,11 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 	}
 	
 	/**
+	 * Les comptes, classés par identifiant.
+	 */
+	private final Map<Integer, Compte> comptesById;
+	
+	/**
 	 * Les en-têtes du fichier.
 	 */
 	private final String[] headers;
@@ -117,12 +113,15 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 	/**
 	 * Construit un objet d'accès aux suivis des comptes, au format CSV.
 	 * 
-	 * @param reader	Le lecteur CSV à utiliser.
+	 * @param reader		Le lecteur CSV à utiliser.
+	 * @param compteById	Les comptes, classés par identifiant.
 	 * 
 	 * @throws IOException
 	 */
-	public CsvSuiviDAO(CsvReader reader) throws IOException {
+	public CsvSuiviDAO(CsvReader reader, Map<Integer, Compte> comptesById)
+			throws IOException {
 		super(reader);
+		this.comptesById = comptesById;
 		
 		// Mémoriser les en-têtes
 		headers = reader.getHeaders();
@@ -155,8 +154,8 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 	 * lire, au début de la prochaine ligne contenant une valeur.
 	 */
 	protected Solde readNext(CsvReader reader)
-			throws NumberFormatException, ParseException, IOException {
-		
+			throws ParseException, IOException {
+
 		// Trouver la prochaine colonne non vide dans cette ligne
 		String text = null;						// Texte lu
 		while (++col == colMois					// Éviter la colonne du mois
@@ -180,7 +179,9 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 			mois = new Month(CsvDAO.DF.parse(reader.get(colMois)));
 		
 		// Renvoyer le solde trouvé, avec son mois et le compte correspondants
-		return new Solde(mois, Integer.parseInt(headers[col]),
-						CsvDAO.parseAmount(text));
+		return new Solde(
+				mois,
+				comptesById.get(Integer.parseInt(headers[col])),
+				CsvDAO.parseAmount(text));
 	}
 }

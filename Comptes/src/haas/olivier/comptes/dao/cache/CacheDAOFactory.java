@@ -84,7 +84,7 @@ public class CacheDAOFactory extends DAOFactory {
 		try{
 			bDAO = new CacheBanqueDAO(dao.getBanques());
 			cDAO = new CacheCompteDAO(dao.getComptes());
-			eDAO = new CacheEcritureDAO(dao.getEcritures(cDAO));
+			eDAO = new CacheEcritureDAO(dao.getEcritures());
 			/* Exception: Pour l'instanciation des opérations permanentes, le
 			 * CacheableDAO a besoin de faire appel à la couche supérieure (i.e.
 			 * le cache des permanents) puisque les Permanents sont
