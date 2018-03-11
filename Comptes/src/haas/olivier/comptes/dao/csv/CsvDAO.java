@@ -338,22 +338,22 @@ public class CsvDAO implements CacheableDAOFactory {
 			saveBanques(zipOut, cache.getBanqueDAO());
 			
 			// Écrire les comptes
-			Map<Integer, Compte> comptesById =
+			Map<Compte, Integer> idByCompte =
 					createIds(cache.getCompteDAO().getAll());
-			saveComptes(zipOut, csvOut, comptesById);
+			saveComptes(zipOut, csvOut, idByCompte);
 			
 			// Écrire les écritures
-			saveEcritures(zipOut, csvOut, cache.getEcritureDAO());
+			saveEcritures(zipOut, csvOut, cache.getEcritureDAO(), idByCompte);
 			
 			// Écrire les écritures permanentes
-			savePermanents(zipOut, cache.getPermanentDAO());
+			savePermanents(zipOut, cache.getPermanentDAO(), idByCompte);
 			
 			// Écrire les trois types de suivis
-			saveSuivis(cache.getHistoriqueDAO(), comptesById,
+			saveSuivis(cache.getHistoriqueDAO(), idByCompte,
 					HISTORIQUE, zipOut, csvOut);
-			saveSuivis(cache.getSoldeAVueDAO(), comptesById,
+			saveSuivis(cache.getSoldeAVueDAO(), idByCompte,
 					SOLDES, zipOut, csvOut);
-			saveSuivis(cache.getMoyenneDAO(), comptesById,
+			saveSuivis(cache.getMoyenneDAO(), idByCompte,
 					MOYENNES, zipOut, csvOut);
 			
 			// Écrire les propriétés
@@ -420,14 +420,14 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @param zipOut		Le flux d'écriture vers l'archive ZIP.
 	 * @param csvOut		Le flux d'écriture CSV.
-	 * @param comptesById	Les comptes classés par identifiants.
+	 * @param idByCompte	Les comptes et leurs identifiants.
 	 * 
 	 * @throws IOException
 	 */
 	private void saveComptes(ZipOutputStream zipOut, CsvWriter csvOut,
-			Map<Integer, Compte> comptesById) throws IOException {
+			Map<Compte, Integer> idByCompte) throws IOException {
 		zipOut.putNextEntry(new ZipEntry(COMPTES));
-		CsvCompteDAO.save(comptesById, csvOut);
+		CsvCompteDAO.save(idByCompte, csvOut);
 		csvOut.flush();
 		zipOut.closeEntry();
 	}
@@ -437,33 +437,33 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @param objects	La collection des objets à numéroter.
 	 * 
-	 * @return			Tous les objets, classés en fonction de leur identifiant
-	 * 					créé.
+	 * @return			Tous les objets, avec leur identifiant créé.
 	 * 
 	 * @throws IOException
 	 */
-	private <T> Map<Integer, T> createIds(Iterable<T> objects)
-			throws IOException {
-		Map<Integer, T> objectsById = new HashMap<>();
+	private <T> Map<T, Integer> createIds(Iterable<T> objects) {
+		Map<T, Integer> objectsById = new HashMap<>();
 		int id = 1;
 		for (T t : objects)
-			objectsById.put(id++, t);
+			objectsById.put(t, id++);
 		return objectsById;
 	}
 	
 	/**
 	 * Écrit un fichier CSV des écritures dans l'archive ZIP.
 	 * 
-	 * @param zipOut	Le flux d'écriture vers l'archive ZIP.
-	 * @param csvOut	Le flux d'écriture CSV.
-	 * @param eDAO		L'objet d'accès aux écritures.
+	 * @param zipOut		Le flux d'écriture vers l'archive ZIP.
+	 * @param csvOut		Le flux d'écriture CSV.
+	 * @param eDAO			L'objet d'accès aux écritures.
+	 * @param idByCompte	Les comptes, avec leurs identifiants.
 	 * 
 	 * @throws IOException
 	 */
 	private void saveEcritures(ZipOutputStream zipOut, CsvWriter csvOut,
-			EcritureDAO eDAO) throws IOException {
+			EcritureDAO eDAO, Map<Compte, Integer> idByCompte)
+					throws IOException {
 		zipOut.putNextEntry(new ZipEntry(ECRITURES));
-		CsvEcritureDAO.save(eDAO.getAll().iterator(), csvOut);
+		CsvEcritureDAO.save(eDAO.getAll().iterator(), idByCompte, csvOut);
 		csvOut.flush();
 		zipOut.closeEntry();
 	}
@@ -471,17 +471,18 @@ public class CsvDAO implements CacheableDAOFactory {
 	/**
 	 * Écrit un fichier XML des opérations permanentes dans l'archive ZIP.
 	 * 
-	 * @param zipOut	Le flux d'écriture de l'archive ZIP.
-	 * @param pDAO		Les opérations permanentes.
+	 * @param zipOut		Le flux d'écriture de l'archive ZIP.
+	 * @param pDAO			Les opérations permanentes.
+	 * @param idByCompte	Les comptes, avec leurs identifiants.
 	 * 
 	 * @throws IOException
 	 */
-	private void savePermanents(ZipOutputStream zipOut, PermanentDAO pDAO)
-			throws IOException {
+	private void savePermanents(ZipOutputStream zipOut, PermanentDAO pDAO,
+			Map<Compte, Integer> idByCompte) throws IOException {
 		
 		// Écrire les données des opérations permanentes
 		zipOut.putNextEntry(new ZipEntry(PERMANENTS));
-		JaxbPermanentDAO.save(pDAO.getAll().iterator(), zipOut);
+		JaxbPermanentDAO.save(pDAO.getAll().iterator(), idByCompte, zipOut);
 		zipOut.closeEntry();
 		
 		// Enregistrer aussi le schéma XSD
@@ -556,7 +557,7 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @param suivis		L'objet d'accès aux suivis à sauvegarder.
 	 * 
-	 * @param comptesById	Les comptes des suivis à sauvegarder, classés par
+	 * @param idByCompte	Les comptes des suivis à sauvegarder, avec leurs
 	 * 						identifiant.
 	 * 
 	 * @param entryName		Le nom de l'entrée ZIP dans laquelle sauvegarder
@@ -569,10 +570,10 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * @throws IOException 
 	 */
 	private void saveSuivis(CacheSuiviDAO suivis,
-			Map<Integer, Compte> comptesById, String entryName,
+			Map<Compte, Integer> idByCompte, String entryName,
 			ZipOutputStream zipOut, CsvWriter csvOut) throws IOException {
 		zipOut.putNextEntry(new ZipEntry(entryName));
-		CsvSuiviDAO.save(suivis, comptesById, csvOut);
+		CsvSuiviDAO.save(suivis, idByCompte, csvOut);
 		csvOut.flush();
 		zipOut.closeEntry();
 	}
