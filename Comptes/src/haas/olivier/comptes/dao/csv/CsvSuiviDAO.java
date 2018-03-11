@@ -27,37 +27,37 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 	 * 
 	 * @param cache			Le cache des suivis.
 	 * 
-	 * @param comptesById	Les comptes, classés en fonction de leurs
-	 * 						identifiants.
+	 * @param idByCompte	Les comptes, avec leurs identifiants.
 	 * 
 	 * @param writer		Le flux d'écriture CSV dans lequel sauvegarder les
 	 * 						données de suivi.
 	 * 
 	 * @throws IOException
 	 */
-	static void save(CacheSuiviDAO cache, Map<Integer, Compte> comptesById,
+	static void save(CacheSuiviDAO cache, Map<Compte, Integer> idByCompte,
 			CsvWriter writer) throws IOException {
 		
 		// Fixer l'ordre des identifiants
-		Integer[] ids =
-				comptesById.keySet().toArray(new Integer[comptesById.size()]);
+		Compte[] comptes =
+				idByCompte.keySet().toArray(new Compte[idByCompte.size()]);
 		
 		// Écrire les en-têtes
+		Integer[] ids = new Integer[comptes.length];
+		for (int i=0; i<ids.length; i++)
+			ids[i] = idByCompte.get(comptes[i]);
 		writeHeaders(ids, writer);
 		
 		// Écrire les soldes
 		for (Month month : cache.getMonths()) {
-			String[] values = new String[ids.length];
+			String[] values = new String[comptes.length];
 			
 			// Écrire le mois
 			values[0] = CsvDAO.DF.format(month.getFirstDay());
 			
 			// Écrire les soldes
 			int i = 1;
-			for (Integer id : ids) {
-				Compte compte = comptesById.get(id);
+			for (Compte compte : comptes)
 				values[i++] = cache.get(compte, month).toPlainString();
-			}
 			
 			// Écrire la ligne
 			writer.writeRecord(values);

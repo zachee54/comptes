@@ -65,27 +65,27 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 	/**
 	 * Sauvegarde les éléments.
 	 * 
-	 * @param comptesById	Une collection des comptes à sauvegarder, selon leurs
-	 * 					identifiants.
+	 * @param idByCompte	Une collection des comptes à sauvegarder, avec leurs
+	 * 						identifiants.
 	 * 
-	 * @param writer	Un flux CSV.
+	 * @param writer		Un flux CSV.
 	 * 
 	 * @throws IOException
 	 */
-	public static void save(Map<Integer, Compte> comptesById, CsvWriter writer)
+	public static void save(Map<Compte, Integer> idByCompte, CsvWriter writer)
 			throws IOException {
 		
 		// Ecrire les en-têtes
 		writer.writeRecord(STANDARD_HEADERS);
 	
 		// Parcourir les comptes
-		for (Entry<Integer, Compte> compteById : comptesById.entrySet()) {
-			Compte c = compteById.getValue();
+		for (Entry<Compte, Integer> compteById : idByCompte.entrySet()) {
+			Compte c = compteById.getKey();
 			for (String header : STANDARD_HEADERS) {
 				String value = null;
 				switch (header) {
 				case HEADER_ID :
-					value = compteById.getKey().toString();
+					value = compteById.getValue().toString();
 					break;
 					
 				case HEADER_TYPE :

@@ -4,8 +4,6 @@ import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.EcritureMissingArgumentException;
 import haas.olivier.comptes.InconsistentArgumentsException;
-import haas.olivier.comptes.dao.CompteDAO;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
@@ -77,13 +75,15 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	/**
 	 * Sauvegarde les éléments.
 	 * 
-	 * @param elements	Un itérateur des écritures à sauvegarder.
-	 * @param writer	Un flux CSV.
+	 * @param elements		Un itérateur des écritures à sauvegarder.
+	 * @param idByCompte	Les comptes, avec leurs identifiants.
+	 * @param writer		Un flux CSV.
 	 * 
 	 * @throws IOException
 	 */
-	static void save(Iterator<Ecriture> elements, CsvWriter writer)
-			throws IOException {
+	static void save(Iterator<Ecriture> elements,
+			Map<Compte, Integer> idByCompte, CsvWriter writer)
+					throws IOException {
 		
 		// Ecrire les en-têtes
 		writer.writeRecord(STANDARD_HEADERS);
@@ -95,11 +95,18 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 				String value = null;
 				switch (header) {
 				case HEADER_ID :	value = e.id.toString();			break;
-				case HEADER_DEBIT :	value = e.debit.getId().toString();	break;
-				case HEADER_CREDIT :value = e.credit.getId().toString();break;
 				case HEADER_LIB :	value = e.libelle;					break;
 				case HEADER_TIERS :	value = e.tiers;					break;
 				case HEADER_MONTANT:value = e.montant.toPlainString();	break;
+				
+				case HEADER_DEBIT :
+					value = idByCompte.get(e.debit).toString();
+					break;
+					
+				case HEADER_CREDIT :
+					value = idByCompte.get(e.credit).toString();
+					break;
+					
 				case HEADER_DATE :
 					if (e.date != null)
 						value = CsvDAO.DF.format(e.date);
