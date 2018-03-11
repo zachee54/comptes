@@ -2,6 +2,8 @@ package haas.olivier.comptes.dao.csv;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,6 +81,7 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		writer.writeRecord(STANDARD_HEADERS);
 	
 		// Parcourir les comptes
+		DateFormat dateFormat = CsvDAO.createDateFormat();
 		for (Entry<Compte, Integer> compteById : idByCompte.entrySet()) {
 			Compte c = compteById.getKey();
 			for (String header : STANDARD_HEADERS) {
@@ -103,13 +106,13 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 				case HEADER_OUV :
 					Date ouv = c.getOuverture();
 					if (ouv != null)
-						value = CsvDAO.DF.format(ouv);
+						value = dateFormat.format(ouv);
 					break;
 					
 				case HEADER_CLOTURE :
 					Date cloture = c.getCloture();
 					if (cloture != null)
-						value = CsvDAO.DF.format(cloture);
+						value = dateFormat.format(cloture);
 					break;
 					
 				case HEADER_NUM :
@@ -127,11 +130,16 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 	}
 
 	/**
+	 * Le format de date.
+	 */
+	private final DateFormat dateFormat = CsvDAO.createDateFormat();
+	
+	/**
 	 * Construit un objet d'accès aux comptes, au format CSV.
 	 * 
 	 * @param reader	Un lecteur de la source CSV.
 	 */
-	CsvCompteDAO(CsvReader reader) throws IOException {
+	public CsvCompteDAO(CsvReader reader) throws IOException {
 		super(reader);
 	}
 
@@ -159,7 +167,7 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 
 	@Override
 	protected Entry<Integer, Compte> readNext(CsvReader reader)
-			throws IOException {
+			throws IOException, ParseException {
 		Integer id = Integer.valueOf(reader.get(HEADER_ID));
 
 		// Déterminer le type de compte
@@ -208,12 +216,12 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		// Ajouter la date d'ouverture s'il y en a une
 		String textOuv = reader.get(HEADER_OUV);		// Texte de date
 		if (textOuv != "")								// Si non vide
-			c.setOuverture(CsvDAO.parseDate(textOuv));	// Définir
+			c.setOuverture(dateFormat.parse(textOuv));	// Définir
 
 		// Ajouter la date de clôture s'il y en a une
 		String textClot = reader.get(HEADER_CLOTURE);	// Texte de date
 		if (textClot != "")								// Si non vide
-			c.setCloture(CsvDAO.parseDate(textClot));	// Définir
+			c.setCloture(dateFormat.parse(textClot));	// Définir
 		
 		return new SimpleEntry<>(id, c);
 	}

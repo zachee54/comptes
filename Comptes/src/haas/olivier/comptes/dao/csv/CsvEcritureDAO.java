@@ -5,6 +5,7 @@ import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.EcritureMissingArgumentException;
 import haas.olivier.comptes.InconsistentArgumentsException;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
@@ -89,6 +90,7 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 		writer.writeRecord(STANDARD_HEADERS);
 		
 		// Écrire les éléments
+		DateFormat dateFormat = CsvDAO.createDateFormat();
 		while (elements.hasNext()) {
 			Ecriture e = elements.next();
 			for (String header : STANDARD_HEADERS) {
@@ -109,12 +111,12 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 					
 				case HEADER_DATE :
 					if (e.date != null)
-						value = CsvDAO.DF.format(e.date);
+						value = dateFormat.format(e.date);
 					break;
 					
 				case HEADER_POINTAGE :
 					value = (e.pointage == null
-					? "" : CsvDAO.DF.format(e.pointage));
+					? "" : dateFormat.format(e.pointage));
 					break;
 					
 				case HEADER_CHEQUE :
@@ -137,6 +139,11 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	private final Map<Integer, Compte> comptesById;
 	
 	/**
+	 * Le format de date.
+	 */
+	private final DateFormat dateFormat = CsvDAO.createDateFormat();
+	
+	/**
 	 * Construit un objet d'accès aux écritures au format CSV.
 	 * 
 	 * @param reader		Le lecteur CSV à utiliser.
@@ -152,13 +159,13 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 
 	@Override
 	protected Ecriture readNext(CsvReader reader)
-			throws NumberFormatException, ParseException, IOException {
+			throws ParseException, IOException {
 		
 		// Valeur optionnelle : date de pointage
 		String textPointage = reader.get(HEADER_POINTAGE);
 		Date pointage = (textPointage == null || textPointage.isEmpty()
 				? null								// Pas de pointage
-				: CsvDAO.DF.parse(textPointage));	// Une date de pointage
+				: dateFormat.parse(textPointage));	// Une date de pointage
 		
 		// Valeur optionnelle : numéro de chèque
 		String textCheque = reader.get(HEADER_CHEQUE);
@@ -170,7 +177,7 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 		try {
 			return new Ecriture(
 					Integer.parseInt(idText),
-					CsvDAO.DF.parse(reader.get(HEADER_DATE)),
+					dateFormat.parse(reader.get(HEADER_DATE)),
 					pointage,
 					comptesById.get(
 							Integer.parseInt(reader.get(HEADER_DEBIT))),

@@ -5,6 +5,7 @@ import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
 import haas.olivier.comptes.dao.cache.Solde;
 import haas.olivier.util.Month;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Map;
 import com.csvreader.CsvReader;
@@ -48,11 +49,12 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 		writeHeaders(ids, writer);
 		
 		// Écrire les soldes
+		DateFormat dateFormat = CsvDAO.createDateFormat();
 		for (Month month : cache.getMonths()) {
 			String[] values = new String[comptes.length];
 			
 			// Écrire le mois
-			values[0] = CsvDAO.DF.format(month.getFirstDay());
+			values[0] = dateFormat.format(month.getFirstDay());
 			
 			// Écrire les soldes
 			int i = 1;
@@ -83,6 +85,11 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 			headers[n++] = id.toString();
 		writer.writeRecord(headers);
 	}
+	
+	/**
+	 * Le format de date.
+	 */
+	private final DateFormat dateFormat = CsvDAO.createDateFormat();
 	
 	/**
 	 * Les comptes, classés par identifiant.
@@ -176,7 +183,7 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 		
 		// Si le mois est inconnu (début de ligne), on le lit
 		if (mois == null)
-			mois = new Month(CsvDAO.DF.parse(reader.get(colMois)));
+			mois = new Month(dateFormat.parse(reader.get(colMois)));
 		
 		// Renvoyer le solde trouvé, avec son mois et le compte correspondants
 		return new Solde(

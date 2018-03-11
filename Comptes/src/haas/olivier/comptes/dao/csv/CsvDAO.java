@@ -10,9 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -120,40 +118,17 @@ public class CsvDAO implements CacheableDAOFactory {
 	private static final String PROPRIETES = "properties.xml";
 
 	/**
-	 * Existence d'une <code>ParseException</code> sur la date (pour éviter les
-	 * redondances).
-	 */
-	private static boolean dateParseException = false;
-
-	/**
-	 * <code>DateFormat</code> utilisable par toutes les classes du paquet.
-	 * <br>Permet une implémentation uniforme des dates, lisible par un tableur.
-	 */
-	static final DateFormat DF = new SimpleDateFormat("dd/MM/yy");
-
-	/**
-	 * Parse une date
+	 * Renvoie un format de date utilisable par toutes les classes du paquet.
+	 * <p>
+	 * Cette méthode utilitaire permet une implémentation uniforme des dates,
+	 * lisible par un tableur.<br>
+	 * Elle introduit une nouvelle instance pour chaque usage du fait que les
+	 * formats de date ne sont pas thread-safe.
 	 * 
-	 * @throws IOException
+	 * @return	Une nouvelle instance de format de date.
 	 */
-	static Date parseDate(String textDate) throws IOException {
-		try {
-			return DF.parse(textDate);				// Renvoyer la date
-			
-		} catch (ParseException e) {				// Erreur non bloquante
-			if (!dateParseException) {
-
-				// 1ère occurrence: afficher le message
-				Logger.getLogger(CsvDAO.class.getName()).log(
-						Level.SEVERE, "Format de date illisible", e);
-
-				// Noter pour ne pas afficher de message la prochaine fois
-				dateParseException = true;
-			}
-			
-			// Occurrences suivantes : faire passer pour une exception banale
-			throw new IOException(e);
-		}
+	static final DateFormat createDateFormat() {
+		return new SimpleDateFormat("dd/MM/yy");
 	}
 
 	/**

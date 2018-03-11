@@ -126,12 +126,13 @@ implements Closeable {
 	 * 					contenues dans la ligne en cours de lecture par le
 	 * 					{@link #reader}.
 	 * 
-	 * @throws NumberFormatException
 	 * @throws ParseException
+	 * 					En cas d'erreur de lecture d'une date.
+	 * 
 	 * @throws IOException
 	 */
 	protected abstract T readNext(CsvReader reader)
-			throws NumberFormatException, ParseException, IOException;
+			throws ParseException, IOException;
 	
 	/**
 	 * Ferme les ressources.
