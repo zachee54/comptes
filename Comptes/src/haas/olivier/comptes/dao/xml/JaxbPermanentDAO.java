@@ -24,7 +24,6 @@ import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
-import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.xml.jaxb.perm.Jours;
 import haas.olivier.comptes.dao.xml.jaxb.perm.Jours.Jour;
@@ -276,51 +275,39 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	@Override
 	public haas.olivier.comptes.Permanent next() {
 		Integer id = null;
-		try {
-			// Récupérer l'objet JAXB
-			Permanent p = it.next();
+		
+		// Récupérer l'objet JAXB
+		Permanent p = it.next();
 
-			// Caractéristiques de l'opération permanente
-			id = p.getId();
-			String nom = p.getNom();
-			String libelle = p.getLibelle();
-			String tiers = p.getTiers();
-			Compte credit = comptesById.get(p.getCredit());
-			Compte debit = comptesById.get(p.getDebit());
-			boolean pointer = p.isPointage();
-			Map<Month, Integer> jours = readJours(p.getJours());
-			Montants montants = p.getMontants();
-			
-			// Cas des opérations à montants prédéfinis
-			if (montants != null) {
-				return new PermanentFixe(id, nom, debit, credit, libelle, tiers,
-						pointer, jours, readMontants(montants));
-			}
-				
-			// Cas des opérations dépendantes
-			Dependance dependance = p.getDependance();
-			if (dependance != null) {
-				return new PermanentProport(id, nom, debit, credit, libelle,
-						tiers, pointer, jours, cache.get(dependance.getId()),
-						new BigDecimal(dependance.getTaux().toString()));
-			}
-			
-			// Cas des opérations qui soldent un compte bancaire
-			if (debit instanceof CompteBancaire) {
-				return new PermanentSoldeur(id, nom, (CompteBancaire) debit,
-						credit, libelle, tiers, pointer, jours);
-			}
-			
-			// Aucun : type inconnu
-			throw new IOException("Impossible de déterminer le type de " +
-					"l'opération permanente n°" + id);
-			
-		} catch (IOException e) {
-			throw new RuntimeException("Impossible de relire " +
-					id == null
-					? "une opération permanente"
-					: "l'opération permanente n°" + id, e);
+		// Caractéristiques de l'opération permanente
+		id = p.getId();
+		String nom = p.getNom();
+		String libelle = p.getLibelle();
+		String tiers = p.getTiers();
+		Compte credit = comptesById.get(p.getCredit());
+		Compte debit = comptesById.get(p.getDebit());
+		boolean pointer = p.isPointage();
+		Map<Month, Integer> jours = readJours(p.getJours());
+		Montants montants = p.getMontants();
+		
+		// Cas des opérations à montants prédéfinis
+		// TODO Refactoriser les constructeurs des permanents
+		if (montants != null) {
+			return new PermanentFixe(id, nom, debit, credit, libelle, tiers,
+					pointer, jours, readMontants(montants));
 		}
+			
+		// Cas des opérations dépendantes
+		Dependance dependance = p.getDependance();
+		if (dependance != null) {
+			return new PermanentProport(id, nom, debit, credit, libelle, tiers,
+					pointer, jours, cache.get(dependance.getId()),
+					new BigDecimal(dependance.getTaux().toString()));
+		}
+		
+		// Cas des opérations qui soldent un compte bancaire
+		return new PermanentSoldeur(
+				id, nom, debit, credit, libelle, tiers, pointer, jours);
 	}
 	
 	/**
