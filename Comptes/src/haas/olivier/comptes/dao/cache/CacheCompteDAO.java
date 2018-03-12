@@ -28,12 +28,12 @@ class CacheCompteDAO implements CompteDAO {
 	 * Les instances existantes.
 	 */
 	private final IdentityHashMap<Compte, Void> instances =
-			new IdentityHashMap<Compte, Void>();
+			new IdentityHashMap<>();
 	
 	/**
 	 * Construit un objet d'accès aux comptes.
 	 */
-	public CacheCompteDAO(Iterator<Compte> it) throws IOException {
+	public CacheCompteDAO(Iterator<Compte> it) {
 		while (it.hasNext())
 			add(it.next());
 		

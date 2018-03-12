@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -17,13 +18,15 @@ import haas.olivier.comptes.dao.IdGenerator;
 import haas.olivier.util.Month;
 import haas.olivier.util.ReadOnlyIterator;
 
-/** Un objet d'accès aux données qui garde en cache toutes les écritures.
+/**
+ * Un objet d'accès aux données qui garde en cache toutes les écritures.
  * 
  * @author Olivier HAAS
  */
 class CacheEcritureDAO implements EcritureDAO {
 	
-	/** Insère une écriture dans une collection à deux niveaux.
+	/**
+	 * Insère une écriture dans une collection à deux niveaux.
 	 * 
 	 * @param e			L'écriture à ajouter.
 	 * 
@@ -49,13 +52,14 @@ class CacheEcritureDAO implements EcritureDAO {
 			map.put(month, pointages			// Collection par pointages...
 					? new TreeSet<Ecriture>(new Ecriture.SortPointages())
 					: new TreeSet<Ecriture>());	// ...ou par ordre naturel
-		}// if
+		}
 		
 		// Ajouter l'écriture
 		map.get(month).add(e);
-	}// insert
+	}
 	
-	/** Insère un texte dans un index.
+	/**
+	 * Insère un texte dans un index.
 	 * 
 	 * @param map	L'index.
 	 * @param s		Le texte à insérer.
@@ -70,76 +74,86 @@ class CacheEcritureDAO implements EcritureDAO {
 			map.put(s, 1);		// 1ère occurrence
 		} else {
 			map.put(s, ++n);	// Occurrence suivante
-		}// if
-	}// insertInIndex
+		}
+	}
 
-	/** Les écritures, triées par mois puis par ordre naturel. */
+	/**
+	 * Les écritures, triées par mois puis par ordre naturel.
+	 */
 	private final NavigableMap<Month, NavigableSet<Ecriture>> ecritures =
 			new TreeMap<>();
 	
-	/** Les écritures, triées par mois de pointage puis par date de pointage. */
+	/**
+	 * Les écritures, triées par mois de pointage puis par date de pointage.
+	 */
 	private final NavigableMap<Month, NavigableSet<Ecriture>> pointages =
 			new TreeMap<>();
 			
-	/** Les écritures en fonction de leur identifiant. */
+	/**
+	 * Les écritures en fonction de leur identifiant.
+	 */
 	private final Map<Integer, Ecriture> nums = new HashMap<>();
 	
-	/** Le générateur d'identifiants. */
+	/**
+	 * Le générateur d'identifiants.
+	 */
 	private IdGenerator idGen= new IdGenerator();
 	
-	/** Drapeau indiquant si les données ont été modifiées depuis la dernière
+	/**
+	 * Drapeau indiquant si les données ont été modifiées depuis la dernière
 	 * sauvegarde.
 	 */
 	private boolean mustBeSaved;
 	
-	/** Construit un objet d'accès aux données qui garde en cache toutes les
+	/**
+	 * Construit un objet d'accès aux données qui garde en cache toutes les
 	 * écritures.
 	 *  
 	 * @param ecritures	Un itérable de toutes les écritures.
 	 */
-	CacheEcritureDAO(Iterator<Ecriture> ecritures) {
+	public CacheEcritureDAO(Iterator<Ecriture> ecritures) {
 		while (ecritures.hasNext())
 			add(ecritures.next());
 		
 		// Rien n'a changé pour l'instant (même si on vient d'appeler add() !)
 		mustBeSaved = false;
-	}// constructeur
+	}
 	
 	@Override
 	public Ecriture get(Integer id) {
 		return nums.get(id);
-	}// get
+	}
 	
 	@Override
 	public Iterable<Ecriture> getAll() {
 		return new EcrituresIterable(ecritures, false);
-	}// getAll
+	}
 	
 	@Override
 	public Iterable<Ecriture> getAllBetween(Month from, Month to) {
 		return new EcrituresIterable(
 				ecritures.tailMap(from, true).headMap(to, true), false);
-	}// getAllBetween
+	}
 
 	@Override
 	public Iterable<Ecriture> getAllSince(Month month) {
 		return new EcrituresIterable(ecritures.tailMap(month, true), true);
-	}// getAllSince
+	}
 
 	@Override
 	public Iterable<Ecriture> getPointagesSince(Month month) {
 		return new EcrituresIterable(pointages.tailMap(month, true), true);
-	}// getPointagesSince
+	}
 
 	@Override
 	public Iterable<Ecriture> getAllTo(Month month) {
 		return new EcrituresIterable(ecritures.headMap(month, true), false);
-	}// getAllSince
+	}
 
 	@Override
 	public Iterable<Ecriture> getPointagesTo(Month month) {
 		return new EcrituresIterable(pointages.headMap(month, true), false);
-	}// getPointagesSince
+	}
 
 	@Override
 	public void add(Ecriture e) {
@@ -155,7 +169,7 @@ class CacheEcritureDAO implements EcritureDAO {
 			} catch (EcritureMissingArgumentException
 					| InconsistentArgumentsException e1) {
 				// Ne devrait pas arriver puisqu'on prend les mêmes arguments
-				throw new RuntimeException(e1);
+				throw new IllegalArgumentException(e1);
 			}// try
 			
 		} else {
@@ -169,7 +183,7 @@ class CacheEcritureDAO implements EcritureDAO {
 		insert(e, pointages, e.pointage, true);	// Collection ordre de pointage
 		nums.put(e.id, e);						// Collection par numéros
 		mustBeSaved = true;						// Sauvegarde attendue
-	}// add
+	}
 	
 	@Override
 	public void remove(int id) {
@@ -185,7 +199,7 @@ class CacheEcritureDAO implements EcritureDAO {
 		
 		// Marquer qu'une sauvegarde est attendue
 		mustBeSaved = true;
-	}// remove
+	}
 	
 	@Override
 	public void update(Ecriture e) {
@@ -197,16 +211,18 @@ class CacheEcritureDAO implements EcritureDAO {
 		add(e);
 		
 		mustBeSaved = true;
-	}// update
+	}
 	
-	/** Efface toutes les données. */
+	/**
+	 * Efface toutes les données.
+	 */
 	void erase() {
 		ecritures.clear();
 		pointages.clear();
 		nums.clear();
 		mustBeSaved = true;
 		idGen = new IdGenerator();
-	}// erase
+	}
 
 	@Override
 	public Map<String, Integer> constructCommentIndex() {
@@ -216,52 +232,59 @@ class CacheEcritureDAO implements EcritureDAO {
 		for (Ecriture e : nums.values()) {
 			insertInIndex(result, e.libelle);	// Insérer le libellé
 			insertInIndex(result, e.tiers);		// Insérer le nom du tiers
-		}// for écritures
+		}
 		
 		return result;
-	}// constructCommentIndex
+	}
 	
-	/** Renvoie le premier mois des écritures (le plus ancien).
+	/**
+	 * Renvoie le premier mois des écritures (le plus ancien).
 	 * 
 	 * @return	Un mois, ou <code>null</code> s'il n'y a aucune écriture.
 	 */
 	Month getDebut() {
 		return ecritures.isEmpty() ? null : ecritures.firstKey();
-	}// getDebut
+	}
 	
-	/** Indique si les données ont été modifiées depuis la dernière sauvegarde.
+	/**
+	 * Indique si les données ont été modifiées depuis la dernière sauvegarde.
 	 */
 	boolean mustBeSaved() {
 		return mustBeSaved;
-	}// mustBeSaved
+	}
 
-	/** Oblige l'objet à considérer que les modifications actuelles ont été
+	/**
+	 * Oblige l'objet à considérer que les modifications actuelles ont été
 	 * sauvegardées.
 	 */
 	void setSaved() {
 		mustBeSaved = false;
-	}// setSaved
+	}
 
 }// class CacheEcritureDAO
 
-/** Un <i>wrapper</i> pour utiliser des <code>EcrituresIterator</code> sous
+/**
+ * Un <i>wrapper</i> pour utiliser des <code>EcrituresIterator</code> sous
  * l'interface d'un <code>Iterable</code>.
  *
  * @author Olivier HAAS
  */
 class EcrituresIterable implements Iterable<Ecriture> {
 
-	/** La collection à faire parcourir par l'itérateur des écritures. Il s'agit
+	/**
+	 * La collection à faire parcourir par l'itérateur des écritures. Il s'agit
 	 * d'une collection à deux niveaux (une collection de collections).
 	 */
 	private final Iterable<NavigableSet<Ecriture>> coll;
 	
-	/** Drapeau indiquant si les écritures doivent être parcourues dans l'ordre
+	/**
+	 * Drapeau indiquant si les écritures doivent être parcourues dans l'ordre
 	 * naturel (<code>true</code>) ou dans l'ordre inverse (<code>false</code>).
 	 */
 	private final boolean ordre;
 	
-	/** Renvoie un objet contenant des écritures et pouvant être parcouru avec
+	/**
+	 * Renvoie un objet contenant des écritures et pouvant être parcouru avec
 	 * l'interface <code>Iterable</code>.
 	 * <p>
 	 * Les valeurs, tant au premier qu'au deuxième niveau, seront parcourues
@@ -274,22 +297,23 @@ class EcrituresIterable implements Iterable<Ecriture> {
 	 * 				niveau (généralement des mois) doivent être triées dans leur
 	 * 				ordre naturel.
 	 */
-	EcrituresIterable(NavigableMap<?, NavigableSet<Ecriture>> map,
+	public EcrituresIterable(NavigableMap<?, NavigableSet<Ecriture>> map,
 			boolean ordre) {
 		
 		// Trier les mois dans l'ordre chronologique, ou l'ordre inverse
 		coll = (ordre ? map : map.descendingMap()).values();
 		this.ordre = ordre;
-	}// constructeur
+	}
 
 	@Override
 	public Iterator<Ecriture> iterator() {
 		return new EcrituresIterator(coll.iterator(), ordre);
-	}// iterator
+	}
 	
 }// EcrituresIterable
 
-/** Un itérateur qui parcourt les écritures dans une collection à deux niveaux.
+/**
+ * Un itérateur qui parcourt les écritures dans une collection à deux niveaux.
  * <p>
  * Cette classe est particulièrement utile pour parcourir les écritures, sachant
  * que <code>CacheEcritureDAO</code> stocke les écritures dans des collections à
@@ -299,18 +323,24 @@ class EcrituresIterable implements Iterable<Ecriture> {
  */
 class EcrituresIterator extends ReadOnlyIterator<Ecriture> {
 	
-	/** L'itérateur principal qui parcourt le premier niveau de la collection.*/
+	/**
+	 * L'itérateur principal qui parcourt le premier niveau de la collection.
+	 */
 	private final Iterator<NavigableSet<Ecriture>> it1;
 	
-	/** L'itérateur de second niveau actuel. */
+	/**
+	 * L'itérateur de second niveau actuel.
+	 */
 	private Iterator<Ecriture> it2;
 	
-	/** Drapeau indiquant si les écritures doivent être parcourues dans l'ordre
+	/**
+	 * Drapeau indiquant si les écritures doivent être parcourues dans l'ordre
 	 * naturel (<code>true</code>) ou dans l'ordre inverse (<code>false</code>).
 	 */
 	private final boolean ordre;
 	
-	/** Construit un itérateur d'écritures à partir d'une collection à deux
+	/**
+	 * Construit un itérateur d'écritures à partir d'une collection à deux
 	 * niveaux.
 	 * <p>
 	 * Les collections de deuxième niveau seront chacune parcourue en ordre
@@ -322,10 +352,11 @@ class EcrituresIterator extends ReadOnlyIterator<Ecriture> {
 	 * @param ordre	<code>true</code> si les écritures doivent être parcourues
 	 * 				dans leur ordre naturel.
 	 */
-	EcrituresIterator(Iterator<NavigableSet<Ecriture>> it, boolean ordre) {
+	public EcrituresIterator(Iterator<NavigableSet<Ecriture>> it,
+			boolean ordre) {
 		it1 = it;
 		this.ordre = ordre;
-	}// constructeur
+	}
 
 	@Override
 	public boolean hasNext() {
@@ -336,14 +367,15 @@ class EcrituresIterator extends ReadOnlyIterator<Ecriture> {
 						: it1.next().descendingIterator();	// Ordre inverse
 			} else {
 				return false;					// Pas de lot suivant = fini
-			}// if it1 next
-		}// while !it2.hasNext()
+			}
+		}
 		return true;
-	}// hasNext
+	}
 
 	@Override
 	public Ecriture next() {
-		hasNext();						// Repositionner le curseur si besoin
+		if (!hasNext())					// Repositionner le curseur si besoin
+			throw new NoSuchElementException();
 		return it2.next();				// Écriture suivante
-	}// next
+	}
 }// class EcrituresIterator

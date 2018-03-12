@@ -83,50 +83,65 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		// Parcourir les comptes
 		DateFormat dateFormat = CsvDAO.createDateFormat();
 		for (Entry<Compte, Integer> compteById : idByCompte.entrySet()) {
-			Compte c = compteById.getKey();
-			for (String header : STANDARD_HEADERS) {
-				String value = null;
-				switch (header) {
-				case HEADER_ID :
-					value = compteById.getValue().toString();
-					break;
-					
-				case HEADER_TYPE :
-					value = c.getType().id + "";
-					break;
-					
-				case HEADER_NOM :
-					value = c.getNom();
-					break;
-					
-				case HEADER_COLOR :
-					value = Integer.toHexString(c.getColor().getRGB());
-					break;
-					
-				case HEADER_OUV :
-					Date ouv = c.getOuverture();
-					if (ouv != null)
-						value = dateFormat.format(ouv);
-					break;
-					
-				case HEADER_CLOTURE :
-					Date cloture = c.getCloture();
-					if (cloture != null)
-						value = dateFormat.format(cloture);
-					break;
-					
-				case HEADER_NUM :
-					Long num = c.getNumero();
-					value = (num == null) ? "" : num.toString();
-					break;
-				
-				default:
-					break;
-				}
-				writer.write(value);
-			}
-			writer.endRecord();
+			writeCompte(compteById.getKey(), compteById.getValue(), writer,
+					dateFormat);
 		}
+	}
+	
+	/**
+	 * Écrit les caractérisiques du compte dans une ligne CSV.
+	 * 
+	 * @param compte		Le compte à écrire.
+	 * @param id			L'identifiant du compte.
+	 * @param writer		Le flux d'écriture CSV.
+	 * @param dateFormat	Le format de date.
+	 * 
+	 * @throws IOException
+	 */
+	private static void writeCompte(Compte compte, Integer id, CsvWriter writer,
+			DateFormat dateFormat) throws IOException {
+		for (String header : STANDARD_HEADERS) {
+			String value = null;
+			switch (header) {
+			case HEADER_ID :
+				value = id.toString();
+				break;
+				
+			case HEADER_TYPE :
+				value = compte.getType().id + "";
+				break;
+				
+			case HEADER_NOM :
+				value = compte.getNom();
+				break;
+				
+			case HEADER_COLOR :
+				value = Integer.toHexString(compte.getColor().getRGB());
+				break;
+				
+			case HEADER_OUV :
+				Date ouv = compte.getOuverture();
+				if (ouv != null)
+					value = dateFormat.format(ouv);
+				break;
+				
+			case HEADER_CLOTURE :
+				Date cloture = compte.getCloture();
+				if (cloture != null)
+					value = dateFormat.format(cloture);
+				break;
+				
+			case HEADER_NUM :
+				Long num = compte.getNumero();
+				value = (num == null) ? "" : num.toString();
+				break;
+			
+			default:
+				break;
+			}
+			writer.write(value);
+		}
+		writer.endRecord();
 	}
 
 	/**

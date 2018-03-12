@@ -1,4 +1,5 @@
-/** Une couche du modèle implémentant une mémoire cache.
+/**
+ * Une couche du modèle implémentant une mémoire cache.
  * 
  * @author Olivier HAAS
  */
