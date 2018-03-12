@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -161,11 +160,10 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 				<code>WriteOnlyCacheableDAOFactory</code> qui sauvegardera
 	 * 				les données dans un nouveau fichier <code>file</code>.
 	 * 
-	 * @throws ZipException
 	 * @throws IOException
 	 */
 	public static CacheableDAOFactory newInstance(File file)
-			throws ZipException, IOException {
+			throws IOException {
 		
 		// La nouvelle instance
 		CsvDAO csvDAO = new CsvDAO(file);
@@ -302,12 +300,12 @@ public class CsvDAO implements CacheableDAOFactory {
 		// Créer un flux d'écriture ZIP vers un fichier temporaire
 		File tmp = File.createTempFile(
 				"comptes-", ".tmp", file.getParentFile());
-		ZipOutputStream zipOut = null;
-		try {
-			zipOut = new ZipOutputStream(			// Flux d'écriture du ZIP
-					new FileOutputStream(tmp), CHARSET);
-			CsvWriter csvOut =						// Flux d'écriture CSV
-					new CsvWriter(zipOut, DELIMITER, CHARSET);
+		
+		try (ZipOutputStream zipOut =
+				new ZipOutputStream(new FileOutputStream(tmp), CHARSET)) {
+			
+			// Flux d'écriture CSV
+			CsvWriter csvOut = new CsvWriter(zipOut, DELIMITER, CHARSET);
 
 			// Écrire les banques
 			saveBanques(zipOut, cache.getBanqueDAO());
@@ -336,11 +334,8 @@ public class CsvDAO implements CacheableDAOFactory {
 			
 		} catch (FactoryConfigurationError e) {
 			throw new IOException("Erreur d'écriture XML", e);
-			
-		} finally {
-			if (zipOut != null) zipOut.close();		// Fermer les ressources
 		}
-
+		
 		// Remplacer l'ancien fichier
 		File bak = null;
 		if (file.exists()) {
@@ -351,23 +346,21 @@ public class CsvDAO implements CacheableDAOFactory {
 					file.getName() + ".bak");	// Extension ".bak"
 
 			// Supprimer l'ancienne sauvegarde si elle existe
-			if (bak.exists() && !bak.delete()) {
-				throw new IOException(
-						"Impossible de supprimer le fichier "
-								+ bak.getAbsolutePath());
-			}// if
+			Files.deleteIfExists(bak.toPath());
 
 			// Renommer le fichier initial en sauvegarde
-			file.renameTo(bak);
+			if (!file.renameTo(bak)) {
+				throw new IOException(
+						"Impossible de renommer le fichier temporaire créé");
+			}
 		}
 
 		// Renommer le fichier temporaire en fichier définitif
-		Files.move(Paths.get(tmp.getAbsolutePath()),
-				Paths.get(file.getAbsolutePath()));
+		Files.move(tmp.toPath(), file.toPath());
 
 		// Effacer la sauvegarde devenue inutile
 		if (bak != null)
-			bak.delete();
+			Files.deleteIfExists(bak.toPath());
 	}
 
 	/**
@@ -506,10 +499,9 @@ public class CsvDAO implements CacheableDAOFactory {
 		// Écrire le schéma XML des opérations permanentes
 		zipOut.putNextEntry(						// Créer l'entrée ZIP
 				new ZipEntry(fileName));
-		InputStream schemaIn = null;				// Flux de lecture du schéma
-		try {
-			schemaIn = new BufferedInputStream(		// Ouvrir flux avec buffer
-					classe.getResourceAsStream(fileName));
+		
+		try (InputStream schemaIn = new BufferedInputStream(
+					classe.getResourceAsStream(fileName))) {
 			int b;
 			while ((b = schemaIn.read()) != -1)		// Copier le contenu
 				zipOut.write(b);					// vers le fichier ZIP
@@ -519,10 +511,6 @@ public class CsvDAO implements CacheableDAOFactory {
 					"Le schéma XML " + fileName + " n'a pas pu " +
 					"être intégré au fichier enregistré.\n" +
 					"Cette erreur n'est pas bloquante", e);
-			
-		} finally {
-			if (schemaIn != null)
-				schemaIn.close();
 		}
 		zipOut.closeEntry();						// Fermer l'entrée ZIP
 	}
@@ -581,6 +569,7 @@ public class CsvDAO implements CacheableDAOFactory {
 	 */
 	@Override
 	public void close() throws IOException {
+		// Rien à fermer
 	}
 
 }

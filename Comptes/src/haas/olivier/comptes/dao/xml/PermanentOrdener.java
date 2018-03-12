@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import haas.olivier.comptes.dao.xml.jaxb.perm.Permanent;
@@ -82,7 +83,7 @@ class PermanentOrdener extends ReadOnlyIterator<Permanent> {
 			}
 		}
 		
-		throw new RuntimeException(
+		throw new NoSuchElementException(
 				"Problème de dépendance des opérations permanentes : dépendance absente ou boucle entre les dépendances.");
 	}
 }

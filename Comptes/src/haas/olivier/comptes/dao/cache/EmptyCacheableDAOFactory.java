@@ -4,7 +4,6 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.diagram.DiagramMemento;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
@@ -91,14 +90,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 */
 	@Override
 	public CacheablePropertiesDAO getProperties() throws IOException {
-		return new CacheablePropertiesDAO() {
-
-			@Override
-			public Map<String, DiagramMemento> getDiagramProperties() {
-				return Collections.emptyMap();
-			}
-			
-		};// classe anonyme PropertiesDAO
+		return Collections::emptyMap;
 	}
 
 	/**
@@ -142,6 +134,7 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 	 */
 	@Override
 	public void close() throws IOException {
+		// Rien à fermer
 	}
 
 	/**
