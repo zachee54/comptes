@@ -8,45 +8,52 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.dao.BanqueDAO;
 import haas.olivier.comptes.dao.IdGenerator;
 
-/** Un objet d'accès aux données qui garde en cache toutes les instances des
+/**
+ * Un objet d'accès aux données qui garde en cache toutes les instances des
  * banques.
  *
  * @author Olivier HAAS
  */
 class CacheBanqueDAO implements BanqueDAO {
 
-	/** La collection des banques. */
-	private final Map<Integer, Banque> banques = new HashMap<Integer, Banque>();
+	/**
+	 * La collection des banques.
+	 */
+	private final Map<Integer, Banque> banques = new HashMap<>();
 	
-	/** Drapeau indiquant si les données ont été modifiées depuis la dernière
+	/**
+	 * Drapeau indiquant si les données ont été modifiées depuis la dernière
 	 * sauvegarde.
 	 */
 	private boolean mustBeSaved = false;
 	
-	/** Le générateur d'identifiants. */
+	/**
+	 * Le générateur d'identifiants.
+	 */
 	private IdGenerator idGen = new IdGenerator();
 	
-	/** Construit un objet d'accès aux banques qui garde toutes les instances en
+	/**
+	 * Construit un objet d'accès aux banques qui garde toutes les instances en
 	 * cache.
 	 * 
 	 * @param banques	Toutes les banques de la source.
 	 */
-	CacheBanqueDAO(Iterator<Banque> banques) {
+	public CacheBanqueDAO(Iterator<Banque> banques) {
 		while (banques.hasNext()) {
 			Banque b = banques.next();
 			this.banques.put(b.id, b);
-		}// while banques
-	}// constructeur
+		}
+	}
 	
 	@Override
 	public Iterable<Banque> getAll() {
 		return banques.values();
-	}// getAll
+	}
 	
 	@Override
 	public Banque get(int id) {
 		return banques.get(id);
-	}// get
+	}
 	
 	@Override
 	public Banque add(Banque b) {
@@ -60,30 +67,34 @@ class CacheBanqueDAO implements BanqueDAO {
 		} else {
 			// Ajouter celle-ci
 			idGen.addId(b.id);
-		}// if
+		}
 		
 		// Ajouter
 		banques.put(b.id, b);
 		mustBeSaved = true;							// DAO modifié
 		return b;
-	}// add
+	}
 	
-	/** Efface toutes les données. */
+	/**
+	 * Efface toutes les données.
+	 */
 	void erase() {
 		banques.clear();
 		mustBeSaved = true;
-	}// erase
+	}
 	
-	/** Indique si les données ont été modifiées depuis la dernière sauvegarde.
+	/**
+	 * Indique si les données ont été modifiées depuis la dernière sauvegarde.
 	 */
 	boolean mustBeSaved() {
 		return mustBeSaved;
-	}// mustBeSaved
+	}
 
-	/** Oblige l'objet à considérer que les modifications actuelles ont été
+	/**
+	 * Oblige l'objet à considérer que les modifications actuelles ont été
 	 * sauvegardées.
 	 */
 	void setSaved() {
 		mustBeSaved = false;
-	}// setSaved
+	}
 }

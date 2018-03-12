@@ -91,46 +91,60 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 		
 		// Écrire les éléments
 		DateFormat dateFormat = CsvDAO.createDateFormat();
-		while (elements.hasNext()) {
-			Ecriture e = elements.next();
-			for (String header : STANDARD_HEADERS) {
-				String value = null;
-				switch (header) {
-				case HEADER_ID :	value = e.id.toString();			break;
-				case HEADER_LIB :	value = e.libelle;					break;
-				case HEADER_TIERS :	value = e.tiers;					break;
-				case HEADER_MONTANT:value = e.montant.toPlainString();	break;
+		while (elements.hasNext())
+			writeEcriture(elements.next(), writer, idByCompte, dateFormat);
+	}
+	
+	/**
+	 * Écrit les caractéristiques d'une écriture dans une ligne CSV.
+	 * 
+	 * @param e				L'écriture à écrire.
+	 * @param writer		Le flux d'écriture CSV
+	 * @param idByCompte	Les comptes, classés par identifiants.
+	 * @param dateFormat	Le format de date;
+	 * 
+	 * @throws IOException
+	 */
+	private static void writeEcriture(Ecriture e, CsvWriter writer,
+			Map<Compte, Integer> idByCompte, DateFormat dateFormat)
+					throws IOException {
+		for (String header : STANDARD_HEADERS) {
+			String value = null;
+			switch (header) {
+			case HEADER_ID :	value = e.id.toString();			break;
+			case HEADER_LIB :	value = e.libelle;					break;
+			case HEADER_TIERS :	value = e.tiers;					break;
+			case HEADER_MONTANT:value = e.montant.toPlainString();	break;
+			
+			case HEADER_DEBIT :
+				value = idByCompte.get(e.debit).toString();
+				break;
 				
-				case HEADER_DEBIT :
-					value = idByCompte.get(e.debit).toString();
-					break;
-					
-				case HEADER_CREDIT :
-					value = idByCompte.get(e.credit).toString();
-					break;
-					
-				case HEADER_DATE :
-					if (e.date != null)
-						value = dateFormat.format(e.date);
-					break;
-					
-				case HEADER_POINTAGE :
-					value = (e.pointage == null
-					? "" : dateFormat.format(e.pointage));
-					break;
-					
-				case HEADER_CHEQUE :
-					value = (e.cheque == null
-					? "" : e.cheque.toString());
-					break;
-					
-				default:
-					break;
-				}
-				writer.write(value);				// Écrire la valeur
+			case HEADER_CREDIT :
+				value = idByCompte.get(e.credit).toString();
+				break;
+				
+			case HEADER_DATE :
+				if (e.date != null)
+					value = dateFormat.format(e.date);
+				break;
+				
+			case HEADER_POINTAGE :
+				value = (e.pointage == null
+				? "" : dateFormat.format(e.pointage));
+				break;
+				
+			case HEADER_CHEQUE :
+				value = (e.cheque == null
+				? "" : e.cheque.toString());
+				break;
+				
+			default:
+				break;
 			}
-			writer.endRecord();						// Écrire la fin de ligne
+			writer.write(value);				// Écrire la valeur
 		}
+		writer.endRecord();						// Écrire la fin de ligne
 	}
 
 	/**
