@@ -8,7 +8,8 @@ import haas.olivier.comptes.InconsistentArgumentsException;
 import java.math.BigDecimal;
 import java.util.Date;
 
-/** Un brouillon d'écritures, pour permettre de stocker des données temporaires
+/**
+ * Un brouillon d'écritures, pour permettre de stocker des données temporaires
  * ou incomplètes avant d'instancier une écriture.
  * <p>
  * En pratique, cette classe est utilisée :<ul>
@@ -25,44 +26,66 @@ import java.util.Date;
  */
 public class EcritureDraft {
 
-	/** L'écriture d'origine, ou <code>null</code> si on est parti d'un
-	 * brouillon vide.
+	/**
+	 * L'écriture d'origine, ou <code>null</code> si on est parti d'un brouillon
+	 * vide.
 	 */
 	public final Ecriture e;
 	
-	/** L'identifiant de l'écriture. */
+	/**
+	 * L'identifiant de l'écriture.
+	 */
 	public Integer id = null;
 	
-	/** La date de l'écriture. */
+	/**
+	 * La date de l'écriture.
+	 */
 	public Date date = null;
 	
-	/** La date de pointage. */
+	/**
+	 * La date de pointage.
+	 */
 	public Date pointage = null;
 	
-	/** Le nom du tiers. */
+	/**
+	 * Le nom du tiers.
+	 */
 	public String tiers = null;
 	
-	/** Le libellé */
+	/**
+	 * Le libellé
+	 */
 	public String libelle = null;
 	
-	/** Le numéro de chèque. */
+	/**
+	 * Le numéro de chèque.
+	 */
 	public Integer cheque = null;
 	
-	/** Le compte débité. */
+	/**
+	 * Le compte débité.
+	 */
 	public Compte debit = null;
 	
-	/** Le compte crédité. */
+	/**
+	 * Le compte crédité.
+	 */
 	public Compte credit = null;
 	
-	/** Le montant. */
+	/**
+	 * Le montant.
+	 */
 	public BigDecimal montant = null;
 	
-	/** Construit un brouillon vide. */
+	/**
+	 * Construit un brouillon vide.
+	 */
 	public EcritureDraft() {
 		this(null);
-	}// constructeur vide
+	}
 	
-	/** Construit un brouillon à partir de l'écriture spécifiée.
+	/**
+	 * Construit un brouillon à partir de l'écriture spécifiée.
 	 * 
 	 * @param e		L'<code>Ecriture</code> dont il faut récupérer les
 	 * 				informations.
@@ -85,10 +108,11 @@ public class EcritureDraft {
 			debit	= e.debit;
 			credit	= e.credit;
 			montant	= e.montant;
-		}// if e not null
-	}// constructeur
+		}
+	}
 
-	/** Tente d'instancier une <code>Ecriture</code> à partir des données
+	/**
+	 * Tente d'instancier une <code>Ecriture</code> à partir des données
 	 * saisies.
 	 * <p>
 	 * Cela suppose que les propriétés de l'objet aient été définies
@@ -107,5 +131,5 @@ public class EcritureDraft {
 			InconsistentArgumentsException {
 		return new Ecriture(id, date, pointage, debit, credit, montant,
 				libelle, tiers, cheque);
-	}// createEcriture
-}// class EcritureDraft
+	}
+}
