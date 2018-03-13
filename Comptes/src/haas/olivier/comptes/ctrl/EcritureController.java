@@ -164,28 +164,53 @@ public class EcritureController {
 	 * @throws IOException
 	 */
 	public static void updateSuivis(Month debut) throws IOException {
+		EcritureDAO ecritureDAO = DAOFactory.getFactory().getEcritureDAO();
 
 		// Effacer les données de suivi actuelles à compter du mois debut
 		Compte.removeSuiviFrom(debut);
+		
+		// Mettre à jour l'historique
+		updateHistoriqueAndEpargne(debut, ecritureDAO);
 
-		// Accès aux données
-		EcritureDAO dao = DAOFactory.getFactory().getEcritureDAO();
-
-		// Obtenir toutes les écritures depuis la date voulue
-		Iterable<Ecriture> journal = dao.getAllSince(debut);
-
-		// Parcourir les écritures et mettre à jour les comptes
+		/*
+		 * Mettre à jour les pointages. On part du principe que le pointage
+		 * intervenant APRÈS l'écriture elle-même, les pointages antérieurs à
+		 * debut ne sont pas modifiés.
+		 */
+		updatePointages(debut, ecritureDAO);
+		
+		// Mettre à jour les moyennes
+		for (Compte compte : DAOFactory.getFactory().getCompteDAO().getAll())
+			updateMoyennes(compte, debut);
+	}
+	
+	/**
+	 * Met à jour l'historique des comptes et le suivi de l'épargne depuis le
+	 * mois spécifié.
+	 * <p>
+	 * Le suivi doit auparavant avoir été réinitialisé pour la période
+	 * concernée.
+	 * 
+	 * @param debut			Le mois à partir duquel recalculer les soldes
+	 * 						(inclus).
+	 * 
+	 * @param ecritureDAO	L'objet d'accès aux écritures.
+	 * 
+	 * @throws IOException
+	 */
+	private static void updateHistoriqueAndEpargne(Month debut,
+			EcritureDAO ecritureDAO) throws IOException {
+		Iterable<Ecriture> journal = ecritureDAO.getAllSince(debut);
 		for (Ecriture e : journal) {
-			Month mois = new Month(e.date); // Mois
+			Month mois = new Month(e.date);
 
-			// Mettre à jour le compte débité (montant opposé)
-			e.debit.addHistorique(mois, e.montant.negate());
-
-			// Mettre à jour le compte crédité
+			// Mettre à jour les soldes des comptes
+			e.debit.addHistorique(mois, e.montant.negate());// Montant opposé
 			e.credit.addHistorique(mois, e.montant);
 
-			/* Si l'opération est un versement d'épargne, le comptabiliser.
-			 * Attention : le compte d'épargne est une instance CompteBudget, il
+			/*
+			 * Si l'opération est un versement d'épargne, le comptabiliser.
+			 * Attention : le compte d'épargne est un compte budgétaire, il
 			 * retient l'opposé des montants qu'on lui donne !!
 			 */
 			switch (e.epargne) {
@@ -196,23 +221,28 @@ public class EcritureController {
 				Compte.compteEpargne.addHistorique(mois, e.montant);
 				break;
 			case NEUTRE:
-				break; // Rien si l'opération est neutre.
+				break;
 			}
 		}
-
-		/*
-		 * Mettre à jour les pointages. On part du principe que le pointage
-		 * intervenant APRÈS l'écriture elle-même, les pointages antérieurs à
-		 * debut ne sont pas modifiés.
-		 */
-
-		/*
-		 * Obtenir les écritures non pointées ou ayant un pointage après la date
-		 * voulue, dans l'ordre chronologique des pointages
-		 */
-		Iterable<Ecriture> journalPointages = dao.getPointagesSince(debut);
-
-		// Parcourir les écritures
+	}
+	
+	/**
+	 * Met à jour les soldes à vue des comptes depuis le mois spécifié.
+	 * <p>
+	 * Le suivi doit auparavant avoir été réinitialisé pour la période
+	 * concernée.
+	 * 
+	 * @param debut			Le mois à partir duquel mettre à jour les soldes à
+	 * 						vue (inclus).
+	 * 
+	 * @param ecritureDAO	L'objet d'accès aux écritures.
+	 * 
+	 * @throws IOException
+	 */
+	private static void updatePointages(Month debut, EcritureDAO ecritureDAO)
+			throws IOException {
+		Iterable<Ecriture> journalPointages =
+				ecritureDAO.getPointagesSince(debut);
 		for (Ecriture e : journalPointages) {
 			if (e.pointage != null) {
 				// Pointée: mettre à jour les soldes à vue à la date de pointage
@@ -221,76 +251,69 @@ public class EcritureController {
 				e.credit.addPointages(mois, e.montant);
 			}
 		}
-		
-		// Recalculer les moyennes des comptes budgétaires
-		for (Compte c : DAOFactory.getFactory().getCompteDAO().getAll()) {
-			if (c instanceof CompteBudget) {
-				((CompteBudget) c).updateMoyennes(debut);
-			}
-		}
-		
-		// Même chose pour le compte virtuel d'épargne
-		Compte.compteEpargne.updateMoyennes(debut);
 	}
 
 	/**
 	 * Recalcule les moyennes à partir du mois donné.
+	 * <p>
+	 * Cette méthode utilise l'historique des comptes. Elle ne consulte pas les
+	 * écritures.
 	 * 
-	 * @param cible	Le mois à partir duquel mettre à jour toutes les moyennes.
-	 * 
-	 * @throws IOException
+	 * @param debut	Le mois à partir duquel mettre à jour toutes les moyennes.
 	 */
-	public void updateMoyennes(Month since) throws IOException {
+	public static void updateMoyennes(Compte compte, Month debut) {
+		
+		// Ne concerne que les comptes budgétaires
+		if (!compte.getType().isBudgetaire())
+			return;
 
-		// Accès aux données
 		SuiviDAO dao = DAOFactory.getFactory().getMoyenneDAO();
 
 		// Trouver la période influencée par le mois cible
+		Month premierMois = debut.getTranslated(-DUREE + 1);
+		Month today = new Month();
 
-		// Début: n-1ème mois avant la date donnée
-		Month debut = since.getTranslated(-DUREE + 1);
+		// File PEPS de montants monétaires sur 12 mois
+		Deque<BigDecimal> queue = new LinkedList<>();
 
-		Month today = new Month();					// Aujourd'hui
-
-		// File PEPS de montants monétaires
-		Deque<BigDecimal> queue = new LinkedList<BigDecimal>();
-
-		// Remplir la file avec les n-1 mois qui précèdent
-		for (Month month = debut;					// Début de période
-				month.before(since);				// Mois cible non atteint
-				month = month.getNext()) {			// Passer au mois suivant
-			queue.add(getHistorique(month));		// Pousser le solde du mois
+		// Remplir la file avec les soldes des n-1 mois qui précèdent
+		for (Month month = premierMois;
+				month.before(debut);
+				month = month.getNext()) {
+			queue.add(compte.getHistorique(month));
 		}
 
 		/*
 		 * Calculer les moyennes glissantes.
 		 * À chaque fois on rajoute un mois et on enlève le plus ancien.
 		 */
-		for (Month month = since;					// Depuis le mois donné
+		for (Month month = debut;
 				!month.after(today);				// Jusqu'à aujourd'hui
-				month = month.getNext()) {			// Un mois après l'autre
+				month = month.getNext()) {
 
 			// Ajouter ce mois à la file
-			queue.add(getHistorique(month));
-
-			// Faire la somme sur la durée glissée
-			BigDecimal somme = BigDecimal.ZERO;		// Initialiser la somme
-			for (BigDecimal montant : queue)
-				somme = somme.add(montant);
+			queue.add(compte.getHistorique(month));
 
 			// Calculer la moyenne sur n mois, arrondie au centième
+			BigDecimal somme = BigDecimal.ZERO;
+			for (BigDecimal montant : queue)
+				somme = somme.add(montant);
 			BigDecimal moy = somme.divide(new BigDecimal("" + DUREE), 2,
 					RoundingMode.HALF_UP);
 			
-			/* Cela vaut-il la peine d'enregister cette moyenne ? Seulement si
+			/*
+			 * Cela vaut-il la peine d'enregister cette moyenne ? Seulement si
 			 * elle est différente de zéro, ou ou alors s'il y a une autre
 			 * moyenne enregistrée
 			 */
 			if (moy.signum() != 0)
-				dao.set(getId(), month, moy);
+				dao.set(compte, month, moy);
 
-			// Enlever le dernier mois de la file
+			// Enlever le mois le plus ancien de la file
 			queue.remove();
 		}
+	}
+	
+	private EcritureController() {
 	}
 }
