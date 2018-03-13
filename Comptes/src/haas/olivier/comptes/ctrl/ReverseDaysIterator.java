@@ -6,20 +6,26 @@ import java.util.Iterator;
 
 import haas.olivier.util.Month;
 
-/** Un itérateur des jours d'un mois dans l'ordre inverse de l'ordre
+/**
+ * Un itérateur des jours d'un mois dans l'ordre inverse de l'ordre
  * chronologique.
  * 
  * @author Olivier Haas
  */
 class ReverseDaysIterator implements Iterator<Date> {
 	
-	/** Le calendrier. */
+	/**
+	 * Le calendrier.
+	 */
 	private final Calendar calendar = Calendar.getInstance();
 	
-	/** Le premier jour du mois. C'est la dernière date à renvoyer. */
+	/**
+	 * Le premier jour du mois. C'est la dernière date à renvoyer.
+	 */
 	private final Date limit;
 	
-	/** Construit un itérateur des jours d'un mois dans l'ordre inverse de
+	/**
+	 * Construit un itérateur des jours d'un mois dans l'ordre inverse de
 	 * l'ordre chronologique.
 	 * 
 	 * @param month	Le mois à parcourir.
@@ -27,7 +33,7 @@ class ReverseDaysIterator implements Iterator<Date> {
 	public ReverseDaysIterator(Month month) {
 		calendar.setTime(month.getNext().getFirstDay());
 		limit = month.getFirstDay();
-	}// constructeur
+	}
 
 	@Override
 	public boolean hasNext() {

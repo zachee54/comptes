@@ -1,7 +1,6 @@
 package haas.olivier.comptes.ctrl;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
@@ -14,7 +13,8 @@ import java.math.RoundingMode;
 import java.util.Deque;
 import java.util.LinkedList;
 
-/** Le contrôleur d'écritures.
+/**
+ * Le contrôleur d'écritures.
  * <p>
  * Il s'agit d'une classe statique dont le rôle est de modifier les écritures
  * en gardant la cohérence des suivis.<br>
@@ -33,10 +33,13 @@ import java.util.LinkedList;
  */
 public class EcritureController {
 
-	/** Durée de la période à retenir pour les moyennes glissantes (en mois). */
+	/**
+	 * Durée de la période à retenir pour les moyennes glissantes (en mois).
+	 */
 	private static final int DUREE = 12;
 
-	/** Insère une écriture dans le modèle de données en assurant la cohérence
+	/**
+	 * Insère une écriture dans le modèle de données en assurant la cohérence
 	 * des données liées.<br>
 	 * Il peut s'agir soit d'une nouvelle écriture, soit de la modification
 	 * d'une écriture existante.
@@ -65,12 +68,14 @@ public class EcritureController {
 			add(e);
 			
 		} else {
+			
 			// Écriture à mettre à jour dans le modèle + mise à jour des suivis
 			update(e);
-		}// if
-	}// insert
+		}
+	}
 	
-	/** Ajoute plusieurs écritures dans le modèle et met à jour les données de
+	/**
+	 * Ajoute plusieurs écritures dans le modèle et met à jour les données de
 	 * suivi après l'ensemble des ajouts.
 	 * 
 	 * @param ecritures	Les écritures à ajouter. Elles doivent avoir un
@@ -91,13 +96,14 @@ public class EcritureController {
 			
 			// Ajouter l'écriture au modèle de données
 			eDAO.add(e);
-		}// for
+		}
 		
 		// Mettre à jour les données de suivi
 		updateSuivis(month);
-	}// add
+	}
 	
-	/** Ajoute une nouvelle écriture dans le modèle de données et met à jour les
+	/**
+	 * Ajoute une nouvelle écriture dans le modèle de données et met à jour les
 	 * suivis à partir du mois de l'écriture.
 	 * 
 	 * @param e	L'écriture à ajouter.
@@ -107,9 +113,10 @@ public class EcritureController {
 	private static void add(Ecriture e) throws IOException {
 		DAOFactory.getFactory().getEcritureDAO().add(e);// Ajouter l'écriture
 		updateSuivis(new Month(e.date));				// Mettre à jour suivis
-	}// add
+	}
 	
-	/** Met à jour une écriture dans le modèle, et met à jour en même temps les
+	/**
+	 * Met à jour une écriture dans le modèle, et met à jour en même temps les
 	 * suivis à partir du mois de l'écriture la plus ancienne : cette écriture
 	 * ou celle qu'elle remplace.
 	 * 
@@ -129,9 +136,10 @@ public class EcritureController {
 		
 		// Mettre à jour les suivis à partir du mois le plus ancien
 		updateSuivis(monthNew.after(monthOld) ? monthOld : monthNew);
-	}// update
+	}
 	
-	/** Supprime une écriture et met à jour les suivis à partir du mois de
+	/**
+	 * Supprime une écriture et met à jour les suivis à partir du mois de
 	 * l'écriture supprimée.
 	 * 
 	 * @param id	L'identifiant de l'écriture à supprimer.
@@ -147,9 +155,10 @@ public class EcritureController {
 		Ecriture e = eDAO.get(id);						// L'écriture à effacer
 		eDAO.remove(id);								// Supprimer du modèle
 		updateSuivis(new Month(e.date));				// Mettre à jour suivis
-	}// remove
+	}
 
-	/** Met à jour l'historique, les soldes à vue et les moyennes des comptes à
+	/**
+	 * Met à jour l'historique, les soldes à vue et les moyennes des comptes à
 	 * partir du mois spécifié.
 	 * 
 	 * @throws IOException
@@ -188,15 +197,17 @@ public class EcritureController {
 				break;
 			case NEUTRE:
 				break; // Rien si l'opération est neutre.
-			}// switch epargne
-		}// for journal
+			}
+		}
 
-		/* Mettre à jour les pointages. On part du principe que le pointage
+		/*
+		 * Mettre à jour les pointages. On part du principe que le pointage
 		 * intervenant APRÈS l'écriture elle-même, les pointages antérieurs à
 		 * debut ne sont pas modifiés.
 		 */
 
-		/* Obtenir les écritures non pointées ou ayant un pointage après la date
+		/*
+		 * Obtenir les écritures non pointées ou ayant un pointage après la date
 		 * voulue, dans l'ordre chronologique des pointages
 		 */
 		Iterable<Ecriture> journalPointages = dao.getPointagesSince(debut);
@@ -208,21 +219,22 @@ public class EcritureController {
 				Month mois = new Month(e.pointage);
 				e.debit.addPointages(mois, e.montant.negate());
 				e.credit.addPointages(mois, e.montant);
-			}// if pointage
-		}// for pointages
+			}
+		}
 		
 		// Recalculer les moyennes des comptes budgétaires
 		for (Compte c : DAOFactory.getFactory().getCompteDAO().getAll()) {
 			if (c instanceof CompteBudget) {
 				((CompteBudget) c).updateMoyennes(debut);
 			}
-		}// for comptes
+		}
 		
 		// Même chose pour le compte virtuel d'épargne
 		Compte.compteEpargne.updateMoyennes(debut);
-	}// update(Month)
+	}
 
-	/** Recalcule les moyennes à partir du mois donné.
+	/**
+	 * Recalcule les moyennes à partir du mois donné.
 	 * 
 	 * @param cible	Le mois à partir duquel mettre à jour toutes les moyennes.
 	 * 
@@ -248,9 +260,10 @@ public class EcritureController {
 				month.before(since);				// Mois cible non atteint
 				month = month.getNext()) {			// Passer au mois suivant
 			queue.add(getHistorique(month));		// Pousser le solde du mois
-		}// for
+		}
 
-		/* Calculer les moyennes glissantes.
+		/*
+		 * Calculer les moyennes glissantes.
 		 * À chaque fois on rajoute un mois et on enlève le plus ancien.
 		 */
 		for (Month month = since;					// Depuis le mois donné
@@ -278,8 +291,6 @@ public class EcritureController {
 
 			// Enlever le dernier mois de la file
 			queue.remove();
-		}// for month
-	}// updateMoyenne
-
-
+		}
+	}
 }
