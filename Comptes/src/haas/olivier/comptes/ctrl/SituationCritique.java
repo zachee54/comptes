@@ -55,10 +55,10 @@ public class SituationCritique {
 	 */
 	public SituationCritique(Compte compte, Date today) throws IOException {
 		Month month = new Month(today);
-		DailySolde dailySolde = compte.getHistoriqueIn(month);
-		
 		Date start = getMidnight(today);
-		explore(dailySolde.iteratorFrom(start));
+		
+		// Étudier le mois actuel et le mois suivant
+		explore(compte.getHistoriqueIn(month).iteratorFrom(start));
 		explore(compte.getHistoriqueIn(month.getNext()).iterator());
 	}
 	
