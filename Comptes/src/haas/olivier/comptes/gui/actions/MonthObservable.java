@@ -9,11 +9,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Un modèle observable de changements de mois ou de dates. Bien que les
- * changements de données impactent toute l'application, chaque instance a ses
- * propres observateurs. Cela permet de ne mettre à jour que les observateurs
- * dont on a besoin. En contrepartie, il faut penser à mettre à jour les autres
- * avant de s'en servir.
+ * Un observable de changements de mois ou de dates. Bien que les changements de
+ * données impactent toute l'application, chaque instance a ses propres
+ * observateurs. Cela permet de ne mettre à jour que les observateurs dont on a
+ * besoin. En contrepartie, il faut penser à mettre à jour les autres avant de
+ * s'en servir.
  * 
  * @author Olivier Haas
  */
@@ -31,7 +31,9 @@ public class MonthObservable extends Observable<MonthObserver> {
 	 */
 	private static Date date = null;
 
-	/** @return Le mois actuellement sélectionné. */
+	/**
+	 * @return Le mois actuellement sélectionné.
+	 */
 	public static Month getMonth() {
 		return month;
 	}
@@ -44,14 +46,18 @@ public class MonthObservable extends Observable<MonthObserver> {
 		return date;
 	}
 
-	/** Notifie aux observateurs le mois actuel. */
+	/**
+	 * Notifie aux observateurs le mois actuel.
+	 */
 	private void notifyMonth() {
 		for (MonthObserver observer : observers) {
 			observer.monthChanged(month); // Notifier le mois
 		}
-	}// notifyMonth
+	}
 
-	/** Notifie aux observateurs la date actuelle. */
+	/**
+	 * Notifie aux observateurs la date actuelle.
+	 */
 	private void notifyDate() {
 		try {
 			for (MonthObserver observer : observers)
@@ -62,7 +68,7 @@ public class MonthObservable extends Observable<MonthObserver> {
 					"Erreur pendant la lecture des données à la date choisie",
 					e);
 		}
-	}// notifyDate
+	}
 
 	/**
 	 * Notifie tous les observateurs en leur indiquant le mois ou la date
@@ -73,23 +79,27 @@ public class MonthObservable extends Observable<MonthObserver> {
 
 		// Si une date est sélectionnée
 		if (date != null) {
-			notifyDate(); // Notifier la date
+			notifyDate();			// Notifier la date
 		} else {
-			notifyMonth(); // Notifier le mois
-		}// if date null
-	}// notifyObservers
+			notifyMonth();			// Notifier le mois
+		}
+	}
 
-	/** Modifie le mois sélectionné et notifie les observateurs. */
+	/**
+	 * Modifie le mois sélectionné et notifie les observateurs.
+	 */
 	public void setMonth(Month newMonth) {
-		month = newMonth; // Nouveau mois
-		date = null; // Supprimer la date s'il y en a une
-		notifyMonth(); // Notifie le nouveau mois
-	}// setMonth
+		month = newMonth;			// Nouveau mois
+		date = null;				// Supprimer la date s'il y en a une
+		notifyMonth();				// Notifie le nouveau mois
+	}
 
-	/** Modifie la date sélectionnée et notifie les observateurs. */
+	/**
+	 * Modifie la date sélectionnée et notifie les observateurs.
+	 */
 	public void setDate(Date newDate) {
-		date = newDate; // Nouvelle date
+		date = newDate;				// Nouvelle date
 		month = new Month(newDate); // Ça paraît bête, mais certaines gens...
-		notifyDate(); // Notifier les observateurs
-	}// setDate
-}// class
+		notifyDate();				// Notifier les observateurs
+	}
+}

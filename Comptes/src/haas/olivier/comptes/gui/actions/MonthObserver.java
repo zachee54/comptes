@@ -5,10 +5,14 @@ import haas.olivier.util.Month;
 import java.io.IOException;
 import java.util.Date;
 
-/** Observer sur un changement de mois ou de date. */
+/**
+ * Un observateur de changements de mois ou de date.
+ */
 public interface MonthObserver {
 
-	/** Notifie un changement de mois. */
+	/**
+	 * Notifie un changement de mois.
+	 */
 	void monthChanged(Month month);
 
 	/**
