@@ -10,7 +10,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
 
-/** Un observable de changements de compte.
+/**
+ * Un observable de changements de compte.
  * <p>
  * L'interface utilisateur étant cloisonnée en plusieurs objets gérant chacun
  * les comptes d'un certain type, l'observable gère ses données dans les
@@ -21,13 +22,18 @@ import javax.swing.JComboBox;
 public class CompteObservable extends Observable<CompteObserver>
 implements ItemListener {
 
-	/** Compte actuel. */
+	/**
+	 * Compte actuel.
+	 */
 	private Compte compte;
 	
-	/** Le composant habituel pour sélection par l'utilisateur. */
+	/**
+	 * Le composant habituel pour sélection par l'utilisateur.
+	 */
 	private JComboBox<Compte> comboBox;
 
-	/** Construit un observable qui écoute une liste déroulante de
+	/**
+	 * Construit un observable qui écoute une liste déroulante de
 	 * <code>Compte</code>s.
 	 * 
 	 * @param comboBox
@@ -41,18 +47,20 @@ implements ItemListener {
 
 		// Ecouter les changements
 		comboBox.addItemListener(this);
-	}// constructeur
+	}
 
-	/** Renvoie le compte actuel.
+	/**
+	 * Renvoie le compte actuel.
 	 * <p>
 	 * Cette méthode est utile lors de l'instanciation d'objets qui ont besoin
 	 * de connaître le compte sans qu'il n'y ait d'événement.
 	 */
 	public Compte getCompte() {
 		return compte;
-	}// getCompte
+	}
 
-	/** Modifie le compte cible.
+	/**
+	 * Modifie le compte cible.
 	 * <p>
 	 * En pratique, cette méthode modifie le compte sélectionné dans la
 	 * <code>JComboBox</code>. Elle permet ainsi de modifier le compte cible
@@ -60,9 +68,10 @@ implements ItemListener {
 	 */
 	public void setCompte(Compte newCompte) {
 		comboBox.setSelectedItem(newCompte);	// Changer la JComboBox
-	}// setCompte
+	}
 
-	/** Récupère le compte sélectionné par la liste déroulante, le mémorise et 
+	/**
+	 * Récupère le compte sélectionné par la liste déroulante, le mémorise et 
 	 * notifie les observateurs.
 	 */
 	@Override
@@ -76,7 +85,7 @@ implements ItemListener {
 			} catch (ClassCastException e1) {
 				Logger.getLogger(getClass().getName()).severe(
 						"L'objet sélectionné n'est pas un compte");
-			}// try
+			}
 
 			// Notifier les observateurs
 			for (CompteObserver observer : observers) {
@@ -87,6 +96,6 @@ implements ItemListener {
 					e1.printStackTrace();
 				}
 			}
-		}// if selected 
-	}// itemStateChanged
-}// class
+		} 
+	}
+}

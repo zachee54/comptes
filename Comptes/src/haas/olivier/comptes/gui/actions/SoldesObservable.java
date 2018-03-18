@@ -6,7 +6,8 @@ import java.util.logging.Logger;
 
 import haas.olivier.util.Observable;
 
-/** Un Observable de changements de soldes (historiques, soldes à vue,
+/**
+ * Un observable de changements de soldes (historiques, soldes à vue,
  * moyennes...).
  * <p>
  * En plus de permettre la mise à jour des composants affichant des soldes, cet
@@ -23,9 +24,10 @@ import haas.olivier.util.Observable;
 public class SoldesObservable extends Observable<SoldesObserver>
 implements DataObserver {
 	
-	/** Construit un SoldesObservable appuyé obligatoirement sur un
-	 * DataObservable: quand les données changent, il faut recalculer les
-	 * soldes.
+	/**
+	 * Construit un <code>SoldesObservable</code> appuyé obligatoirement sur un
+	 * <code>DataObservable</code> : quand les données changent, il faut
+	 * recalculer les soldes.
 	 */
 	public SoldesObservable(DataObservable dataObservable) {
 		dataObservable.addObserver(this);
@@ -34,9 +36,11 @@ implements DataObserver {
 	@Override
 	public void dataModified() {
 		notifyObservers();
-	}// dataModified
+	}
 	
-	/** Met à jour les soldes et prévient ensuite les Observers. */
+	/**
+	 * Met à jour les soldes et prévient ensuite les observateurs.
+	 */
 	public void notifyObservers() {
 		try {
 			for (SoldesObserver observer : observers)
@@ -47,5 +51,5 @@ implements DataObserver {
 					"Erreur pendant la détermination des soldes à afficher",
 					e);
 		}
-	}// notifyObservers
+	}
 }
