@@ -27,25 +27,42 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-@SuppressWarnings("serial")
-/** Un panel présentant les soldes utiles.
+/**
+ * Un panel présentant les soldes utiles.
+ * <p>
  * La classe propose d'instancier deux types de classes dérivées, selon que l'on
  * souhaite suivre un compte bancaire ou un compte budgétaire.
+ * 
  * @author Olivier HAAS
  */
+@SuppressWarnings("serial")
 public abstract class SoldesPanel extends JPanel implements MonthObserver,
 		CompteObserver, SoldesObserver {
 
-	// Les couleurs de soldes
-	protected static final Color COLOR1 = new Color(0, 0, 127);
-	protected static final Color COLOR2 = new Color(0, 127, 0);
-	protected static final Color COLOR3 = new Color(127, 63, 0);
+	/**
+	 * La couleur du solde théorique.
+	 */
+	protected static final Color COLOR_THEORIQUE = new Color(0, 0, 127);
+	
+	/**
+	 * La couleur du solde à vue.
+	 */
+	protected static final Color COLOR_A_VUE = new Color(0, 127, 0);
+	
+	/**
+	 * La couleur de la situation critique.
+	 */
+	protected static final Color COLOR_CRITIQUE = new Color(127, 63, 0);
 
-	/** Format monétaire */
+	/**
+	 * Le format monétaire.
+	 */
 	protected static final DecimalFormat NF = new DecimalFormat(
 			"#,##0.00 €;- #,##0.00 €", new DecimalFormatSymbols(Locale.FRANCE));
 
-	/** Le format de date pour l'affichage de la date critique. */
+	/**
+	 * Le format de date pour l'affichage de la date critique.
+	 */
 	protected static final DateFormat DF = new SimpleDateFormat("d MMM");
 
 	/**
@@ -75,12 +92,16 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 			return new SoldesBudgetPanel(monthObservable, compteObservable,
 					soldesObservable);
 		}
-	}// getInstance
+	}
 
-	/** Le compte sélectionné. */
+	/**
+	 * Le compte sélectionné.
+	 */
 	protected Compte compte;
 
-	/** Constructeur privé ne contenant que les dispositions communes. */
+	/**
+	 * Constructeur privé ne contenant que les dispositions communes.
+	 */
 	protected SoldesPanel(MonthObservable monthObservable,
 			CompteObservable compteObservable,
 			SoldesObservable soldesObservable) {
@@ -94,7 +115,7 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 		compte = compteObservable.getCompte();
 
 		// Laisser les instances se mettre à jour après s'être initialisées.
-	}// constructeur
+	}
 
 	/**
 	 * Affiche le solde théorique et solde à vue ou la moyenne à la fin du mois
@@ -108,7 +129,9 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 	 */
 	protected abstract void setSoldesToDate(Date date);
 
-	/** Met à jour tous les soldes affichés. */
+	/**
+	 * Met à jour tous les soldes affichés.
+	 */
 	public void update() {
 		// Mettre à jour solde théorique et solde à vue au mois ou à la date
 		if (MonthObservable.getDate() == null) {
@@ -116,14 +139,14 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 		} else {
 			setSoldesToDate(MonthObservable.getDate());	// Ou Date sélectionnée
 		}
-	}// update
+	}
 
 	@Override
 	public void monthChanged(Month month) {
 		// Écrire les soldes à ce mois
 		if (compte != null)			// Sauf s'il n'y a pas de compte
 			setSoldesToMonth(month);
-	}// monthChanged
+	}
 
 	@Override
 	public void dateChanged(Date date) {
@@ -142,17 +165,44 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 	}
 }// class SoldesPanel
 
-@SuppressWarnings("serial")
-/** Un SoldesPanel pour les comptes bancaires.
+/**
+ * Un <code>SoldesPanel</code> pour les comptes bancaires.
+ * <p>
  * Affiche le solde théorique, le solde à vue et la situation critique du
  * compte.
+ * 
  * @author Olivier HAAS
  */
+@SuppressWarnings("serial")
 class SoldesBancairesPanel extends SoldesPanel {
 
-	// Les étiquettes contenant les montants (modifiables)
-	private JLabel theo, aVue, crit, date;
+	/**
+	 * L'étiquette contenant le solde théorique.
+	 */
+	private JLabel theo;
+	
+	/**
+	 * L'étiquette contenant le solde à vue.
+	 */
+	private JLabel aVue;
+	
+	/**
+	 * L'étiquette contenant le montant critique.
+	 */
+	private JLabel crit;
+	
+	/**
+	 * L'étiquette contenant la date critique.
+	 */
+	private JLabel date;
 
+	/**
+	 * Construit un panneau des soldes pour les comptes bancaires.
+	 * 
+	 * @param monthObservable	L'observable de mois.
+	 * @param compteObservable	L'observable de compte.
+	 * @param soldesObservable	L'observable de soldes.
+	 */
 	protected SoldesBancairesPanel(MonthObservable monthObservable,
 			CompteObservable compteObservable,
 			SoldesObservable soldesObservable) {
@@ -180,10 +230,10 @@ class SoldesBancairesPanel extends SoldesPanel {
 		date.setHorizontalAlignment(SwingConstants.CENTER);
 
 		// Coloriser
-		theo.setForeground(COLOR1);
-		aVue.setForeground(COLOR2);
-		crit.setForeground(COLOR3);
-		date.setForeground(COLOR3);
+		theo.setForeground(COLOR_THEORIQUE);
+		aVue.setForeground(COLOR_A_VUE);
+		crit.setForeground(COLOR_CRITIQUE);
+		date.setForeground(COLOR_CRITIQUE);
 
 		// Insérer dans le panel des soldes
 		add(labelAVue);		// Libellé solde à vue
@@ -191,11 +241,11 @@ class SoldesBancairesPanel extends SoldesPanel {
 		add(labelCritique);	// Libellé solde critique
 		add(new JLabel());	// Un vide
 
-		add(aVue); // Solde à vue
-		add(theo); // Solde théorique
-		add(crit); // Solde critique
-		add(date); // Date critique
-	}// constructeur
+		add(aVue);			// Solde à vue
+		add(theo);			// Solde théorique
+		add(crit);			// Solde critique
+		add(date);			// Date critique
+	}
 
 	@Override
 	protected void setSoldesToMonth(Month month) {
@@ -214,9 +264,10 @@ class SoldesBancairesPanel extends SoldesPanel {
 	public void update() {
 		super.update();
 		setSoldeCritique(MonthObservable.getMonth());
-	}// update
+	}
 	
-	/** Met à jour les libellés "solde critique...le..." en fontion de la
+	/**
+	 * Met à jour les libellés "solde critique...le..." en fontion de la
 	 * situation du compte au cours du mois spécifié. 
 	 * <p>
 	 * Si le compte n'est pas un compte bancaire (ce qui ne devrait jamais
@@ -243,12 +294,13 @@ class SoldesBancairesPanel extends SoldesPanel {
 				date.setText(null);
 				
 				e.printStackTrace();
-			}// try
-		}// if compte bancaire
-	}// setSoldeCritique
+			}
+		}
+	}
 }// class SoldesBancairesPanel
 
-/** Un <code>SoldesPanel</code> pour les comptes budgétaires.
+/**
+ * Un <code>SoldesPanel</code> pour les comptes budgétaires.
  * <p>
  * Affiche le solde théorique (opérations du mois) et la moyenne.
  * 
@@ -257,9 +309,23 @@ class SoldesBancairesPanel extends SoldesPanel {
 @SuppressWarnings("serial")
 class SoldesBudgetPanel extends SoldesPanel {
 
-	// Les étiquettes contenant les montants (modifiables)
-	private JLabel theo, moy;
+	/**
+	 * L'étiquette contenant le solde théorique.
+	 */
+	private JLabel theo;
+	
+	/**
+	 * L'étiquette contenant la moyenne.
+	 */
+	private JLabel moy;
 
+	/**
+	 * Construit un panneau de soldes pour les comptes budgétaires.
+	 * 
+	 * @param monthObservable	L'observable de mois.
+	 * @param compteObservable	L'observable de compte.
+	 * @param soldesObservable	L'observable de soldes.
+	 */
 	protected SoldesBudgetPanel(MonthObservable monthObservable,
 			CompteObservable compteObservable,
 			SoldesObservable soldesObservable) {
@@ -281,8 +347,8 @@ class SoldesBudgetPanel extends SoldesPanel {
 		moy.setHorizontalAlignment(SwingConstants.CENTER);
 
 		// Coloriser
-		theo.setForeground(COLOR1);
-		moy.setForeground(COLOR2);
+		theo.setForeground(COLOR_THEORIQUE);
+		moy.setForeground(COLOR_A_VUE);
 
 		// Insérer dans le panel des soldes
 		add(labelTheo);								// Libellé solde théorique
@@ -290,18 +356,18 @@ class SoldesBudgetPanel extends SoldesPanel {
 
 		add(theo);									// Solde théorique
 		add(moy);									// Moyenne
-	}// constructeur
+	}
 
 	@Override
 	protected void setSoldesToMonth(Month month) {
 		theo.setText(NF.format(compte.getHistorique(month)));
 		moy.setText(NF.format(((CompteBudget) compte).getMoyenne(month)));
-	}// setSoldesToMonth
+	}
 
 	@Override
 	protected void setSoldesToDate(Date date) {
 		theo.setText(NF.format(compte.getHistoriqueAt(date)));
 		moy.setText(NF.format(((CompteBudget) compte)
 				.getMoyenne(new Month(date))));
-	}// setSoldesToDate
+	}
 }// class SoldesBudgetPanel
