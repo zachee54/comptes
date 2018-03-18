@@ -23,7 +23,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-/** Un sélecteur de date.
+/**
+ * Un sélecteur de date.
  * <p>
  * Il s'agit d'une interface graphique de choix des dates sous la forme de trois
  * "sliders", respectivement pour l'année, le mois et le jour du mois.<br>
@@ -38,22 +39,34 @@ import javax.swing.event.ChangeListener;
 public class DateSelector extends JPanel
 implements ChangeListener, MonthObserver, MouseWheelListener {
 
-	/** Objet observable gérant les mois et jours. */
+	/**
+	 * Objet observable gérant les mois et jours.
+	 */
 	private MonthObservable observable;
 
-	/** Le slider définissant l'année. */
+	/**
+	 * Le slider définissant l'année.
+	 */
 	private JSlider sliderAnnee;
-	/** Le slider définissant le mois. */
+	
+	/**
+	 * Le slider définissant le mois.
+	 */
 	private JSlider sliderMois;
-	/** Le slider définissant le jour. */
+	
+	/**
+	 * Le slider définissant le jour.
+	 */
 	private JSlider sliderJour;
 
-	/** Détermine s'il faut ou non réagir aux événements (utile pendant les
+	/**
+	 * Détermine s'il faut ou non réagir aux événements (utile pendant les
 	 * phases d'ajustement).
 	 */
 	private boolean ignoreEvent = false;
 
-	/** Construit un sélecteur de date.
+	/**
+	 * Construit un sélecteur de date.
 	 * 
 	 * @param debut			Le mois le plus ancien à proposer.
 	 * @param observable	L'observable à notifier en cas de changement.
@@ -92,9 +105,10 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		sliderAnnee.addChangeListener(this);
 		sliderMois.addChangeListener(this);
 		sliderJour.addChangeListener(this);
-	}// constructeur
+	}
 
-	/** Crée un slider permettant de choisir l'année.
+	/**
+	 * Crée un slider permettant de choisir l'année.
 	 * 
 	 * @param debut		Le mois le plus ancien à proposer. Seule son année nous
 	 * 					intéresse ici.
@@ -123,9 +137,10 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 
 		// L'aspect du slider année
 		sliderAnnee.setSnapToTicks(true);	// Ajuster le curseur aux marques
-	}// createSliderAnnee
+	}
 
-	/** Crée un slider permettant de choisir le mois. L'échelle va de décembre
+	/**
+	 * Crée un slider permettant de choisir le mois. L'échelle va de décembre
 	 * N-1 à janvier N+1. Janvier ayant l'index 0, le slider est gradué de -1 à
 	 * 12.
 	 * 
@@ -162,9 +177,11 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 
 		// L'aspect du slider mois
 		sliderMois.setSnapToTicks(true); // Ajuster le curseur aux marques
-	}// createSliderMois
+	}
 
-	/** Crée un slider de 1 à 31 pour choisir le jour. */
+	/**
+	 * Crée un slider de 1 à 31 pour choisir le jour.
+	 */
 	private void createSliderJour() {
 
 		// Créer le slider
@@ -182,9 +199,11 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 
 		// Ne pas s'arrêter entre les marques
 		sliderJour.setSnapToTicks(true);
-	}// createDaySelector
+	}
 
-	/** Calcule le nouveau mois défini par les sliders et le transmet. */
+	/**
+	 * Calcule le nouveau mois défini par les sliders et le transmet.
+	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
 
@@ -217,9 +236,10 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 
 			// Autoriser à nouveau la gestion des événements
 			ignoreEvent = false;
-		}// if changer d'année
+		}
 
-		/* Plafonner la date au dernier jour du mois (ex:"31 avril" => 30 avril)
+		/*
+		 * Plafonner la date au dernier jour du mois (ex:"31 avril" => 30 avril)
 		 * Concrètement: si le jour du mois n'est plus le même que celui qu'on
 		 * vient de définir (1er mai au lieu de "31 avril")
 		 */
@@ -247,7 +267,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 			newDate = null;				// Garder le mois seul
 		} else {
 			newDate = cal.getTime();	// Configurer la date
-		}// if date ou mois
+		}
 
 		// Le mois a-t-il changé ?
 		if (!newMonth.equals(actualMonth)) {
@@ -256,8 +276,8 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 			// Sinon, a-t-on une date ? A-t-elle changé ?
 		} else if (newDate != null && !newDate.equals(actualDate)) {
 			observable.setDate(newDate);	// Oui: notifier l'observable
-		}// if mois ou date a changé
-	}// stateChanged
+		}
+	}
 
 	@Override
 	public void monthChanged(Month month) {
@@ -277,7 +297,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		sliderMois.setValue(cal.get(Calendar.MONTH) + 1);	// Régler le mois
 		sliderJour.setValue(cal.get(Calendar.DAY_OF_MONTH));// Régler le jour
 		ignoreEvent = false;			// Rétablir la gestion des événements
-	}// dateChanged
+	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
@@ -286,5 +306,5 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 			JSlider slider = (JSlider) component;
 			slider.setValue(slider.getValue() - e.getWheelRotation());
 		}
-	}// mouseWheelMoved
-}// private class DateSelector
+	}
+}
