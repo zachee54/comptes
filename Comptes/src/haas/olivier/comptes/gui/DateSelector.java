@@ -14,7 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.Dictionary;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,10 +35,14 @@ import javax.swing.event.ChangeListener;
  * <code>PropertyChangeEvent pour la propriété "jour". Pour le slider jour, le
  * 31 équivaut au dernier jour du mois, même si le mois a moins de 31 jours.
  */
-@SuppressWarnings("serial")
-public class DateSelector extends JPanel
+public class DateSelector
 implements ChangeListener, MonthObserver, MouseWheelListener {
 
+	/**
+	 * Le composant graphique.
+	 */
+	private final JPanel panel = new JPanel();
+	
 	/**
 	 * Objet observable gérant les mois et jours.
 	 */
@@ -81,25 +85,26 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		Month initial = MonthObservable.getMonth();
 
 		// Définir un panel pour le choix des dates
-		setLayout(new GridLayout(1, 3, 15, 0));
+		panel.setLayout(new GridLayout(1, 3, 15, 0));
 
 		// Ajouter le slider année au panel
 		createSliderAnnee(debut, initial);
-		add(sliderAnnee);
+		panel.add(sliderAnnee);
 
 		// Ajouter le slider mois au panel
 		createSliderMois(initial);
-		add(sliderMois);
+		panel.add(sliderMois);
 
 		// Ajouter le slider jour au panel
 		createSliderJour();
-		add(sliderJour);
+		panel.add(sliderJour);
 
 		// Créer une bordure invisible pour faire la marge
-		setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 0), 10));
+		panel.setBorder(
+				BorderFactory.createLineBorder(new Color(0, 0, 0, 0), 10));
 
 		// Ecouter les mouvements de la molette
-		addMouseWheelListener(this);
+		panel.addMouseWheelListener(this);
 		
 		// Enregistrer cet objet pour écouter les changements
 		sliderAnnee.addChangeListener(this);
@@ -128,11 +133,12 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 				anneeInitial);
 
 		// Définir les étiquettes du slider année
-		Hashtable<Integer, JLabel> annees = new Hashtable<Integer, JLabel>();
+		@SuppressWarnings("unchecked")
+		Dictionary<Integer, JLabel> annees = sliderAnnee.getLabelTable();
 		for (int annee = anneeDebut; annee <= anneeFin; annee++) {
 			annees.put(annee, new JLabel("" + annee)); // Ajouter une étiquette
 		}
-		sliderAnnee.setLabelTable(annees);	// Attribuer le dico d'étiquettes
+//		sliderAnnee.setLabelTable(annees);	// Attribuer le dico d'étiquettes
 		sliderAnnee.setPaintLabels(true);	// Peindre les étiquettes
 
 		// L'aspect du slider année
@@ -152,28 +158,29 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		sliderMois = new JSlider(JSlider.VERTICAL, 0, 13,
 				initial.getNumInYear());						// Mois en cours
 
-		// Définir un dictionnaire pour les étiquettes du slider mois
-		Hashtable<Integer, JLabel> tableMois = new Hashtable<Integer, JLabel>();
-
 		// Partir d'un mois de décembre
 		DateFormat dateParser = new SimpleDateFormat("dd/MM/yy");
 		Month unMois = null;
 		try {
 			unMois = new Month((dateParser.parse("01/12/00")));
+
+			// Définir un dictionnaire pour les étiquettes du slider mois
+			@SuppressWarnings("unchecked")
+			Dictionary<Integer, JLabel> tableMois = sliderMois.getLabelTable();
+
+			// Ecrire les mois
+			DateFormat moisFormatter = new SimpleDateFormat("MMM");
+			for (int i=sliderMois.getMinimum(); i<=sliderMois.getMaximum(); i++) {
+				tableMois.put(i,
+						new JLabel(moisFormatter.format(unMois.getFirstDay())));
+				unMois = unMois.getNext();						// Mois suivant
+			}
+
+			// Attribuer ces étiquettes au slider mois
+//			sliderMois.setLabelTable(tableMois);
+			sliderMois.setPaintLabels(true);
 		} catch (ParseException e) {
 		}
-
-		// Ecrire les mois
-		DateFormat moisFormatter = new SimpleDateFormat("MMM");
-		for (int i=sliderMois.getMinimum(); i<=sliderMois.getMaximum(); i++) {
-			tableMois.put(i, new JLabel(moisFormatter.format(	// Label
-					unMois.getFirstDay())));
-			unMois = unMois.getNext();							// Mois suivant
-		}
-
-		// Attribuer ces étiquettes au slider mois
-		sliderMois.setLabelTable(tableMois);
-		sliderMois.setPaintLabels(true);
 
 		// L'aspect du slider mois
 		sliderMois.setSnapToTicks(true); // Ajuster le curseur aux marques
@@ -188,7 +195,8 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		sliderJour = new JSlider(JSlider.VERTICAL, 1, 31, 31);
 
 		// Les labels
-		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+		@SuppressWarnings("unchecked")
+		Dictionary<Integer, JLabel> labels = sliderJour.getLabelTable();
 		for (int n = 1; n <= 31; n++) {
 			JLabel label = new JLabel("" + n);	// Etiquette du jour n
 			label.setHorizontalAlignment(SwingConstants.RIGHT); // Alignement
@@ -301,10 +309,18 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		Component component = getComponentAt(e.getPoint());
+		Component component = panel.getComponentAt(e.getPoint());
 		if (component instanceof JSlider) {
 			JSlider slider = (JSlider) component;
 			slider.setValue(slider.getValue() - e.getWheelRotation());
 		}
+	}
+	
+	/**
+	 * Renvoie le composant graphique du sélecteur de date.
+	 * @return
+	 */
+	public Component getComponent() {
+		return panel;
 	}
 }

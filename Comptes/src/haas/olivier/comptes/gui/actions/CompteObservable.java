@@ -6,6 +6,7 @@ import haas.olivier.util.Observable;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
@@ -78,24 +79,27 @@ implements ItemListener {
 	public void itemStateChanged(ItemEvent e) {
 		
 		// Seulement pour le nouveau compte (pas pour l'ancien)
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-			try {
-				compte = (Compte) e.getItem();
-				
-			} catch (ClassCastException e1) {
-				Logger.getLogger(getClass().getName()).severe(
-						"L'objet sélectionné n'est pas un compte");
-			}
+		if (e.getStateChange() != ItemEvent.SELECTED)
+			return;
+			
+		try {
+			compte = (Compte) e.getItem();
 
-			// Notifier les observateurs
-			for (CompteObserver observer : observers) {
-				try {
-					observer.compteChanged(compte);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+		} catch (ClassCastException e1) {
+			Logger.getLogger(getClass().getName()).severe(
+					"L'objet sélectionné n'est pas un compte");
+		}
+
+		// Notifier les observateurs
+		for (CompteObserver observer : observers) {
+			try {
+				observer.compteChanged(compte);
+			} catch (IOException e1) {
+				Logger.getLogger(getClass().getName()).log(
+						Level.SEVERE,
+						"Erreur pendant l'affichage des données du compte",
+						e1);
 			}
-		} 
+		}
 	}
 }
