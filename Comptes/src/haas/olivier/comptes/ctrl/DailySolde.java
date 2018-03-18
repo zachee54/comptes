@@ -77,4 +77,17 @@ public class DailySolde implements Iterable<Entry<Date, BigDecimal>> {
 	public Iterator<Entry<Date, BigDecimal>> iteratorFrom(Date date) {
 		return soldesByDay.tailMap(date).entrySet().iterator();
 	}
+	
+	/**
+	 * Renvoie le solde à une date précise.
+	 * 
+	 * @param date	La date souhaitée.
+	 * 
+	 * @return		Le solde à la date souhaitée, ou <code>null</code> si la
+	 * 				date n'est pas incluse dans le mois traité par cette
+	 * 				instance.
+	 */
+	public BigDecimal getSoldeAt(Date date) {
+		return soldesByDay.get(date);
+	}
 }

@@ -1,10 +1,13 @@
 package haas.olivier.comptes.gui.actions;
 
-/** Observer sur un changement de soldes (historiques, soldes à vue,
+import java.io.IOException;
+
+/**
+ * Un observateur sur un changement de soldes (historiques, soldes à vue,
  * moyennes...).
  *
  * @author Olivier HAAS
  */
 public interface SoldesObserver {
-	void soldesChanged();
+	void soldesChanged() throws IOException;
 }

@@ -1,8 +1,7 @@
 package haas.olivier.comptes.gui;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
+import haas.olivier.comptes.ctrl.SituationCritique;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.gui.actions.CompteObservable;
 import haas.olivier.comptes.gui.actions.CompteObserver;
@@ -21,7 +20,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -126,13 +126,17 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 	/**
 	 * Affiche le solde théorique et le solde à vue ou la moyenne à la date
 	 * spécifiée.
+	 * 
+	 * @throws IOException
 	 */
-	protected abstract void setSoldesToDate(Date date);
+	protected abstract void setSoldesToDate(Date date) throws IOException;
 
 	/**
 	 * Met à jour tous les soldes affichés.
+	 * 
+	 * @throws IOException
 	 */
-	public void update() {
+	public void update() throws IOException {
 		// Mettre à jour solde théorique et solde à vue au mois ou à la date
 		if (MonthObservable.getDate() == null) {
 			setSoldesToMonth(MonthObservable.getMonth());	// Mois sélectionné
@@ -149,18 +153,18 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 	}
 
 	@Override
-	public void dateChanged(Date date) {
+	public void dateChanged(Date date) throws IOException {
 		setSoldesToDate(date);		// Écrire les soldes à cette date
 	}
 
 	@Override
-	public void compteChanged(Compte compte) {
+	public void compteChanged(Compte compte) throws IOException {
 		this.compte = compte;		// Modifier le compte
 		update();					// Mettre à jour
 	}
 
 	@Override
-	public void soldesChanged() {
+	public void soldesChanged() throws IOException {
 		update();					// Si les soldesont changé, recalculer tout
 	}
 }// class SoldesPanel
@@ -255,13 +259,14 @@ class SoldesBancairesPanel extends SoldesPanel {
 	}
 
 	@Override
-	protected void setSoldesToDate(Date date) {
-		theo.setText(NF.format(compte.getHistoriqueAt(date)));
-		aVue.setText(NF.format(compte.getSoldeAVueAt(date)));
+	protected void setSoldesToDate(Date date) throws IOException {
+		Month month = new Month(date);
+		theo.setText(NF.format(compte.getHistoriqueIn(month).getSoldeAt(date)));
+		aVue.setText(NF.format(compte.getSoldeAVueIn(month).getSoldeAt(date)));
 	}
 
 	@Override
-	public void update() {
+	public void update() throws IOException {
 		super.update();
 		setSoldeCritique(MonthObservable.getMonth());
 	}
@@ -276,14 +281,14 @@ class SoldesBancairesPanel extends SoldesPanel {
 	 * @param month	Le mois au titre duquel afficher la situation critique.
 	 */
 	private void setSoldeCritique(Month month) {
-		if (compte instanceof CompteBancaire) {
+		if (compte.getType().isBancaire()) {
 			try {
-				Entry<Date, BigDecimal> situationCritique =
-						((CompteBancaire) compte).getSituationCritique(month);
+				SituationCritique situationCritique =
+						compte.getSituationCritique();
 				Date dateCritique =						// Date de la situation
-						situationCritique.getKey();
+						situationCritique.getDateCritique();
 				BigDecimal soldeCritique =				// Montant critique
-						situationCritique.getValue();
+						situationCritique.getSoldeMini();
 
 				// Convertir au format texte
 				crit.setText(NF.format(soldeCritique));
@@ -292,8 +297,9 @@ class SoldesBancairesPanel extends SoldesPanel {
 			} catch (IOException e) {
 				crit.setText(null);
 				date.setText(null);
-				
-				e.printStackTrace();
+				Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+						"Erreur de lecture des données pour calculer la situation critique",
+						e);
 			}
 		}
 	}
@@ -361,13 +367,13 @@ class SoldesBudgetPanel extends SoldesPanel {
 	@Override
 	protected void setSoldesToMonth(Month month) {
 		theo.setText(NF.format(compte.getHistorique(month)));
-		moy.setText(NF.format(((CompteBudget) compte).getMoyenne(month)));
+		moy.setText(NF.format(compte.getMoyenne(month)));
 	}
 
 	@Override
-	protected void setSoldesToDate(Date date) {
-		theo.setText(NF.format(compte.getHistoriqueAt(date)));
-		moy.setText(NF.format(((CompteBudget) compte)
-				.getMoyenne(new Month(date))));
+	protected void setSoldesToDate(Date date) throws IOException {
+		Month month = new Month(date);
+		theo.setText(NF.format(compte.getHistoriqueIn(month).getSoldeAt(date)));
+		moy.setText(NF.format(compte.getMoyenne(month)));
 	}
 }// class SoldesBudgetPanel
