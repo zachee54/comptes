@@ -100,5 +100,28 @@ public class SituationCritique {
 		}
 	}
 	
+	/**
+	 * Renvoie la date critique.
+	 * <p>
+	 * S'il est prévu que le compte passe à découvert, la date critique est la
+	 * première date à laquelle le solde est négatif.<br>
+	 * Sinon, il s'agit de la première date à laquelle le solde minimum est
+	 * atteint.
+	 * 
+	 * @return	La première date à laquelle le compte devient débiteur, à défaut
+	 * 			la première date à laquelle le solde minimal est atteint.
+	 */
+	public Date getDateCritique() {
+		return (dateDebit == null) ? dateCreditMini : dateDebit;
+	}
 	
+	/**
+	 * Renvoie le solde prévisible le plus faible.<br>
+	 * Il peut être débiteur ou créditeur.
+	 * 
+	 * @return	Le solde prévisible le plus faible.
+	 */
+	public BigDecimal getSoldeMini() {
+		return soldeMini;
+	}
 }

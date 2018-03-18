@@ -3,7 +3,10 @@ package haas.olivier.comptes.gui.actions;
 import haas.olivier.util.Month;
 import haas.olivier.util.Observable;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Un modèle observable de changements de mois ou de dates. Bien que les
@@ -50,8 +53,14 @@ public class MonthObservable extends Observable<MonthObserver> {
 
 	/** Notifie aux observateurs la date actuelle. */
 	private void notifyDate() {
-		for (MonthObserver observer : observers) {
-			observer.dateChanged(date); // Notifier la date
+		try {
+			for (MonthObserver observer : observers)
+				observer.dateChanged(date);	// Notifier la date
+		} catch (IOException e) {
+			Logger.getLogger(getClass().getName()).log(
+					Level.SEVERE,
+					"Erreur pendant la lecture des données à la date choisie",
+					e);
 		}
 	}// notifyDate
 

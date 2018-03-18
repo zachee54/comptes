@@ -5,6 +5,7 @@ import haas.olivier.util.Observable;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
@@ -78,8 +79,14 @@ implements ItemListener {
 			}// try
 
 			// Notifier les observateurs
-			for (CompteObserver observer : observers)
-				observer.compteChanged(compte);
+			for (CompteObserver observer : observers) {
+				try {
+					observer.compteChanged(compte);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 		}// if selected 
 	}// itemStateChanged
 }// class

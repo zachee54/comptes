@@ -557,7 +557,7 @@ ActionListener, PropertiesController {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		new SwingWorker<Void,Void>() {
-			public Void doInBackground() {
+			public Void doInBackground() throws IOException {
 				Component tab = tabs.getSelectedComponent();
 				if (tab instanceof ComptePanel) {	// Bonne classe et non null 
 					((ComptePanel) tab).update();
