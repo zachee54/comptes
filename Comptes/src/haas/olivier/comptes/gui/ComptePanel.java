@@ -39,7 +39,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
@@ -58,11 +57,6 @@ import javax.swing.SwingConstants;
 @SuppressWarnings("serial")
 public class ComptePanel extends JPanel {
 	
-	/**
-	 * Onglets intérieurs pour gérer le type de vue.
-	 */
-	private JTabbedPane containerVue;
-
 	/**
 	 * Table qui contient les écritures (que le modèle a besoin de connaître).
 	 */
@@ -111,7 +105,7 @@ public class ComptePanel extends JPanel {
 	 * 			Le filtre à utiliser pour sélectionner les comptes à afficher.
 	 */
 	public ComptePanel(DataObserver gui, FilterCompte filter) {
-		super(new BorderLayout());				// JPanel avec BorderLayout
+		super(new BorderLayout());
 		Month debut =							// Mois le plus ancien possible
 				DAOFactory.getFactory().getDebut();
 
@@ -129,7 +123,7 @@ public class ComptePanel extends JPanel {
 
 		// Ajouter le sélecteur de date
 		dateSelector = new DateSelector(debut, monthObservable);
-		add(dateSelector, BorderLayout.WEST);
+		add(dateSelector.getComponent(), BorderLayout.WEST);
 
 		// Liste déroulante des comptes
 		JComboBox<Compte> compteComboBox = createComboBox(filter);
@@ -170,11 +164,11 @@ public class ComptePanel extends JPanel {
 
 		} catch (IOException e) {
 			// Renvoyer un ensemble vide
-			comptes = new HashSet<Compte>();
+			comptes = new HashSet<>();
 		}
 
 		// Construire une liste des comptes de ce type
-		List<Compte> comptes2display = new ArrayList<Compte>();
+		List<Compte> comptes2display = new ArrayList<>();
 		for (Compte c : comptes) {
 
 			// Si le compte est du type voulu, ajouter à la liste
@@ -205,11 +199,9 @@ public class ComptePanel extends JPanel {
 			 * Attribuer un ListCellRenderer pour aligner séparément nom et
 			 * numéro
 			 */
-			compteComboBox.setRenderer(new ListCellRenderer<Compte>() {
-				@Override
-				public Component getListCellRendererComponent(
-						JList<? extends Compte> list, Compte value, int index,
-						boolean isSelected, boolean cellHasFocus) {
+			compteComboBox.setRenderer(					
+						(JList<? extends Compte> list, Compte value, int index,
+						boolean isSelected, boolean cellHasFocus) -> {
 					
 					// Si pas de compte
 					if (value == null) {
@@ -217,7 +209,7 @@ public class ComptePanel extends JPanel {
 					}
 
 					// Créer un panel
-					JPanel panel = new JPanel(new GridLayout(1, 2));
+					JPanel rendererPanel = new JPanel(new GridLayout(1, 2));
 
 					// Créer l'étiquette du nom
 					JLabel nom = (JLabel) new DefaultListCellRenderer()
@@ -239,12 +231,11 @@ public class ComptePanel extends JPanel {
 					num.setHorizontalAlignment(SwingConstants.RIGHT);
 
 					// Empaqueter et renvoyer
-					panel.add(nom);
-					panel.add(num);
-					return panel;
-				}// getListCellRendererComponent
-			});// classe anonyme
-		}// if compte bancaire
+					rendererPanel.add(nom);
+					rendererPanel.add(num);
+					return rendererPanel;
+			});// classe lambda
+		}
 
 		// Sélectionner le 1er item
 		if (compteComboBox.getModel().getSize() > 0) {
@@ -258,7 +249,7 @@ public class ComptePanel extends JPanel {
 	 * Crée une table de données pour le compte et le mois en cours.
 	 */
 	private Component createTable(MonthObservable monthObservable) {
-		containerVue = new JTabbedPane();				// Le panel
+		JTabbedPane containerVue = new JTabbedPane();
 
 		// La table des écritures
 		tableEcritures = new FinancialTable(modelEcritures);
@@ -378,7 +369,7 @@ public class ComptePanel extends JPanel {
 		if (e != null
 				&& JOptionPane.showConfirmDialog(
 						// Demander confirmation
-						this.getRootPane(),
+						getRootPane(),
 						"Voulez-vous vraiment supprimer " +
 						"l'écriture sélectionnée ?",
 						"Effacer l'écriture",

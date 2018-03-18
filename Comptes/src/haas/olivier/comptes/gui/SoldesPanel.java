@@ -61,11 +61,6 @@ public abstract class SoldesPanel extends JPanel implements MonthObserver,
 			"#,##0.00 €;- #,##0.00 €", new DecimalFormatSymbols(Locale.FRANCE));
 
 	/**
-	 * Le format de date pour l'affichage de la date critique.
-	 */
-	protected static final DateFormat DF = new SimpleDateFormat("d MMM");
-
-	/**
 	 * Renvoie une instance du type souhaité.
 	 * 
 	 * @param bancaires
@@ -199,6 +194,11 @@ class SoldesBancairesPanel extends SoldesPanel {
 	 * L'étiquette contenant la date critique.
 	 */
 	private JLabel date;
+	
+	/**
+	 * Le format de date.
+	 */
+	private final DateFormat dateFormat = new SimpleDateFormat("d MMM");
 
 	/**
 	 * Construit un panneau des soldes pour les comptes bancaires.
@@ -255,7 +255,7 @@ class SoldesBancairesPanel extends SoldesPanel {
 	protected void setSoldesToMonth(Month month) {
 		theo.setText(NF.format(compte.getHistorique(month)));
 		aVue.setText(NF.format(compte.getSoldeAVue(month)));
-		setSoldeCritique(month);
+		updateSoldeCritique();
 	}
 
 	@Override
@@ -268,7 +268,7 @@ class SoldesBancairesPanel extends SoldesPanel {
 	@Override
 	public void update() throws IOException {
 		super.update();
-		setSoldeCritique(MonthObservable.getMonth());
+		updateSoldeCritique();
 	}
 	
 	/**
@@ -277,10 +277,8 @@ class SoldesBancairesPanel extends SoldesPanel {
 	 * <p>
 	 * Si le compte n'est pas un compte bancaire (ce qui ne devrait jamais
 	 * arriver), la méthode ne fait rien.
-	 * 
-	 * @param month	Le mois au titre duquel afficher la situation critique.
 	 */
-	private void setSoldeCritique(Month month) {
+	private void updateSoldeCritique() {
 		if (compte.getType().isBancaire()) {
 			try {
 				SituationCritique situationCritique =
@@ -292,7 +290,7 @@ class SoldesBancairesPanel extends SoldesPanel {
 
 				// Convertir au format texte
 				crit.setText(NF.format(soldeCritique));
-				date.setText("le " + DF.format(dateCritique));
+				date.setText("le " + dateFormat.format(dateCritique));
 				
 			} catch (IOException e) {
 				crit.setText(null);
