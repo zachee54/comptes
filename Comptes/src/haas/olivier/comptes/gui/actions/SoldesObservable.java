@@ -1,5 +1,9 @@
 package haas.olivier.comptes.gui.actions;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import haas.olivier.util.Observable;
 
 /** Un Observable de changements de soldes (historiques, soldes à vue,
@@ -34,7 +38,14 @@ implements DataObserver {
 	
 	/** Met à jour les soldes et prévient ensuite les Observers. */
 	public void notifyObservers() {
-		for (SoldesObserver observer : observers)
-			observer.soldesChanged();
+		try {
+			for (SoldesObserver observer : observers)
+				observer.soldesChanged();
+		} catch (IOException e) {
+			Logger.getLogger(getClass().getName()).log(
+					Level.SEVERE,
+					"Erreur pendant la détermination des soldes à afficher",
+					e);
+		}
 	}// notifyObservers
 }

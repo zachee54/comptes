@@ -1,7 +1,6 @@
 package haas.olivier.comptes.gui;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.ctrl.EcritureController;
@@ -196,8 +195,10 @@ public class ComptePanel extends JPanel {
 		JComboBox<Compte> compteComboBox = new JComboBox<>(
 				comptes2display.toArray(new Compte[comptes2display.size()]));
 
-		/* Prévoir un Renderer spécifique s'il faut afficher des comptes
-		 * bancaires. */
+		/*
+		 * Prévoir un Renderer spécifique s'il faut afficher des comptes
+		 * bancaires.
+		 */
 		if (filter.acceptsBancaires()) {
 
 			/*
@@ -226,10 +227,8 @@ public class ComptePanel extends JPanel {
 
 					// Créer l'étiquette du numéro
 					String numero = "";
-					if (value instanceof CompteBancaire) {	// Au cas où
-						// Numéro
-						numero = ((CompteBancaire) value).getFormattedNumero();
-					}
+					if (value.getType().isBancaire())		// Au cas où
+						numero = value.getNumero().toString();
 
 					JLabel num = (JLabel) new DefaultListCellRenderer()
 							.getListCellRendererComponent(list, numero, index,
@@ -347,8 +346,10 @@ public class ComptePanel extends JPanel {
 	/**
 	 * Met à jour le contenu du panel. Cette méthode est appelée lorsqu'on
 	 * change d'onglet. Concrètement, elle met à jour le sélecteur de date.
+	 * 
+	 * @throws IOException
 	 */
-	public void update() {
+	public void update() throws IOException {
 
 		// Mettre à jour les données des composants du panel
 		modelEcritures.update();
