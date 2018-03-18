@@ -54,54 +54,114 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-/** Interface graphique classique pour la gestion des comptes.
+/**
+ * Interface graphique classique pour la gestion des comptes.
+ * 
  * @author Olivier HAAS
  */
 public class SimpleGUI implements WindowListener, ChangeListener, DataObserver,
 ActionListener, PropertiesController {
 	
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(SimpleGUI.class.getName());
 	
-	/** Nom de la clé déterminant la position à l'écran (abscisse). */
+	/**
+	 * Nom de la clé déterminant la position à l'écran (abscisse).
+	 */
 	private static final String POS_X = "pos_X";
-	/** Nom de la clé déterminant la position à l'écarn (ordonnée). */
+	
+	/**
+	 * Nom de la clé déterminant la position à l'écarn (ordonnée).
+	 */
 	private static final String POS_Y = "pos_Y";
-	/** Nom de la clé déterminant la largeur de la fenêtre. */
+	
+	/**
+	 * Nom de la clé déterminant la largeur de la fenêtre.
+	 */
 	private static final String WIDTH = "width";
-	/** Nom de la clé déterminant la hauteur de la fenêtre. */
+	
+	/**
+	 * Nom de la clé déterminant la hauteur de la fenêtre.
+	 */
 	private static final String HEIGHT = "height";
 
-	/** Constantes représentant les actions utilisateur. */
+	/**
+	 * Constante représentant l'action de paramétrage des opérations
+	 * permanentes.
+	 */
 	private static final String PERMANENTS  = "permanents";
+	
+	/**
+	 * Constante représentant l'action de suppression d'une écriture.
+	 */
 	private static final String DELETE = "delete";
+	
+	/**
+	 * Constante représentant l'action de tri par pointages.
+	 */
 	private static final String POINTAGES = "pointages";
 	
-	/** Préférences utilisateur. */
+	/**
+	 * Préférences utilisateur.
+	 */
 	private final Preferences prefs;
-	/** La fenêtre. */
+	
+	/**
+	 * La fenêtre.
+	 */
 	private JFrame frame;
-	/** Les onglets. */
+	
+	/**
+	 * Les onglets.
+	 */
 	private JTabbedPane tabs;
-	/** Bouton de sauvegarde. */
+	
+	/**
+	 * Bouton de sauvegarde.
+	 */
 	private JButton saveButton;
-	/** Bouton d'effacement. */
+	
+	/**
+	 * Bouton d'effacement.
+	 */
 	private JButton deleteButton;
-	/** Bouton de tri par pointages. */
+	
+	/**
+	 * Bouton de tri par pointages.
+	 */
 	private JToggleButton triButton;
-	/** Case d'information. */
+	
+	/**
+	 * Case d'information.
+	 */
 	private JLabel infoLabel;
-	/** Nom du DAO. */
+	
+	/**
+	 * Étiquette contenant le nom du DAO.
+	 */
 	private JLabel daoLabel;
-	/** Affichage du nom de fichier. */
+	
+	/**
+	 * Étiquette contenant le nom de fichier.
+	 */
 	private JLabel sourceLabel;
 	
-	/** Action Enregistrer. */
+	/**
+	 * Action Enregistrer.
+	 */
 	private Action actionSave;
-	/** Action diagramme moyennes. */
+	
+	/**
+	 * Action diagramme moyennes.
+	 */
 	private Action diagMoyAction;
-	/** Action diagramme patrimoine. */
+	
+	/**
+	 * Action diagramme patrimoine.
+	 */
 	private Action diagPatrimAction;
 
 	@SuppressWarnings("serial")
@@ -121,10 +181,11 @@ ActionListener, PropertiesController {
 					
 				} catch (IOException e1) {
 					e1.printStackTrace();
-				}// try
-			}// actionPerformed
+				}
+			}
 			
 		};// classe anonyme AbstractAction
+		
 		// Active l'action si les données ont besoin d'être sauvegardées
 		actionSave.setEnabled(DAOFactory.getFactory().mustBeSaved());
 		
@@ -142,8 +203,8 @@ ActionListener, PropertiesController {
 					LOGGER.log(Level.SEVERE,
 							"Impossible de créer le diagramme des moyennes",
 							e1);
-				}// try
-			}// actionPerformed
+				}
+			}
 			
 		};// classe anonyme AbstractAction
 		
@@ -161,8 +222,8 @@ ActionListener, PropertiesController {
 					LOGGER.log(Level.SEVERE,
 							"Impossible de créer le diagramme d'évolution "
 							+ "du patrimoine", e1);
-				}// try
-			}// actionPerformed
+				}
+			}
 
 		};// classe anonyme AbstractAction
 		
@@ -199,7 +260,7 @@ ActionListener, PropertiesController {
 		rootLogger.addHandler(new ConsoleHandler());// Afficher sur la console
 		rootLogger.addHandler(						// et à l'écran depuis frame
 				new DialogHandler(frame));
-	}// constructeur
+	}
 	
 	public void createTabs() {
 		tabs.removeAll();	// Enlever les onglets actuels s'il y en a
@@ -225,8 +286,10 @@ ActionListener, PropertiesController {
 						TypeCompte.DEPENSES_EN_EPARGNE,
 						TypeCompte.RECETTES_EN_EPARGNE)));
 		
-		/* Pour les comptes clôturés, un filtre spécial qui n'accepte que les
-		 * comptes clôturés */
+		/*
+		 * Pour les comptes clôturés, un filtre spécial qui n'accepte que les
+		 * comptes clôturés.
+		 */
 		tabs.addTab("Clôturés", new ComptePanel(
 				this, new FilterCompte() {
 					
@@ -238,7 +301,7 @@ ActionListener, PropertiesController {
 					@Override
 					public boolean accepts(Compte c) {
 						return c.getCloture() != null;	// Compte clôturé
-					}// accepts
+					}
 					
 				}));// classe anonyme FilterCompte
 		
@@ -246,7 +309,7 @@ ActionListener, PropertiesController {
 		
 		// Mettre à jour l'onglet initial (simuler un changement d'onglet)
 		stateChanged(null);
-	}// createTabs
+	}
 	
 	@SuppressWarnings("serial")
 	private JMenuBar createMenuBar() {
@@ -304,9 +367,11 @@ ActionListener, PropertiesController {
 		});// classe anonyme AbstractAction
 		
 		return menuBar;
-	}// createMenuBar
+	}
 	
-	/** Crée la barre d'outils. */
+	/**
+	 * Crée la barre d'outils.
+	 */
 	private JToolBar createToolBar() {
 		JToolBar toolBar = new JToolBar();
 		toolBar.setBorderPainted(false);
@@ -359,7 +424,7 @@ ActionListener, PropertiesController {
 		toolBar.add(buttonPatrim);
 		
 		return toolBar;
-	}// createToolBar
+	}
 	
 	private Component createStatusBar() {
 		JPanel statusBar = new JPanel(new BorderLayout());	// Panel
@@ -392,9 +457,10 @@ ActionListener, PropertiesController {
 		statusBar.add(right, BorderLayout.EAST);		// Partie droite
 
 		return statusBar;
-	}// createStatusBar
+	}
 	
-	/** Affiche la fenêtre principale en tenant compte des préférences de
+	/**
+	 * Affiche la fenêtre principale en tenant compte des préférences de
 	 * l'utilisateur.
 	 */
 	private void showFrame() {
@@ -437,15 +503,16 @@ ActionListener, PropertiesController {
 				posY = ecran.height - height;
 			}
 			frame.setLocation(posX, posY);			// Position à utiliser
-		}// if propriété(s) de position null
+		}
 		frame.pack();
 		frame.setVisible(true);						// Afficher la fenêtre
 		
 //		//S'enregistrer comme contrôleur de propriétés pour pouvoir les modifier
 //		propManager.addController(this);
-	}// showFrame
+	}
 
-	/** Met à jour l'affichage du nom du DAO et de la source de données, et les
+	/**
+	 * Met à jour l'affichage du nom du DAO et de la source de données, et les
 	 * enregistre dans les préférences utilisateurs.
 	 */
 	public void updateDaoName() {
@@ -470,7 +537,7 @@ ActionListener, PropertiesController {
 //		} else {
 //			MessagesFactory.getInstance().showErrorMessage(
 //					"Type de DAO non reconnu : préférences non sauvegardées.");
-//		}// if type de DAO
+//		}
 		
 		// Enregistrer dans les préférences
 		if (fullName != null) {
@@ -478,13 +545,15 @@ ActionListener, PropertiesController {
 					Paths.get(new File("").getAbsolutePath()).relativize(
 							new File(factory.getSourceFullName()).toPath())
 							.toString());
-		}// if
-	}// updateDaoName
+		}
+	}
 	
-	/** Met à jour l'onglet sélectionné.
+	/**
+	 * Met à jour l'onglet sélectionné.
 	 * <p>
 	 * Cette méthode est appelée lorsque l'utilisateur change d'onglet.
-	 * Elle utilise un fil d'exécution à part pour ne pas bloquer la fenêtre. */
+	 * Elle utilise un fil d'exécution à part pour ne pas bloquer la fenêtre.
+	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		new SwingWorker<Void,Void>() {
@@ -496,9 +565,10 @@ ActionListener, PropertiesController {
 				return null;
 			}
 		}.execute();
-	}// stateChanged
+	}
 
-	/** Met à jour l'interface à chaque changement de données.
+	/**
+	 * Met à jour l'interface à chaque changement de données.
 	 * <p>
 	 * En pratique, il s'agit d'activer ou désactiver la commande Enregistrer
 	 * (commande du menu et bouton de la barre d'outils).
@@ -507,10 +577,11 @@ ActionListener, PropertiesController {
 	public void dataModified() {
 		// Actualise le statut de l'action Enregistrer
 		actionSave.setEnabled(DAOFactory.getFactory().mustBeSaved());
-	}// dataModified
+	}
 
-	/** Reçoit les actions de l'utilisateur sur la partie générale de
-	 * l'interface utilisateur.
+	/**
+	 * Reçoit les actions de l'utilisateur sur la partie générale de l'interface
+	 * utilisateur.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -553,13 +624,13 @@ ActionListener, PropertiesController {
 						Level.SEVERE,
 						"Impossible de supprimer l'écriture",
 						e1);
-			}// try
+			}
 
 		} else if (e.getActionCommand() == POINTAGES) {		// Action tri
 			EcrituresTableModel.triPointage = triButton.isSelected();
 			stateChanged(null);									// Mettre à jour
-		}// if actionCommand
-	}// actionPerformed
+		}
+	}
 
 	@Override
 	public void windowActivated(WindowEvent arg0) {}
@@ -599,8 +670,8 @@ ActionListener, PropertiesController {
 			case JOptionPane.CANCEL_OPTION:
 			case JOptionPane.CLOSED_OPTION:
 				return;									// Annuler la fermeture
-			}// switch
-		}// if must be saved
+			}
+		}
 
 //		// Enregistrer les propriétés
 //		try {
@@ -616,8 +687,8 @@ ActionListener, PropertiesController {
 		} catch (InterruptedException e1) {
 		} finally {
 			System.exit(0);								// Quitter brutalement !
-		}// try
-	}// windowClosing
+		}
+	}
 	
 	@Override
 	public void windowDeactivated(WindowEvent arg0) {}
@@ -631,12 +702,14 @@ ActionListener, PropertiesController {
 	@Override
 	public void windowOpened(WindowEvent arg0) {}
 
-	/** Mémorise les préférences relatives à la position de la fenêtre. */
+	/**
+	 * Mémorise les préférences relatives à la position de la fenêtre.
+	 */
 	@Override
 	public void setAllProperties() {
 		prefs.putInt(POS_X, frame.getLocation().x);
 		prefs.putInt(POS_Y, frame.getLocation().y);
 		prefs.putInt(WIDTH, frame.getSize().width);
 		prefs.putInt(HEIGHT, frame.getSize().height);
-	}// setAllProperties
-}// class
+	}
+}

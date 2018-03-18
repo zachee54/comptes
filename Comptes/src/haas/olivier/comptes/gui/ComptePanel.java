@@ -44,40 +44,59 @@ import javax.swing.ListCellRenderer;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
-@SuppressWarnings("serial")
-/** Un panel qui contient tous les composants utiles pour gérer les comptes.
+/**
+ * Un panel qui contient tous les composants utiles pour gérer les comptes.
+ * <p>
  * Chaque instance est propre à un type de compte, ce qui permet de séparer la
- * vision utilisateur en fonction des types.
+ * vision utilisateur en fonction des types.<br>
  * Pour des raisons de simplicité, cette classe implémente aussi un observable
  * (pattern Observer) pour les changements de compte, puisque par principe
  * chaque instance maintient la sélection par l'utilisateur des comptes
  * correspondant à son type.
+ * 
  * @author Olivier HAAS
  */
+@SuppressWarnings("serial")
 public class ComptePanel extends JPanel {
 	
-	/** Onglets intérieurs pour gérer le type de vue */
+	/**
+	 * Onglets intérieurs pour gérer le type de vue.
+	 */
 	private JTabbedPane containerVue;
 
-	/** Table qui contient les écritures (que le modèle a besoin de connaître) */
+	/**
+	 * Table qui contient les écritures (que le modèle a besoin de connaître).
+	 */
 	private FinancialTable tableEcritures;
 
-	/** Modèle des écritures. */
+	/**
+	 * Modèle des écritures.
+	 */
 	private EcrituresTableModel modelEcritures;
 
-	/** Modèle des suivis de compte. */
+	/**
+	 * Modèle des suivis de compte.
+	 */
 	private SuiviTableModel modelSuivi;
 
-	/** Modèle de la synthèse des comptes. */
+	/**
+	 * Modèle de la synthèse des comptes.
+	 */
 	private SyntheseTableModel modelSynthese;
 	
-	/** Panel des soldes. */
+	/**
+	 * Panel des soldes.
+	 */
 	private SoldesPanel panelSoldes;
 
-	/** Sélecteur de date (pour le mettre à jour à chaque changement d'onglet) */
+	/**
+	 * Sélecteur de date (pour le mettre à jour à chaque changement d'onglet).
+	 */
 	private DateSelector dateSelector;
 
-	/** Observable gérant les changements de données. */
+	/**
+	 * Observable gérant les changements de données.
+	 */
 	private DataObservable dataObservable = new DataObservable();
 
 	/**
@@ -135,9 +154,10 @@ public class ComptePanel extends JPanel {
 		modelSynthese = new SyntheseTableModel(monthObservable,
 				compteObservable, soldesObservable, filter);
 		add(createTable(monthObservable), BorderLayout.CENTER);
-	}// constructeur
+	}
 
-	/** Crée un panel contenant une <code>JComboBox</code> pour le choix du
+	/**
+	 * Crée un panel contenant une <code>JComboBox</code> pour le choix du
 	 * compte.
 	 * 
 	 * @param filter	Le filtre pour sélectionner les comptes à proposer.
@@ -233,9 +253,11 @@ public class ComptePanel extends JPanel {
 		}
 
 		return compteComboBox;
-	}// createComboBox
+	}
 
-	/** Crée une table de données pour le compte et le mois en cours. */
+	/**
+	 * Crée une table de données pour le compte et le mois en cours.
+	 */
 	private Component createTable(MonthObservable monthObservable) {
 		containerVue = new JTabbedPane();				// Le panel
 
@@ -284,13 +306,13 @@ public class ComptePanel extends JPanel {
 		searchPanel.add(new JScrollPane(new FinancialTable(searchModel)));
 		
 		return containerVue;
-	}// createTable
+	}
 
 	/**
 	 * Crée un panel pour la barre supérieure. Je n'ai pas trouvé mieux qu'un
-	 * GroupLayout pour éviter que les composants ne reviennent à la ligne (s'il
-	 * n'y a pas assez de place) ou ne soient exagérément agrandis (s'il y a
-	 * trop de place).
+	 * <code>GroupLayout</code> pour éviter que les composants ne reviennent à
+	 * la ligne (s'il n'y a pas assez de place) ou ne soient exagérément
+	 * agrandis (s'il y a trop de place).
 	 */
 	private JPanel createTopPanel(Component c1, Component c2) {
 
@@ -340,9 +362,11 @@ public class ComptePanel extends JPanel {
 		} else {									// Sinon
 			dateSelector.dateChanged(MonthObservable.getDate());	// La date
 		}
-	}// update
+	}
 
-	/** Efface l'écriture actuellement sélectionnée. */
+	/**
+	 * Efface l'écriture actuellement sélectionnée.
+	 */
 	public void deleteCurrentEcriture() throws IOException {
 
 		// Récupérer l'écriture sélectionnée
@@ -363,13 +387,14 @@ public class ComptePanel extends JPanel {
 			// Supprimer l'écriture
 			EcritureController.remove(e.id);
 			dataObservable.notifyObservers();
-		}// if e non null et confirmation
-	}// deleteCurrentEcriture
+		}
+	}
 }// class ComptePanel
 
 /**
- * Un JPanel implémentant Scrollable. Tout simplement pour faire défiler une
- * table dans un JScrollPane avec un incrément défini à l'avance.
+ * Un <code>JPanel</code> implémentant <code>Scrollable</code>.<br>
+ * Tout simplement pour faire défiler une table dans un <code>JScrollPane</code>
+ * avec un incrément défini à l'avance.
  * 
  * @author Olivier HAAS
  */
@@ -380,35 +405,47 @@ class ScrollablePanel extends JPanel implements Scrollable {
 		super(l);
 	}
 
+	/**
+	 * Implémentation par défaut.
+	 * 
+	 * @return	getPreferredSize()
+	 */
 	@Override
-	/** Implémentation par défaut
-	 * @return	getPreferredSize() */
 	public Dimension getPreferredScrollableViewportSize() {
 		return getPreferredSize();
 	}
 
+	/**
+	 * Retourne une valeur pré-définie pour les grandes incrémentations.
+	 */
 	@Override
-	/** Retourne une valeur pré-définie pour les grandes incrémentations. */
 	public int getScrollableBlockIncrement(Rectangle visibleRect,
 			int orientation, int direction) {
 		return 48; // soit 3 lignes
 	}
 
+	/**
+	 * @return <code>false</code>
+	 */
 	@Override
-	/** @return false */
 	public boolean getScrollableTracksViewportHeight() {
 		return false;
 	}
 
+	/**
+	 * Cette implémentation force la table à s'ajuster en largeur.
+	 * 
+	 * @return <code>true</code>
+	 */
 	@Override
-	/** Cette implémentation force la table à s'ajuster en largeur.
-	 * @return true. */
 	public boolean getScrollableTracksViewportWidth() {
 		return true;
 	}
 
+	/**
+	 * Retourne une valeur pré-définie pour les incrémentations classiques.
+	 */
 	@Override
-	/** Retourne une valeur pré-définie pour les incrémentations classiques */
 	public int getScrollableUnitIncrement(Rectangle visibleRect,
 			int orientation, int direction) {
 		return 16; // soit 1 ligne
