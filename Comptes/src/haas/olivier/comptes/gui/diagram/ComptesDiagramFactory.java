@@ -19,14 +19,16 @@ import haas.olivier.diagram.Serie;
 import haas.olivier.diagram.SimpleDiagramModel;
 import haas.olivier.util.Month;
 
-/** Une classe utilitaire construisant des diagrammes propres à l'application
+/**
+ * Une classe utilitaire construisant des diagrammes propres à l'application
  * <code>Comptes</code>.
  *
  * @author Olivier Haas
  */
 public class ComptesDiagramFactory {
 
-	/** Construit un diagramme affichant les moyennes glissantes des comptes
+	/**
+	 * Construit un diagramme affichant les moyennes glissantes des comptes
 	 * budgétaires.
 	 * 
 	 * @throws IOException
@@ -43,11 +45,12 @@ public class ComptesDiagramFactory {
 						return montant.negate();
 					default:
 						return montant;
-					}// switch
+					}
 				}));
-	}// newMoyenne
+	}
 	
-	/** Construit un diagramme affichant les soldes des comptes bancaires sous
+	/**
+	 * Construit un diagramme affichant les soldes des comptes bancaires sous
 	 * forme d'aires cumulées. Il donne une idée de l'évolution du patrimoine.
 	 * 
 	 * @throws IOException
@@ -55,9 +58,10 @@ public class ComptesDiagramFactory {
 	public static DiagramAndAxisComponent newPatrimoine() throws IOException {
 		return DiagramFactory.newAire(newModel(true, "patrimoine",
 				(c, month) -> ((CompteBancaire) c).getSoldeAVue(month)));
-	}// newPatrimoine
+	}
 	
-	/** Crée un modèle de diagramme à partir de suivis des comptes et lui
+	/**
+	 * Crée un modèle de diagramme à partir de suivis des comptes et lui
 	 * applique les propriétés précédemment enregistrées.
 	 * 
 	 * @param bancaire	<code>true</code> s'il faut prendre uniquement les
@@ -83,17 +87,18 @@ public class ComptesDiagramFactory {
 				model.add(new Serie(
 						compte.getId(), compte.getNom(), compte.getColor(),
 						true, getSuivi(compte, provider)));
-			}// if
-		}// for compte
+			}
+		}
 		
 		// Appliquer les propriétés
 		model.getOrdener().setMemento(
 				factory.getPropertiesDAO().getDiagramProperties(name));
 		
 		return model;
-	}// newModel
+	}
 	
-	/** Construit un modèle de diagramme contenant tous les mois comme
+	/**
+	 * Construit un modèle de diagramme contenant tous les mois comme
 	 * étiquettes, et aucune série.
 	 */
 	private static DiagramModel newChronoModel() {
@@ -103,9 +108,10 @@ public class ComptesDiagramFactory {
 		for (Month month = debut; !month.after(today); month = month.getNext())
 			months.add(month);
 		return new SimpleDiagramModel(months.toArray());
-	}// newChronoModel
+	}
 	
-	/** Renvoie une collection des suivis (les montants) d'un compte sur
+	/**
+	 * Renvoie une collection des suivis (les montants) d'un compte sur
 	 * l'ensemble de la période disponible.
 	 * 
 	 * @param compte	Le compte dont on veut collecter le suivi.
@@ -127,5 +133,5 @@ public class ComptesDiagramFactory {
 			suivi.put(month, montantProvider.apply(compte, month));
 		
 		return suivi;
-	}// getSuivi
+	}
 }
