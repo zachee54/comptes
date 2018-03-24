@@ -8,19 +8,26 @@ import java.awt.RenderingHints;
 
 import javax.swing.Icon;
 
-/** Une icône de taile prédéfinie symbolisant un menu */
+/**
+ * Une icône de taile prédéfinie symbolisant un menu
+ * 
+ * @author Olivier Haas
+ */
 class MenuIcon implements Icon {
 	
-	/** La hauteur de l'icône. */
+	/**
+	 * La hauteur de l'icône.
+	 */
 	private final int height;
 	
-	/** Construit une icône symbolisant un menu.
+	/**
+	 * Construit une icône symbolisant un menu.
 	 * 
 	 * @param size	La Hauteur de l'icône.
 	 */
 	MenuIcon(int height) {
 		this.height = height;
-	}// constructeur
+	}
 
 	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
@@ -35,7 +42,8 @@ class MenuIcon implements Icon {
 				BasicStroke.CAP_ROUND,						// Bouts ronds
 				BasicStroke.JOIN_ROUND));
 		
-		/* Épaisseur des traits
+		/*
+		 * Épaisseur des traits
 		 * Les traits sont disposés au quart de la hauteur, à la moitié et aux
 		 * trois quarts. L'épaisseur des traits est la moitié des écarts afin de
 		 * laisser une largeur équivalente à la couleur de fond ; donc 1/8.
@@ -47,17 +55,17 @@ class MenuIcon implements Icon {
 		for (int i=0; i<3; i++) {
 			h = (2*i+1)*height/6;
 			g2d.drawLine(x+thickness, y+h, x+getIconWidth()-thickness, y+h);
-		}// for
-	}// paintIcon
+		}
+	}
 
 	@Override
 	public int getIconWidth() {
 		return height*4/3;
-	}// getIconWidth
+	}
 
 	@Override
 	public int getIconHeight() {
 		return height;
-	}// getIconHeight
+	}
 	
-}// class MenuIcon
+}

@@ -19,7 +19,8 @@ import haas.olivier.diagram.DiagramModel;
 import haas.olivier.diagram.Painter;
 import haas.olivier.diagram.Legend;
 
-/** Une fenêtre contenant un diagramme.
+/**
+ * Une fenêtre contenant un diagramme.
  * <p>
  * L'intégration dans une fenêtre à part permet de proposer en même temps des
  * options pour modifier le diagramme.
@@ -29,10 +30,13 @@ import haas.olivier.diagram.Legend;
 @SuppressWarnings("serial")
 public class DiagramFrame extends JFrame {
 
-	/** Le panneau de sélection des séries de données */
+	/**
+	 * Le panneau de sélection des séries de données.
+	 */
 	private Component seriesSelector;
 	
-	/** Construit et affiche une fenêtre contenant un diagramme.
+	/**
+	 * Construit et affiche une fenêtre contenant un diagramme.
 	 * 
 	 * @param diagramAndAxisComponent
 	 * 				Le composant contenant le diagramme à afficher avec son
@@ -71,26 +75,30 @@ public class DiagramFrame extends JFrame {
 		setPreferredSize(new Dimension(800,600));// TODO ?
 		pack();
 		setVisible(true);
-	}// constructeur
+	}
 	
-	/** Un <code>ActionListener</code> qui permet d'afficher ou de masquer le
+	/**
+	 * Un <code>ActionListener</code> qui permet d'afficher ou de masquer le
 	 * sélecteur de séries.
 	 *
 	 * @author Olivier Haas
 	 */
 	private class SelectorActionListener implements ActionListener {
 		
-		/** Le lieu où insérer le composant. Il s'agit d'une constante de
+		/**
+		 * Le lieu où insérer le composant. Il s'agit d'une constante de
 		 * <code>BorderLayout</code>.
 		 */
 		private final String orientation = BorderLayout.EAST;
 		
-		/** Le composant à afficher à la place du panneau lorsque celui-ci
-		 * n'est pas affiché.
+		/**
+		 * Le composant à afficher à la place du panneau lorsque celui-ci n'est
+		 * pas affiché.
 		 */
 		private Component old;
 
-		/** Affiche ou masque le panneau de sélection des séries de données.
+		/**
+		 * Affiche ou masque le panneau de sélection des séries de données.
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -115,10 +123,10 @@ public class DiagramFrame extends JFrame {
 				// Remettre l'ancien composant
 				if (old != null)
 					add(old, orientation);
-			}// if
+			}
 			revalidate();
 			repaint();
-		}// actionPerformed
+		}
 		
 	}// private inner class SelectorActionListener
-}// class DiagramFrame
+}

@@ -11,7 +11,8 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-/** Un sélecteur de la période à afficher.
+/**
+ * Un sélecteur de la période à afficher.
  * <p>
  * Il s'agit d'un curseur permettant de déplacer la date de début du graphique,
  * sachant que la période actuelle est toujours affichée.
@@ -21,13 +22,18 @@ import javax.swing.event.ChangeListener;
 @SuppressWarnings("serial")
 class TimeSelector extends JSlider implements ChangeListener {
 
-	/** Le modèle du diagramme. */
+	/**
+	 * Le modèle du diagramme.
+	 */
 	private final DiagramModel model;
 	
-	/** Les mois d'origine. */
+	/**
+	 * Les mois d'origine.
+	 */
 	private final List<Month> months = new ArrayList<>();
 	
-	/** Construit un sélecteur de période.
+	/**
+	 * Construit un sélecteur de période.
 	 * 
 	 * @param model	Le modèle de diagramme à modifier en fonction de la
 	 * 				sélection.
@@ -42,9 +48,10 @@ class TimeSelector extends JSlider implements ChangeListener {
 				!month.after(actual);
 				month = month.getNext()) {
 			months.add(month);
-		}// for
+		}
 		
-		/* Les bornes du sélecteur.
+		/*
+		 * Les bornes du sélecteur.
 		 * On utilise comme bornes intermédiaires le mois de chaque année égal
 		 * au mois calendaire actuel (par exemple octobre). On aura donc des
 		 * bornes [oct N1, oct N2], càd avec length % 12 == 1.
@@ -74,7 +81,7 @@ class TimeSelector extends JSlider implements ChangeListener {
 		setPaintLabels(true);
 		setPaintTicks(true);
 		createStandardLabels(1);
-	}// constructeur
+	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -84,5 +91,5 @@ class TimeSelector extends JSlider implements ChangeListener {
 						Math.max(0, months.size() - nbAnnees * 12 - 1),
 						months.size())
 				.toArray());
-	}// stateChanged
+	}
 }

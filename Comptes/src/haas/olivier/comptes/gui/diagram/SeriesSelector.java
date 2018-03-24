@@ -19,7 +19,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
-/** Un panneau de sélection et gestion des séries de données.
+/**
+ * Un panneau de sélection et gestion des séries de données.
  * <p>
  * Il permet de masquer certaines séries et de changer l'ordre des séries.
  *
@@ -28,18 +29,24 @@ import javax.swing.table.TableModel;
 @SuppressWarnings("serial")
 class SeriesSelector extends JPanel {
 	
-	/** Le nom unique du diagramme, pour l'identifier lors du chargement et de
-	 * la mise à jour des propriétés.
+	/**
+	 * Le nom unique du diagramme, pour l'identifier lors du chargement et de la
+	 * mise à jour des propriétés.
 	 */
 	private final String name;
 	
-	/** La table affichant les séries. */
+	/**
+	 * La table affichant les séries.
+	 */
 	private final JTable table;
 
-	/** L'ordonnateur des séries dans le modèle de diagramme. */
+	/**
+	 * L'ordonnateur des séries dans le modèle de diagramme.
+	 */
 	private final SeriesOrdener ordener;
 	
-	/** Construit un panneau de sélection et gestion des séries.
+	/**
+	 * Construit un panneau de sélection et gestion des séries.
 	 * 
 	 * @param model	Le modèle du diagramme.
 	 */
@@ -67,7 +74,7 @@ class SeriesSelector extends JPanel {
 					int row, int column) {
 				setOpaque(isSelected);				// Opaque ssi sélectionnée
 				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			}// getTableCellRendererComponent
+			}
 			
 		});// classe anonyme DefaultTableCellRenderer
 		
@@ -77,6 +84,7 @@ class SeriesSelector extends JPanel {
 				table.getPreferredSize());
 		scrollPane.setBorder(null);							// Pas de bordure
 		add(scrollPane);									// Ajouter		
+		
 		// Les boutons pour changer l'ordre des séries
 		JPanel ordre = new JPanel();						// Le panneau
 		JButton haut = new JButton("\u25b2"),				// Bouton haut
@@ -88,29 +96,34 @@ class SeriesSelector extends JPanel {
 		ordre.add(haut);									// Ajouter bouton H
 		ordre.add(bas);										// Ajouter bouton B
 		add(ordre, BorderLayout.NORTH);						// Ajouter panneau
-	}// constructeur
+	}
 	
-	/** Met à jour les propriétés du diagramme dans le modèle de données. */
+	/**
+	 * Met à jour les propriétés du diagramme dans le modèle de données.
+	 */
 	private void notifyDAO() {
 		DAOFactory.getFactory().getPropertiesDAO().setDiagramProperties(name,
 				ordener.getMemento());
 		// TODO Avertir la vue que le modèle doit être sauvegardé
-	}// notifyDAO
+	}
 	
-	/** Un <code>ActionListener</code> pour décaler une série dans la liste.
+	/**
+	 * Un <code>ActionListener</code> pour décaler une série dans la liste.
 	 * 
 	 * @author Olivier HAAS
 	 */
 	private class OrdreActionListener implements ActionListener {
 
-		/** Le sens dans lequel déplacer la série : <code>true</code> pour la
+		/**
+		 * Le sens dans lequel déplacer la série : <code>true</code> pour la
 		 * déplacer vers le haut de la table (la fin de la liste),
 		 * <code>false</code> pour la déplacer vers le bas de la table (le début
 		 * de la liste).
 		 */
 		private final boolean forward;
 		
-		/** Construit un objet qui décale une série dans la liste.
+		/**
+		 * Construit un objet qui décale une série dans la liste.
 		 * 
 		 * @param delta	Le sens dans lequel déplacer la série :
 		 * 				<code>true</code> pour la déplacer vers le début de la
@@ -118,7 +131,7 @@ class SeriesSelector extends JPanel {
 		 */
 		private OrdreActionListener(boolean forward) {
 			this.forward = forward;
-		}// constructeur
+		}
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -138,10 +151,11 @@ class SeriesSelector extends JPanel {
 			
 			// Décaler la sélection dans la table graphique
 			table.getSelectionModel().setSelectionInterval(newIndex, newIndex);
-		}// actionPerformed
+		}
 	}// classe OrdreActionListener
 
-	/** Un modèle pour la table constituant le composant principal du sélecteur
+	/**
+	 * Un modèle pour la table constituant le composant principal du sélecteur
 	 * de séries de données.
 	 * <p>
 	 * Les séries sont présentées dans l'ordre inverse du
@@ -155,22 +169,22 @@ class SeriesSelector extends JPanel {
 		@Override
 		public int getRowCount() {
 			return ordener.getSeriesCount();
-		}// getRowCount
+		}
 
 		@Override
 		public int getColumnCount() {
 			return 2;
-		}// getColumnCount
+		}
 
 		@Override
 		public Class<?> getColumnClass(int columnIndex) {
 			return columnIndex == 0 ? Boolean.class : Object.class;
-		}// getColumnClass
+		}
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return columnIndex == 0;
-		}// isCellEditable
+		}
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -179,8 +193,8 @@ class SeriesSelector extends JPanel {
 			case 0:		return !ordener.isHidden(serie);
 			case 1:		return serie;
 			default:	return null;
-			}// switch
-		}// getValueAt
+			}
+		}
 
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
@@ -191,16 +205,17 @@ class SeriesSelector extends JPanel {
 						getSerieForRow(rowIndex),
 						!((boolean) aValue));
 				notifyDAO();
-			}// if colonne
-		}// setValueAt
+			}
+		}
 		
-		/** Renvoie la série se trouvant à l'index de ligne spécifié.
+		/**
+		 * Renvoie la série se trouvant à l'index de ligne spécifié.
 		 * 
 		 * @param rowIndex	L'index de ligne.
 		 * @return			La série à présenter à cette ligne.
 		 */
 		private Serie getSerieForRow(int rowIndex) {
 			return ordener.getSerieAt(rowIndex);
-		}// getSerieForRow
+		}
 	}// class SeriesSelectorModel
 }// class SeriesSelector
