@@ -63,70 +63,101 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-/** Une boîte de dialogue pour paramétrer les comptes.
+/**
+ * Une boîte de dialogue pour paramétrer les comptes.
  * 
  * @author Olivier HAAS
  */
 public class SetupCompte implements ActionListener, ListSelectionListener {
 	
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupCompte.class.getName());
 	
-	/** Commande permettant d'adapter l'interface pour un compte bancaire. */
+	/**
+	 * Commande permettant d'adapter l'interface pour un compte bancaire.
+	 */
 	static final String BANCAIRE = "bancaire";
-	/** Commande permettant d'adapter l'interface pour un compte budgétaire. */
+	
+	/**
+	 * Commande permettant d'adapter l'interface pour un compte budgétaire.
+	 */
 	static final String BUDGET = "budgétaire";
 	
-	/** Commande pour appliquer les changements. */
+	/**
+	 * Commande pour appliquer les changements.
+	 */
 	private static final String APPLIQUER = "appliquer";
-	/** Commande pour valider (appliquer les changements et quitter). */
+	
+	/**
+	 * Commande pour valider (appliquer les changements et quitter).
+	 */
 	static final String VALIDER = "valider";
-	/** Commande pour quitter. */
+	
+	/**
+	 * Commande pour quitter.
+	 */
 	static final String QUITTER = "quitter";
-	/** Commande pour supprimer un compte. */
+	
+	/**
+	 * Commande pour supprimer un compte.
+	 */
 	static final String SUPPRIMER = "supprimer";
 	
-	/** Un médiateur entre les données de l'interface graphique et les données
-	 * du modèle.
+	/**
+	 * Un médiateur entre les données de l'interface graphique et les données du
+	 * modèle.
 	 * 
 	 * @author Olivier HAAS
 	 */
 	private class DataMediator implements DocumentListener, ItemListener {
 		
-		/** Le format de date. */
+		/**
+		 * Le format de date.
+		 */
 		private final SimpleDateFormat FORMAT =
 				new SimpleDateFormat("dd/MM/yyyy");
 		
-		/** Le contrôleur de données.<br>
+		/**
+		 * Le contrôleur de données.<br>
 		 * Il gère l'objet <code>Compte</code> à éditer.
 		 */
 		private CompteController controller = null;
 		
-		/** Le contrôleur de type principal.<br>
+		/**
+		 * Le contrôleur de type principal.<br>
 		 * C'est celui qui gère les changements de l'interface graphique selon
 		 * qu'il s'agit d'un compte bancaire ou budgétaire.
 		 */
 		private final MainTypeController mainTypeController;
 		
-		/** Composant graphique de saisie des données. */
+		/**
+		 * Composant graphique de saisie des données.
+		 */
 		private final JTextComponent nom, numero, ouverture, cloture;	// Champs texte
 		
-		/** Bouton de choix de la couleur. */
+		/**
+		 * Bouton de choix de la couleur.
+		 */
 		private final JButton colorButton;
 		
-		/** Liste déroulante pour choisir le type secondaire. */
+		/**
+		 * Liste déroulante pour choisir le type secondaire.
+		 */
 		private final JComboBox<TypeCompte> type;
 		
-		/** Construit un médiateur de données écoutant et modifiant les
-		 * objets spécifiés.
+		/**
+		 * Construit un médiateur de données écoutant et modifiant les objets
+		 * spécifiés.
 		 * 
-		 * @param mainTypeController	Contrôleur de type principal
-		 * @param nom					Champ de saisie du nom
-		 * @param numero				Champ de saisie du numéro
-		 * @param type					ComboBox de saisie du type secondaire
-		 * @param ouverture				Champ de saisie de la date d'ouverture
-		 * @param cloture				Champ de saisie de la date de clôture
+		 * @param mainTypeController	Contrôleur de type principal.
+		 * @param nom					Champ de saisie du nom.
+		 * @param numero				Champ de saisie du numéro.
+		 * @param type					ComboBox de saisie du type secondaire.
+		 * @param ouverture				Champ de saisie de la date d'ouverture.
+		 * @param cloture				Champ de saisie de la date de clôture.
 		 */
 		@SuppressWarnings("serial")
 		private DataMediator(
@@ -174,12 +205,15 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			});// classe anonyme AbstractAction
 		}// constructeur
 		
-		/** Renvoie le contrôleur vers lequel pointe actuellement l'objet. */
+		/**
+		 * Renvoie le contrôleur vers lequel pointe actuellement l'objet.
+		 */
 		private CompteController getController() {
 			return controller;
 		}
 
-		/** Remplace le contrôleur de référence. Les données du nouveau
+		/**
+		 * Remplace le contrôleur de référence. Les données du nouveau
 		 * contrôleur sont retranscrites dans l'interface graphique.
 		 */
 		private void setController(CompteController controller) {
@@ -218,16 +252,18 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			ouverture.getDocument().addDocumentListener(this);
 			cloture.getDocument().addDocumentListener(this);
 			type.addItemListener(this);
-		}// setController
+		}
 		
-		/** Reçoit les modifications de type principal, et les renvoie au
+		/**
+		 * Reçoit les modifications de type principal, et les renvoie au
 		 * contrôleur de type.
 		 */
 		private void setMainType(String mainType) {
 			controller.setMainType(mainType);
 		}
 		
-		/** Interface <code>ItemListener</code>. Reçoit les notifications de
+		/**
+		 * Interface <code>ItemListener</code>. Reçoit les notifications de
 		 * changement de la ComboBox de type secondaire.
 		 */
 		@Override
@@ -237,10 +273,11 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 				controller.setType(
 						(TypeCompte) typeValue);		// Affecter le type
 			}
-		}// itemStateChanged
+		}
 		
-		/** Reçoit les modifications des zones de texte dans l'interface et
-		 * les envoie vers le modèle.
+		/**
+		 * Reçoit les modifications des zones de texte dans l'interface et les
+		 * envoie vers le modèle.
 		 * 
 		 * @param e	Le <code>DocumentEvent</code> généré par le
 		 * 			<code>JTextComponent</code> modifié.
@@ -259,13 +296,14 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 				} else if (doc == cloture.getDocument()) {
 					controller.setCloture(
 							FORMAT.parse(cloture.getText()));	// Clôture
-				}// if Document
+				}
 			} catch (ParseException e1) {		// Numéro illisible:rien à faire
 			} catch (NumberFormatException e2) {// Date illisible  :rien à faire
-			}// try
-		}// textChanged
+			}
+		}
 		
-		/** Interface <code>DocumentListener</code>. Reçoit les notifications de
+		/**
+		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
 		 * changement sur le nom.
 		 */
 		@Override
@@ -273,7 +311,8 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			textChanged(e);
 		}
 
-		/** Interface <code>DocumentListener</code>. Reçoit les notifications de
+		/**
+		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
 		 * changement sur le nom.
 		 */
 		@Override
@@ -281,13 +320,15 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			textChanged(e);
 		}
 
-		/** Interface <code>DocumentListener</code>. Aucune implémentation.
+		/**
+		 * Interface <code>DocumentListener</code>. Aucune implémentation.
 		 */
 		@Override
 		public void changedUpdate(DocumentEvent e) {}
 	}// inner class DataMediator
 	
-	/** Un contrôleur gérant les changements de vue entre compte bancaire et
+	/**
+	 * Un contrôleur gérant les changements de vue entre compte bancaire et
 	 * compte budgétaire.
 	 * <p>
 	 * En particulier, il remplit la combo box des types secondaires en fonction
@@ -299,21 +340,38 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 	 */
 	private class MainTypeController implements ActionListener {
 		
-		/** Collection des types bancaires. */
+		/**
+		 * Collection des types bancaires.
+		 */
 		private TreeSet<TypeCompte> typesBancaire = new TreeSet<>();
-		/** Collection des types budgétaires. */
+		
+		/**
+		 * Collection des types budgétaires.
+		 */
 		private TreeSet<TypeCompte> typesBudget = new TreeSet<>();
 		
-		/** Bouton radio de choix du type "bancaire". */
+		/**
+		 * Bouton radio de choix du type "bancaire".
+		 */
 		private JRadioButton bancaire;
-		/** Bouton radio de choix du type "budgétaire". */
+		
+		/**
+		 * Bouton radio de choix du type "budgétaire".
+		 */
 		private JRadioButton budget;
-		/** Liste déroulante des types secondaires. */
+		
+		/**
+		 * Liste déroulante des types secondaires.
+		 */
 		private JComboBox<TypeCompte> boxType;
-		/** Composants à activer/désactiver. */
+		
+		/**
+		 * Composants à activer/désactiver.
+		 */
 		private Component[] components;
 		
-		/** Construit un contrôleur de type mettant à jour les composants
+		/**
+		 * Construit un contrôleur de type mettant à jour les composants
 		 * spécifiés.
 		 * 
 		 * @param bancaire		Bouton radio indiquant le type "compte
@@ -340,22 +398,25 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 				} else if (type.isBancaire()) {
 					typesBancaire.add(type);
 				}
-			}// for types
+			}
 			
 			// Tous
 			types = new TreeSet<TypeCompte>(typesBudget);		// Budgétaires
 			types.addAll(typesBancaire);						// + bancaires
-		}// constructeur
+		}
 
-		/** Action envoyée par un objet Swing sur action de l'utilisateur. */
+		/**
+		 * Action envoyée par un objet Swing sur action de l'utilisateur.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
 			changeVue(command);						// Modifier la vue
 			dataMediator.setMainType(command);		// Faire suivre au modèle
-		}// actionPerformed
+		}
 		
-		/** Modifie la vue en fonction du type principal choisi.
+		/**
+		 * Modifie la vue en fonction du type principal choisi.
 		 * <p>
 		 * La méthode re-remplit la combo box de type précis avec les types
 		 * correspondant au type principal et active ou désactive les compocants
@@ -364,7 +425,8 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		private void changeVue(String command) {
 			boolean enable;
 			
-			/* Choisir la collection des types secondaires, sélectionner le bon
+			/*
+			 * Choisir la collection des types secondaires, sélectionner le bon
 			 * bouton radio et déterminer s'il faut activer ou désactiver les
 			 * composants.
 			 */  
@@ -391,23 +453,41 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			for (TypeCompte type : typesSet) {		// Remplir
 				boxType.addItem(type);
 			}
-		}// changeVue
+		}
 	}// inner class MainTypeController
 
-	/** La boîte de dialogue. */
+	/**
+	 * La boîte de dialogue.
+	 */
 	private JDialog dialog;
-	/** Le GUI principal. */
+	
+	/**
+	 * Le GUI principal.
+	 */
 	private SimpleGUI gui;
-	/** La liste graphique des comptes. */
+	
+	/**
+	 * La liste graphique des comptes.
+	 */
 	private JList<CompteController> listComptes;
-	/** Le médiateur de données. */
+	
+	/**
+	 * Le médiateur de données.
+	 */
 	private DataMediator dataMediator;
-	/** Les contrôleurs de comptes. */
+	
+	/**
+	 * Les contrôleurs de comptes.
+	 */
 	private ArrayList<CompteController> controllers;
-	/** Les types secondaires. */
+	
+	/**
+	 * Les types secondaires.
+	 */
 	private TreeSet<TypeCompte> types;
 	
-	/** Construit une boîte de dialogue de gestion des comptes.
+	/**
+	 * Construit une boîte de dialogue de gestion des comptes.
 	 * 
 	 * @param gui	L'instance du GUI en cours.
 	 * @param owner	Le cadre auquel rattacher la boîte de dialogue.
@@ -416,7 +496,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		this.gui = gui;
 		
 		// Liste des comptes
-		listComptes = new JList<CompteController>();	// Liste
+		listComptes = new JList<>();					// Liste
 		listComptes.setSelectionMode(					// Mode de sélection
 				ListSelectionModel.SINGLE_SELECTION);
 		listComptes.addListSelectionListener(this);		// Écouter la sélection
@@ -616,7 +696,8 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		dialog.setVisible(true);
 	}// constructeur
 	
-	/** Re-remplit la liste graphique des comptes.
+	/**
+	 * Re-remplit la liste graphique des comptes.
 	 * 
 	 * @param selection	Le compte à sélectionner après la mise à jour. Utiliser
 	 * 					<code>null</code> pour un nouveau compte.
@@ -630,7 +711,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		} catch (IOException e) {
 			comptes = new HashSet<Compte>();
 			e.printStackTrace();
-		}// try
+		}
 		
 		// Ajouter un null pour une nouvelle saisie
 		comptes.add(null);
@@ -645,7 +726,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			if (compte == selection) {
 				selected = controller;					// Repérer la sélection
 			}
-		}// for comptes
+		}
 		Collections.sort(controllers);					// Trier les contrôleurs
 		
 		// Tout insérer dans le modèle
@@ -658,9 +739,11 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		
 		// Sélectionner le bon item
 		listComptes.setSelectedValue(selected, true);
-	}// fillComptesList
+	}
 
-	/**  Reçoit les actions des boutons de validation. */
+	/**
+	 * Reçoit les actions des boutons de validation.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
@@ -699,7 +782,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 							// Le nouveau compte remonte plus loin: reculer
 							toUpdate = new Month(compte.getOuverture());
 						}
-					}// if changement
+					}
 					
 				} catch (IOException e1) {
 					LOGGER.severe("Impossible de sauvegarder le compte "
@@ -707,13 +790,13 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 					
 					// Arrêter ici sans recharger les données
 					return;
-				}// try
+				}
 				
 				// Actualiser la sélection si besoin
 				if (controller == selected) {
 					selection = compte;
 				}
-			}// for controllers
+			}
 			
 			// Appliquer une mise à jour
 			if (toUpdate != null) {
@@ -724,9 +807,9 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 							Level.WARNING,
 							"Échec de mise à jour des suivis",
 							e1);
-				}// try
-			}// if mise à jour
-		}// if Valider ou Appliquer
+				}
+			}
+		}
 		
 		// Supprimer si nécessaire
 		if (SUPPRIMER.equals(command)
@@ -742,8 +825,8 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 				
 			} catch (IOException e1) {
 				LOGGER.severe("Impossible de supprimer " + selected);
-			}// try
-		}// if Supprimer et confirmation
+			}
+		}
 		
 		// Quitter ou recharger les données
 		if (QUITTER.equals(command) || VALIDER.equals(command)) {
@@ -768,13 +851,14 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 				
 				// Mettre à jour la liste des comptes dans le TableCellEditor
 				FinancialTable.updateComptesEditor();
-			}// if pas modifié ou confirmé
+			}
 		} else {
 			fillComptesList(selection);				// Recharger les données
-		}// if Quitter ou Valider
-	}// actionPerformed
+		}
+	}
 
-	/** Actualise l'interface graphique avec les paramètres du compte
+	/**
+	 * Actualise l'interface graphique avec les paramètres du compte
 	 * nouvellement sélectionné.
 	 */
 	@Override
@@ -783,10 +867,11 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		// Faire afficher les données de la nouvelle sélection
 		CompteController cc = listComptes.getSelectedValue();
 		dataMediator.setController(cc);
-	}// valueChanged
+	}
 }// class SetupCompte
 
-/** Un contrôleur de Compte.<br>
+/**
+ * Un contrôleur de Compte.<br>
  * Il permet de pré-visualiser les changements à apporter à un compte.
  * <p>
  * Cette classe est externe à <code>SetupCompte</code> pour éviter que celle-ci
@@ -795,13 +880,18 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
  */
 class CompteController implements Comparable<CompteController> {
 	
-	/** Le compte contrôlé. */
+	/**
+	 * Le compte contrôlé.
+	 */
 	private Compte compte = null;
 	
-	/** Marqueur de modifications. */
+	/**
+	 * Marqueur de modifications.
+	 */
 	private boolean modified = false;
 	
-	/** Propriété à éditer.<br>
+	/**
+	 * Propriété à éditer.<br>
 	 * La valeur par défaut est celle à utiliser pour une nouvelle saisie.
 	 */
 	private String mainType	= SetupCompte.BANCAIRE;
@@ -812,7 +902,8 @@ class CompteController implements Comparable<CompteController> {
 	private Date ouverture	= null;
 	private Date cloture	= null;
 	
-	/** Construit un contrôleur contenant les données actuelles du compte
+	/**
+	 * Construit un contrôleur contenant les données actuelles du compte
 	 * spécifié.
 	 * 
 	 * @param compte	Le compte à éditer. Utiliser <code>null</code> pour un
@@ -821,9 +912,11 @@ class CompteController implements Comparable<CompteController> {
 	public CompteController(Compte compte) {
 		this.compte = compte;
 		refresh();
-	}// constructeur
+	}
 	
-	/** Rafraîchit les données à partir du compte actuel. */
+	/**
+	 * Rafraîchit les données à partir du compte actuel.
+	 */
 	private void refresh() {
 		if (compte != null) {
 			
@@ -842,13 +935,15 @@ class CompteController implements Comparable<CompteController> {
 			} else if (compte instanceof CompteBudget) {	// Compte budgétaire
 				mainType = SetupCompte.BUDGET;				// Type principal
 			}
-		}// if compte not null
-	}// refresh
+		}
+	}
 	
-	/** Renvoie le compte actuel. */
+	/**
+	 * Renvoie le compte actuel.
+	 */
 	public Compte getCompte() {
 		return compte;
-	}// getCompte
+	}
 	
 	// Getters
 	public String getNom()		{return nom;}
@@ -889,15 +984,16 @@ class CompteController implements Comparable<CompteController> {
 		modified = true;
 	}
 	
-	/** Indique si les données ont été modifiées par rapport à l'état d'origine
+	/**
+	 * Indique si les données ont été modifiées par rapport à l'état d'origine
 	 * du compte.
 	 */
 	public boolean isModified() {
 		return modified;
 	}
 	
-	/** Applique les changements au compte et envoie la nouvelle instance au
-	 * DAO.
+	/**
+	 * Applique les changements au compte et envoie la nouvelle instance au DAO.
 	 * 
 	 * @return	Le nouveau compte enregistré dans le DAO. S'il n'y a pas de
 	 * 			modifications, c'est la même instance qu'auparavant.
@@ -940,17 +1036,19 @@ class CompteController implements Comparable<CompteController> {
 		refresh();
 		
 		return compte;
-	}// applyChanges
+	}
 	
-	/** Supprime le Compte.
+	/**
+	 * Supprime le compte.
 	 * 
 	 * @throws IOException
 	 */
 	public void deleteCompte() throws IOException {
 		DAOFactory.getFactory().getCompteDAO().remove(compte.getId());
-	}// deleteCompte
+	}
 
-	/** Applique la relation d'ordre des comptes aux contrôleurs de comptes.<br>
+	/**
+	 * Applique la relation d'ordre des comptes aux contrôleurs de comptes.<br>
 	 * Si un contrôleur et vide ("Nouveau..."), il passe avant.
 	 */
 	@Override
@@ -965,9 +1063,11 @@ class CompteController implements Comparable<CompteController> {
 		} else {
 			return 0;								// Deux null: égalité !
 		}
-	}// compareTo
+	}
 	
-	/** Renvoie le nom du compte vers lequel pointe l'objet. */
+	/**
+	 * Renvoie le nom du compte vers lequel pointe l'objet.
+	 */
 	@Override
 	public String toString() {
 		if (compte == null) {
@@ -975,5 +1075,5 @@ class CompteController implements Comparable<CompteController> {
 		} else {
 			return compte.toString();
 		}
-	}// toString
-}// package-private class CompteController
+	}
+}

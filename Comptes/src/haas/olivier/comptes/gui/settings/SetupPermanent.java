@@ -76,13 +76,16 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 
-/** Une boîte de dialogue pour paramétrer les Permanents. 
+/**
+ * Une boîte de dialogue pour paramétrer les Permanents. 
  * 
  * @author Olivier HAAS.
  */
 public class SetupPermanent implements ActionListener, ListSelectionListener {
 	
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupPermanent.class.getName());
 	
@@ -97,7 +100,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	public static final String SUPPRIMER = "supprimer";
 	public static final String QUITTER = "quitter";
 	
-	/** Un médiateur entre les données de l'interface et les données du modèle.
+	/**
+	 * Un médiateur entre les données de l'interface et les données du modèle.
 	 */
 	private class DataMediator
 	implements ChangeListener, DocumentListener, ItemListener, TableModelListener {
@@ -163,15 +167,17 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			
 			this.compteASolder = compteASolder;			// Compte à solder
 			compteASolder.addItemListener(this);		// Écouter
-		}// constructeur
+		}
 		
-		/** Renvoie le contrôleur vers lequel pointe actuellement le médiateur.
+		/**
+		 * Renvoie le contrôleur vers lequel pointe actuellement le médiateur.
 		 */
 		public PermanentController getController() {
 			return controller;
 		}
 		
-		/** Remplace le contrôleur de référence. Les données du nouveau
+		/**
+		 * Remplace le contrôleur de référence. Les données du nouveau
 		 * contrôleur sont retranscrites dans l'interface graphique.
 		 */
 		public void setController(PermanentController controller) {
@@ -241,18 +247,23 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			dependance.addItemListener(this);
 			taux.addChangeListener(this);
 			compteASolder.addItemListener(this);		
-		}// setController
+		}
 
-		/** Reçoit les modifications de type initiées par l'utilisateur, et les
-		 * renvoie au contrôleur de Permanent. */
+		/**
+		 * Reçoit les modifications de type initiées par l'utilisateur, et les
+		 * renvoie au contrôleur de Permanent.
+		 */
 		public void setType(String type) {
 			controller.setType(type);
 		}
 		
-		/** Reçoit les modifications des zones de texte dans l'interface et
-		 * les envoie vers le modèle.
-		 * @param e	Le DocumentEvent généré par le JTextComponent contenant le
-		 * 			texte. */
+		/**
+		 * Reçoit les modifications des zones de texte dans l'interface et les
+		 * envoie vers le modèle.
+		 * 
+		 * @param e	Le <code>DocumentEvent</code> généré par le
+		 * 			<code>JTextComponent</code> contenant le texte.
+		 */
 		private void textChanged(DocumentEvent e) {
 			if (e.getDocument() == nom.getDocument()) {
 				controller.setNom(nom.getText());			// Nom
@@ -261,32 +272,36 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			} else if (e.getDocument() == tiers.getDocument()) {
 				controller.setTiers(tiers.getText());		// Tiers
 			}
-		}// textChanged
+		}
 		
-		/** Interface DocumentListener. Reçoit les notifications de changement
-		 * sur le nom.
+		/**
+		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
+		 * changement sur le nom.
 		 */
 		@Override
 		public void insertUpdate(DocumentEvent e) {
 			textChanged(e);
 		}
 
-		/** Interface DocumentListener. Reçoit les notifications de changement
-		 * sur le nom.
+		/**
+		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
+		 * changement sur le nom.
 		 */
 		@Override
 		public void removeUpdate(DocumentEvent e) {
 			textChanged(e);
 		}
 
-		@Override
-		/** Interface DocumentListener. Aucune implémentation ici.
+		/**
+		 * Interface <code>DocumentListener</code>. Aucune implémentation ici.
 		 */
+		@Override
 		public void changedUpdate(DocumentEvent e) {}
 
-		/** Interface ItemListener. Reçoit les notifications de changements sur
-		 * les comptes débité/crédité, sur la dépendance à une autre opération
-		 * permanente et sur le compte à solder.
+		/**
+		 * Interface <code>ItemListener</code>. Reçoit les notifications de
+		 * changements sur les comptes débité/crédité, sur la dépendance à une
+		 * autre opération permanente et sur le compte à solder.
 		 */
 		@Override
 		public void itemStateChanged(ItemEvent e) {
@@ -299,15 +314,17 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			} else if (e.getSource() == compteASolder) {
 				controller.setCompteASolder((CompteBancaire) e.getItem());
 			}
-		}// itemStateChanged
+		}
 
-		/** Interface TableModelListener. Reçoit les notifications de
-		 * changements sur le planning des jours, ou des montants fixes.
+		/**
+		 * Interface <code>TableModelListener</code>. Reçoit les notifications
+		 * de changements sur le planning des jours, ou des montants fixes.
 		 */
 		@Override
 		public void tableChanged(TableModelEvent e) {
 			
-			/* Pour les tables de jours et de montants, la classe
+			/*
+			 * Pour les tables de jours et de montants, la classe
 			 * PlannerTableModel utilise une Map<Month,Object> pour permettre
 			 * l'héritage entre les deux tables.
 			 * Il faut transférer les entrées de cette Map vers une
@@ -329,8 +346,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 						// Insérer dans la nouvelle Map
 						mapJours.put(
 								entry.getKey(), (Integer) entry.getValue());
-					}// if value Integer
-				}// for Entry
+					}
+				}
 				
 				// Envoyer la nouvelle Map au contrôleur
 				controller.setJours(mapJours);
@@ -350,16 +367,17 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 						// Insérer dans la nouvelle Map
 						mapMontants.put(
 								entry.getKey(), (BigDecimal) entry.getValue());
-					}// if value BigDecimal
-				}// for Entry
+					}
+				}
 				
 				// Envoyer la nouvelle Map au contrôleur
 				controller.setMontants(mapMontants);
-			}// if jours ou montants
-		}// tableChanged
+			}
+		}
 
-		/** Interface ChangeListener. Reçoit les notifications de la case à
-		 * cocher pour le pointage automatique ou du spinner taux, et les
+		/**
+		 * Interface <code>ChangeListener</code>. Reçoit les notifications de la
+		 * case à cocher pour le pointage automatique ou du spinner taux, et les
 		 * renvoie au contrôleur. */
 		@Override
 		public void stateChanged(ChangeEvent e) {
@@ -369,18 +387,24 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				controller.setTaux(							// Taux parsé
 						new BigDecimal(taux.getValue().toString()));
 			}
-		}// stateChanged
+		}
 	}// inner class DataMediator
 
-	/** Un ActionListener qui gère les changements de vues et de boutons en
-	 * fonction du type de Permanent. Il peut être appelé par les objets Swing
-	 * générant des ActionEvent, ou directement par le programme.
-	 * L'objet crée son propre JPanel avec un CardLayout standard.
-	 * @author Olivier HAAS */
+	/**
+	 * Un <code>ActionListener</code> qui gère les changements de vues et de
+	 * boutons en fonction du type de Permanent. Il peut être appelé par les
+	 * objets Swing générant des <code>ActionEvent</code>, ou directement par le
+	 * programme. L'objet crée son propre <code>JPanel</code> avec un
+	 * <code>CardLayout</code> standard.
+	 * 
+	 * @author Olivier HAAS
+	 */
 	private class TypeController implements ActionListener {
 		
-		/** Map associant les commandes aux boutons, pour permettre la mise à
-		 * jour du statut du bouton à l'invocation de la commande. */
+		/**
+		 * <code>Map</code> associant les commandes aux boutons, pour permettre
+		 * la mise à jour du statut du bouton à l'invocation de la commande.
+		 */
 		public HashMap<String,AbstractButton> buttonMap =
 				new HashMap<String,AbstractButton>();
 		
@@ -390,25 +414,31 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		// Composants "débit" à désactiver pour le type "compte à solder"
 		private JComponent[] debitComponents;
 		
-		/** Crée un contrôleur de type qui active ou désactive les composants
+		/**
+		 * Crée un contrôleur de type qui active ou désactive les composants
 		 * spécifiés selon le type. 
-		 * @param debit	Les JComponents à désactiver pour le type "compte à
-		 * 				solder". Il s'agit en principe des composants du choix
-		 * 				du compte débité.
+		 * 
+		 * @param debit	Les <code>JComponent</code>s à désactiver pour le type
+		 * 				"compte à solder". Il s'agit en principe des composants
+		 * 				du choix du compte débité.
 		 */
 		public TypeController(JComponent... debitComponents) {
 			this.debitComponents = debitComponents;
 		}
 		
+		/**
+		 * Action envoyée par un objet Swing sur action de l'utilisateur.
+		 */
 		@Override
-		/** Action envoyée par un objet Swing sur action de l'utilisateur. */
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
 			changeVue(command);						// Extraire la commande
 			dataMediator.setType(command);			// Faire suivre au modèle
 		}
 
-		/** Action demandée programmatiquement. */
+		/**
+		 * Action demandée programmatiquement.
+		 */
 		public void changeVue(String command) {
 			AbstractButton bouton;					// Bouton à mettre à jour
 			if (buttonMap.containsKey(command)) {	// Commande connue ?
@@ -426,28 +456,40 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			for (JComponent comp : debitComponents) {	// Appliquer aux JComp
 				comp.setEnabled(actif);
 			}
-		}// changeVue
+		}
 	}// inner class TypeListener
 
-	/** Le GUI associé. */
+	/**
+	 * Le GUI associé.
+	 */
 	private SimpleGUI gui;
 	
-	/** Boîte de dialogue principale. */
+	/**
+	 * Boîte de dialogue principale.
+	 */
 	private JDialog dialog;
 	
-	/** Médiateur entre les données de l'IHM et du modèle. */
+	/**
+	 * Médiateur entre les données de l'IHM et du modèle.
+	 */
 	private DataMediator dataMediator;
 	
-	/** La collection ordonnée de contrôleurs de Permanents. */
+	/**
+	 * La collection ordonnée de contrôleurs de <code>Permanent</code>s.
+	 */
 	private ArrayList<PermanentController> controllers;
 	
-	/** Liste graphique des Permanents. Elle contient en fait des instances de
-	 * PermanentController, transparents pour l'utilisateur. */
+	/**
+	 * Liste graphique des Permanents. Elle contient en fait des instances de
+	 * <code>PermanentController</code>, transparents pour l'utilisateur.
+	 */
 	private JList<PermanentController> listPermanents;
 	
-	/** Construit une boîte de dialogue de gestion des Permanents.
-	 * @param owner	La fenêtre parent
-	 * @param gui	Le GUI associé (pour mise à jour des boutons)
+	/**
+	 * Construit une boîte de dialogue de gestion des <code>Permanent</code>s.
+	 * 
+	 * @param owner	La fenêtre parent.
+	 * @param gui	Le GUI associé (pour mise à jour des boutons).
 	 */
 	public SetupPermanent(JFrame owner, SimpleGUI gui) {
 		this.gui = gui;
@@ -752,11 +794,14 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 //		boxDebit.setSelectedItem(null);
 	}// constructeur
 	
-	/** Renvoie une table de planning par mois.
+	/**
+	 * Renvoie une table de planning par mois.
 	 * La table gère l'affichage et l'édition des mois.
-	 * @param model	Le PlannerTableModel à utiliser
-	 * @return		Une table appuyée sur le PlannerTableModel.
-	 * @see	PlannerTableModel
+	 * 
+	 * @param model	Le <code>PlannerTableModel</code> à utiliser
+	 * @return		Une table appuyée sur le <code>PlannerTableModel</code>.
+	 * 
+	 * @see	{@link PlannerTableModel}
 	 */
 	private JTable createPlannerTable(PlannerTableModel model) {
 		JTable table = new JTable(model);
@@ -765,12 +810,15 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		table.setDefaultEditor(							// Editor des mois
 				Month.class, new MonthCellEditor());
 		return table;
-	}// createPlannerTable
+	}
 	
-	/** Remplit la liste graphique avec des contrôleurs de tous les Permanents.
+	/**
+	 * Remplit la liste graphique avec des contrôleurs de tous les
+	 * <code>Permanent</code>s.
 	 * 
-	 * @param selection	Le Permanent à sélectionner après la mise à jour. Si
-	 * 					<code>null</code>, sélectionne l'item "Nouveau..."
+	 * @param selection	Le <code>Permanent</code> à sélectionner après la mise à
+	 * 					jour. Si <code>null</code>, sélectionne l'item
+	 * 					"Nouveau..."
 	 */
 	private void fillPermanentList(Permanent selection) {
 		
@@ -786,13 +834,13 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				DAOFactory.getFactory().getPermanentDAO().getAll()) {
 				
 				permanents.add(p);
-			}// for permanents
+			}
 			
 		} catch (IOException e) {
-		}// try
+		}
 		
 		// Liste des contrôleurs de Permanents
-		controllers = new ArrayList<PermanentController>();
+		controllers = new ArrayList<>();
 		
 		// Remplir la liste de contrôleurs
 		PermanentController selected = null;
@@ -803,7 +851,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			if (p == selection) {
 				selected = controller;					// Repérer la sélection
 			}
-		}// for Permanent
+		}
 		
 		// Trier
 		Collections.sort(controllers);
@@ -824,10 +872,11 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			listPermanents.setSelectedValue(			// Ou l'item spécifié
 					selected, true);
 		}
-	}// fillPermanentList
+	}
 	
-	/** Actualise l'interface graphique avec les paramètres du Permanent
-	 * nouvellement sélectionné.
+	/**
+	 * Actualise l'interface graphique avec les paramètres du
+	 * <code>Permanent</code> nouvellement sélectionné.
 	 */
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
@@ -835,9 +884,11 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		// Faire afficher les données de la nouvelle sélection
 		dataMediator.setController(
 				(PermanentController) listPermanents.getSelectedValue());
-	}// valueChanged
+	}
 
-	/** Reçoit les actions des boutons de validation. */
+	/**
+	 * Reçoit les actions des boutons de validation.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
@@ -864,14 +915,14 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 					
 					// Arrêter ici sans recharger les données
 					return;
-				}// try
+				}
 				
 				// Actualiser la sélection si besoin
 				if (pc == selected) {
 					selection = p;
 				}
-			}// for controllers
-		}// if Valider ou Appliquer
+			}
+		}
 		
 		// Supprimer si nécessaire
 		if (SUPPRIMER.equals(command)
@@ -887,8 +938,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			} catch (IOException e1) {
 				LOGGER.log(Level.SEVERE,
 						"Impossible de supprimer " + selected, e1);
-			}// try
-		}// if Supprimer et confirmation
+			}
+		}
 		
 		// Quitter ou recharger les données
 		if (QUITTER.equals(command) || VALIDER.equals(command)) {
@@ -912,15 +963,17 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			}
 		} else {
 			fillPermanentList(selection);			// Recharger les données
-		}// if Quitter ou Valider
-	}// actionPerformed
+		}
+	}
 }// class SetupPermanent
 
-/** Un contrôleur de Permanent. Permet de pré-visualiser les modifications à
- * apporter à un Permanent.
- * Cette classe est externe à SetupPermanent pour éviter que celle-ci n'accède
- * aux propriétés privés du PermanentController, au lieu de passer par les
- * setters.
+/**
+ * Un contrôleur de <code>Permanent</code>. Permet de pré-visualiser les
+ * modifications à apporter à un <code>Permanent</code>.
+ * <p>
+ * Cette classe est externe à <code>SetupPermanent</code> pour éviter que
+ * celle-ci n'accède aux propriétés privés du <code>PermanentController</code>,
+ * au lieu de passer par les setters.
  */
 class PermanentController implements Comparable<PermanentController> {
 	private Permanent permanent = null;			// Permanent à modifier
@@ -938,17 +991,21 @@ class PermanentController implements Comparable<PermanentController> {
 	private BigDecimal taux;
 	private CompteBancaire compteASolder = null;
 	
-	/** Construit un contrôleur contenant les données actuelles du Permanent
-	 * spécifié.
-	 * @param p	Le Permanent à utiliser. Utiliser null pour la définition
-	 * 			d'un nouveau Permanent.
+	/**
+	 * Construit un contrôleur contenant les données actuelles du
+	 * <code>Permanent</code> spécifié.
+	 * 
+	 * @param p	Le <code>Permanent</code> à utiliser. Utiliser <code>null</code>
+	 * 			pour la définition d'un nouveau <code>Permanent</code.
 	 */
 	public PermanentController(Permanent p) {
 		permanent = p;								// Mémoriser le Permanent
 		refresh();									// Récupérer ses propriétés
 	}
 	
-	/** Rafraîchit les données à partir des propriétés du Permanent actuel.
+	/**
+	 * Rafraîchit les données à partir des propriétés du <code>Permanent</code>
+	 * actuel.
 	 */
 	private void refresh() {
 		if (permanent != null) {			// Permanent pré-existant (non null)
@@ -972,17 +1029,17 @@ class PermanentController implements Comparable<PermanentController> {
 				
 			} else if (permanent instanceof PermanentSoldeur) {				
 				type = SetupPermanent.SOLDER;
-			}// if type
+			}
 			
 		} else {									// Pas de Permanent
 			type = SetupPermanent.FIXE;				// Type FIXE par défaut
 			taux = new BigDecimal("2");				// Taux par défaut
-		}// if permanent not null
-	}// constructeur
+		}
+	}
 	
 	public Permanent getPermanent() {
 		return permanent;
-	}// getPermanent
+	}
 	
 	// Getters
 	public String getType()						{return type;}
@@ -1002,72 +1059,74 @@ class PermanentController implements Comparable<PermanentController> {
 	public void setType(String type) {
 		this.type = type;
 		modified = true;
-	}// setType
+	}
 	
 	public void setNom(String nom) {
 		this.nom = nom;
 		modified = true;
-	}// setNom
+	}
 	
 	public void setDebit(Compte debit) {
 		this.debit = debit;
 		modified = true;
-	}// setDebit
+	}
 	
 	public void setCredit(Compte credit) {
 		this.credit = credit;
 		modified = true;
-	}// setCredit
+	}
 	
 	public void setLibelle(String libelle) {
 		this.libelle = libelle;
 		modified = true;
-	}// setLibelle
+	}
 	
 	public void setTiers(String tiers) {
 		this.tiers = tiers;
 		modified = true;
-	}// setTiers
+	}
 	
 	public void setPointer(boolean pointer) {
 		this.pointer = pointer;
 		modified = true;
-	}// setPointer
+	}
 	
 	public void setJours(Map<Month,Integer> jours) {
 		this.jours = jours;
 		modified = true;
-	}// setJours
+	}
 	
 	public void setMontants(Map<Month,BigDecimal> montants) {
 		this.montants = montants;
 		modified = true;
-	}// setMontants
+	}
 	
 	public void setDependance(Permanent dependance) {
 		this.dependance = dependance;
 		modified = true;
-	}// setDependance
+	}
 	
 	public void setTaux(BigDecimal taux) {
 		this.taux = taux;
 		modified = true;
-	}// setTaux
+	}
 	
 	public void setCompteASolder(CompteBancaire compteASolder) {
 		this.compteASolder = compteASolder;
 		modified = true;
-	}// setCompteASolder
+	}
 	
 	public boolean isModified() {
 		return modified;
-	}// isModified
+	}
 	
-	/** Applique les modifications au Permanent et envoie la nouvelle
-	 * version au DAO.
+	/**
+	 * Applique les modifications au Permanent et envoie la nouvelle version au
+	 * DAO.
 	 * 
-	 * @return	Le nouveau Permanent enregistré dans le DAO. S'il n'y a pas de
-	 * 			modifications, c'est la même instance qu'auparavant.
+	 * @return	Le nouveau <code>Permanent</code> enregistré dans le DAO. S'il
+	 * 			n'y a pas de modifications, c'est la même instance
+	 * 			qu'auparavant.
 	 * 
 	 * @throws IOException
 	 */
@@ -1109,16 +1168,22 @@ class PermanentController implements Comparable<PermanentController> {
 		modified = false;
 		
 		return permanent;
-	}// applyChanges
+	}
 	
-	/** Supprime le Permanent. 
-	 * @throws IOException */
+	/**
+	 * Supprime le <code>Permanent</code>. 
+	 * 
+	 * @throws IOException
+	 */
 	public void deletePermanent() throws IOException {
 		DAOFactory.getFactory().getPermanentDAO().remove(permanent.id);
 	}
 	
-	/** Applique la relation d'ordre des Permanents au contrôleurs de
-	 * Permanents. Si on contrôleur est vide ("Nouveau..."), il passe avant. */
+	/**
+	 * Applique la relation d'ordre des Permanents au contrôleurs de
+	 * <code>Permanent</code>s. Si on contrôleur est vide ("Nouveau..."), il
+	 * passe avant.
+	 */
 	@Override
 	public int compareTo(PermanentController controller) {
 		Permanent permanent2 = controller.getPermanent();
@@ -1131,9 +1196,11 @@ class PermanentController implements Comparable<PermanentController> {
 		} else {
 			return 0;								// Deux null: égalité !
 		}
-	}// compareTo
+	}
 	
-	/** Affiche le nom du Permanent vers lequel pointe l'objet. */
+	/**
+	 * Affiche le nom du Permanent vers lequel pointe l'objet.
+	 */
 	@Override
 	public String toString() {
 		if (permanent == null) {					// Pas de Permanent
@@ -1141,11 +1208,13 @@ class PermanentController implements Comparable<PermanentController> {
 		} else {
 			return permanent.toString();			// Sinon, nom du Permanent
 		}
-	}// toString
+	}
 }// package-private class PermanentController
 
+/**
+ * Un <code>TableModel</code> pour la table des jours.
+ */
 @SuppressWarnings("serial")
-/** Un TableModel pour la table des jours. */
 class PlannerTableModel extends AbstractTableModel {
 
 	private final Class<?> classe;
@@ -1159,8 +1228,11 @@ class PlannerTableModel extends AbstractTableModel {
 		this.titre = titre;
 	}
 	
-	/** Retourne les données de la ligne spécifiée de la map.
-	 * @param index	Index de la map interne (et non du modèle). */
+	/**
+	 * Retourne les données de la ligne spécifiée de la map.
+	 * 
+	 * @param index	Index de la map interne (et non du modèle).
+	 */
 	private Entry<Month,Object> getEntryAt(int index) {
 		Entry<Month,Object> entry = null;					// La variable
 		Iterator<Entry<Month,Object>> iterator =
@@ -1170,7 +1242,7 @@ class PlannerTableModel extends AbstractTableModel {
 			entry = iterator.next();						// Suivant
 		}
 		return entry;
-	}// getEntryAt
+	}
 	
 	@Override
 	public String getColumnName(int columnIndex) {
@@ -1227,11 +1299,11 @@ class PlannerTableModel extends AbstractTableModel {
 					map.remove(entry.getKey());		// Supprimer l'entrée
 				} else {
 					map.put(entry.getKey(), valeur);// Changer la valeur du mois
-				}// if valeur null
-			}// if colonne
-		}// if ligne de saisie
+				}
+			}
+		}
 		fireTableDataChanged();						// Avertir des changements
-	}// setValueAt
+	}
 
 	@Override
 	public int getRowCount() {
@@ -1257,15 +1329,19 @@ class PlannerTableModel extends AbstractTableModel {
 		
 		// Retourner le mois ou le jour du mois, suivant la colonne
 		return (columnIndex == 0) ? entry.getKey() : entry.getValue();
-	}// getValueAt
+	}
 	
-	/** Renvoie la Map actuelle. */
+	/**
+	 * Renvoie la <code>Map</code> actuelle.
+	 */
 	public Map<Month,Object> getMap() {
 		return map;
 	}
 	
-	/** Remplace les données actuelles par celles qui sont contenues dans la Map
+	/**
+	 * Remplace les données actuelles par celles qui sont contenues dans la Map
 	 * spécifiée.
+	 * 
 	 * @param jours	La Map contenant les valeurs à utiliser. L'objet fourni en
 	 * 				paramètre n'est pas modifié. Par contrat, cette	Map ne doit
 	 * 				contenir comme valeurs que des objets de la	classe fournie
@@ -1273,25 +1349,31 @@ class PlannerTableModel extends AbstractTableModel {
 	 */
 	public void setMap(Map<Month,? extends Object> jours) {
 		map = (jours == null)
-				? new TreeMap<Month,Object>()
-				: new TreeMap<Month,Object>(jours);		// Nouvelles données
+				? new TreeMap<>()
+				: new TreeMap<>(jours);					// Nouvelles données
 		fireTableDataChanged();							// Avertir du changement
 	}
 }// class PlannerTableModel
 
-/** Un TableCellEditor pour la classe Month. */
+/**
+ * Un <code>TableCellEditor</code> pour la classe <code>Month</code>.
+ */
 @SuppressWarnings("serial")
 class MonthCellEditor extends DefaultCellEditor {
 	
-	/** Construit un éditeur avec JComboBox. */
+	/**
+	 * Construit un éditeur avec <code>JComboBox</code>.
+	 */
 	public MonthCellEditor() {
 		super(new JComboBox<Month>());
 	}
 
+	/**
+	 * Renvoie une <code>JComboBox</code> pré-remplie avec les 12 mois avant et
+	 * après le mois de référence. Si le mois de référence est
+	 * <code>null</code>, par rapport à la date du jour.
+	 */
 	@Override
-	/** Renvoie une JComboBox pré-remplie avec les 12 mois avant et après le
-	 * mois de référence. Si le mois de référence est null, par rapport à la
-	 * date du jour. */
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSelected, int row, int column) {
 		
@@ -1314,5 +1396,5 @@ class MonthCellEditor extends DefaultCellEditor {
 		comboBox.setSelectedItem(reference);
 		
 		return comboBox;
-	}// getTableCellEditorComponent
+	}
 }// class MonthCellEditor
