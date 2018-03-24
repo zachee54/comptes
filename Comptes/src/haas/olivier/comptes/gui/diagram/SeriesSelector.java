@@ -4,8 +4,8 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.diagram.DiagramModel;
 import haas.olivier.diagram.Serie;
 import haas.olivier.diagram.SeriesOrdener;
-import haas.olivier.gui.util.ReverseRowSorter;
-import haas.olivier.gui.util.SmartTable;
+import haas.olivier.gui.table.ReverseRowSorter;
+import haas.olivier.gui.table.SmartTable;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
