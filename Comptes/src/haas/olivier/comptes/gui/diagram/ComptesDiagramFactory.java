@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.diagram.DiagramAndAxisComponent;
 import haas.olivier.diagram.DiagramFactory;
@@ -36,7 +34,7 @@ public class ComptesDiagramFactory {
 	public static DiagramAndAxisComponent newMoyenne() throws IOException {
 		return DiagramFactory.newCourbe(newModel(false, "moyennes",
 				(c, month) -> {
-					BigDecimal montant = ((CompteBudget) c).getMoyenne(month);
+					BigDecimal montant = c.getMoyenne(month);
 
 					// Pour les dépenses, on préfère des montants en positif
 					switch (c.getType()) {
@@ -57,7 +55,7 @@ public class ComptesDiagramFactory {
 	 */
 	public static DiagramAndAxisComponent newPatrimoine() throws IOException {
 		return DiagramFactory.newAire(newModel(true, "patrimoine",
-				(c, month) -> ((CompteBancaire) c).getSoldeAVue(month)));
+				(c, month) -> c.getSoldeAVue(month)));
 	}
 	
 	/**
