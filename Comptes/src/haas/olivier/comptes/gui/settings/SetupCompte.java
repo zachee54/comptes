@@ -1,12 +1,9 @@
 package haas.olivier.comptes.gui.settings;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.ctrl.EcritureController;
-import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.gui.SimpleGUI;
 import haas.olivier.comptes.gui.table.FinancialTable;
@@ -928,12 +925,12 @@ class CompteController implements Comparable<CompteController> {
 			cloture = compte.getCloture();
 			
 			// Selon le type du compte (bancaire ou budgétaire)
-			if (compte instanceof CompteBancaire) {			// Compte bancaire
-				mainType = SetupCompte.BANCAIRE;			// Type principal
-				numero =									// Numéro
-						((CompteBancaire) compte).getNumero();
-			} else if (compte instanceof CompteBudget) {	// Compte budgétaire
-				mainType = SetupCompte.BUDGET;				// Type principal
+			TypeCompte type = compte.getType();
+			if (type.isBancaire()) {
+				mainType = SetupCompte.BANCAIRE;
+				numero = compte.getNumero();
+			} else {
+				mainType = SetupCompte.BUDGET;
 			}
 		}
 	}
@@ -1004,30 +1001,16 @@ class CompteController implements Comparable<CompteController> {
 		if (!modified)								// Pas de modifications
 			return compte;							// Ne rien faire
 		
-		// Instancier un nouveau Compte en remplacement de l'actuel
-		Compte newCompte = null;
-		Integer id = (compte == null) ? null : compte.getId();
-		if (type.isBancaire()) {					// CompteBancaire
-			newCompte =
-					new CompteBancaire(id, nom, numero, type);
-		} else if (type.isBudgetaire()) {			// CompteBudget
-			newCompte = new CompteBudget(id, nom, type);
+		// Instancier un nouveau Compte si besoin
+		if (compte == null) {
+			compte = new Compte(type);
+			DAOFactory.getFactory().getCompteDAO().add(compte);
 		}
 		
 		// Ajuster les nouvelles propriétés
-		newCompte.setColor(color);
-		newCompte.setOuverture(ouverture);
-		newCompte.setCloture(cloture);
-		
-		// Enregistrer dans le DAO
-		DAOFactory factory = DAOFactory.getFactory();
-		CompteDAO dao = factory.getCompteDAO();
-		if (compte == null) {						// Nouveau Compte
-			compte = dao.add(newCompte);			// Enregistrer et mémoriser
-		} else {									// Compte pré-existant
-			dao.update(newCompte);					// Enregistrer
-			compte = dao.get(id);					// Mémoriser
-		}
+		compte.setColor(color);
+		compte.setOuverture(ouverture);
+		compte.setCloture(cloture);
 		
 		// Réinitialiser le marqueur de modifications
 		modified = false;
@@ -1044,7 +1027,7 @@ class CompteController implements Comparable<CompteController> {
 	 * @throws IOException
 	 */
 	public void deleteCompte() throws IOException {
-		DAOFactory.getFactory().getCompteDAO().remove(compte.getId());
+		DAOFactory.getFactory().getCompteDAO().remove(compte);
 	}
 
 	/**
