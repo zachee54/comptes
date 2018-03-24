@@ -15,7 +15,8 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 // TODO Classe à remplacer à terme par DossierComptes
-/** Une classe gérant le choix d'un fichier de données à ouvrir, créer ou
+/**
+ * Une classe gérant le choix d'un fichier de données à ouvrir, créer ou
  * enregistrer.
  *
  * @author Olivier HAAS
@@ -23,7 +24,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 @SuppressWarnings("serial")
 public class SetupDAO extends JFileChooser {
 	
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupDAO.class.getName());
 	
@@ -44,8 +47,10 @@ public class SetupDAO extends JFileChooser {
 	private FileFilter filterSerial =
 			new FileNameExtensionFilter(SERIAL, "cpt");	// Filtre natif
 	
-	/** Ouvre un boîte de dialogue de sélection du fichier, et réalise l'action
-	 * correspondante. */
+	/**
+	 * Ouvre un boîte de dialogue de sélection du fichier, et réalise l'action
+	 * correspondante.
+	 */
 	public SetupDAO(SimpleGUI gui, Component parent, int action) {
 		this.gui = gui;
 		this.parent = parent;
@@ -68,9 +73,11 @@ public class SetupDAO extends JFileChooser {
 		
 		// Mettre à jour l'affichage du nom de DAO et fichier
 		gui.updateDaoName();
-	}// constructeur
+	}
 	
-	/** Charge une nouvelle source de données. */
+	/**
+	 * Charge une nouvelle source de données.
+	 */
 	private void openFile() {
 		if (showOpenDialog(parent)
 				== JFileChooser.APPROVE_OPTION) {		// Bouton OK
@@ -88,7 +95,7 @@ public class SetupDAO extends JFileChooser {
 //					DAOFactory.setFactory(
 //							new CacheDAOFactory(new SerializeDAOFactory(file)),
 //							false);
-				}// if filter
+				}
 				
 				// Recréer les onglets de l'interface principale
 				gui.createTabs();
@@ -98,11 +105,12 @@ public class SetupDAO extends JFileChooser {
 						Level.SEVERE,
 						"Impossible d'ouvrir le fichier " + file.getName(),
 						e);
-			}// try
-		}// if OK
-	}// openFile
+			}
+		}
+	}
 	
-	/** Bascule les données vers une nouvelle source de données.
+	/**
+	 * Bascule les données vers une nouvelle source de données.
 	 * Les données potentiellement contenues dans la source, si elle existe
 	 * déjà, seront écrasées et remplacées par les données en cours
 	 * d'utilisation.
@@ -126,9 +134,10 @@ public class SetupDAO extends JFileChooser {
 				
 				// Ajouter l'extension
 				file = new File(file.getAbsolutePath() + ext);
-			}// if extension
+			}
 			
 			try {
+				
 				// Redéfinir le DAO
 				if (filter.equals(filterCSV)) {			// Fichier CSV
 					DAOFactory.setFactory(
@@ -141,7 +150,7 @@ public class SetupDAO extends JFileChooser {
 //							true);
 				} else {
 					return;					// Filtre inconnu = ne rien faire
-				}// if filter
+				}
 				
 				// Sauvegarder les données immédiatement
 				DAOFactory.getFactory().save();
@@ -151,7 +160,7 @@ public class SetupDAO extends JFileChooser {
 						Level.SEVERE,
 						"Impossible de sauvegarder le fichier "+file.getName(),
 						e);
-			}// try
-		}// if OK
-	}// saveFile
+			}
+		}
+	}
 }
