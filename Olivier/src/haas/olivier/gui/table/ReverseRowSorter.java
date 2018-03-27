@@ -1,4 +1,4 @@
-package haas.olivier.comptes.gui.diagram;
+package haas.olivier.gui.table;
 
 import java.util.Collections;
 import java.util.List;
