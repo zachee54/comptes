@@ -27,6 +27,7 @@ import haas.olivier.diagram.Legend;
  *
  * @author Olivier HAAS
  */
+// TODO Ajouter un titre et une icône à la fenêtre du diagramme
 @SuppressWarnings("serial")
 public class DiagramFrame extends JFrame {
 
