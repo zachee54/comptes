@@ -383,9 +383,6 @@ public class SetupCompte implements ActionListener {
 	public SetupCompte(SimpleGUI gui, JFrame owner) {
 		this.gui = gui;
 		
-		// Liste des comptes
-		listComptes = createComptesList();
-		
 		// Champs modifiables
 		JLabel labelNature			= new JLabel("Nature :");
 		JLabel labelCouleur			= new JLabel("Couleur :");
@@ -399,31 +396,29 @@ public class SetupCompte implements ActionListener {
 		JTextField fieldNumero		= new JTextField();
 		JLabel labelType			= new JLabel("Type :");
 		
+		// Liste des comptes
+		listComptes = createComptesList();
+		
 		// Composants à n'activer que pour les comptes de type bancaire
 		bancairesComponents = new Component[] {labelNumero, fieldNumero};
 		
 		// Sélection du type principal de compte (bancaire ou budgétaire)
-		ButtonGroup groupeClasse = new ButtonGroup();
-		groupeClasse.add(radioBancaire);
-		groupeClasse.add(radioBudget);
-		radioBancaire.addActionListener(EventHandler.create(
-				ActionListener.class, this, "setVueBancaire"));
-		radioBudget.addActionListener(EventHandler.create(
-				ActionListener.class, this, "setVueBudget"));
+		prepareTypeRadioButtons();
 		
 		// Boutons de validation
 		JButton valider		= new JButton("Valider");		// Bouton valider
 		JButton appliquer	= new JButton("Appliquer");		// Bouton appliquer
 		JButton quitter		= new JButton("Quitter");		// Bouton quitter
-		JButton supprimer	= new JButton("Supprimer");		// Bouton supprimer
 		valider		.setActionCommand(VALIDER);				// Commandes
 		appliquer	.setActionCommand(APPLIQUER);
 		quitter		.setActionCommand(QUITTER);
-		supprimer	.setActionCommand(SUPPRIMER);
 		valider		.addActionListener(this);				// Listener
 		appliquer	.addActionListener(this);
 		quitter		.addActionListener(this);
-		supprimer	.addActionListener(this);
+		
+		JButton supprimer = new JButton("Supprimer");
+		supprimer.addActionListener(EventHandler.create(
+				ActionListener.class, this, "confirmDeletion"));
 		
 		// Agencement général
 		
@@ -587,6 +582,20 @@ public class SetupCompte implements ActionListener {
 						((JList<CompteController>) e.getSource())
 						.getSelectedValue()));
 		return list;
+	}
+	
+	/**
+	 * Configure le comportement des boutons radio "Compte bancaire" et
+	 * "Compte budgétaire".
+	 */
+	private void prepareTypeRadioButtons() {
+		ButtonGroup groupeClasse = new ButtonGroup();
+		groupeClasse.add(radioBancaire);
+		groupeClasse.add(radioBudget);
+		radioBancaire.addActionListener(EventHandler.create(
+				ActionListener.class, this, "setVueBancaire"));
+		radioBudget.addActionListener(EventHandler.create(
+				ActionListener.class, this, "setVueBudget"));
 	}
 	
 	/**
@@ -756,23 +765,6 @@ public class SetupCompte implements ActionListener {
 			}
 		}
 		
-		// Supprimer si nécessaire
-		if (SUPPRIMER.equals(command)
-				&& JOptionPane.showConfirmDialog(		// Demander confirmation
-						dialog,
-						"Voulez-vous vraiment supprimer le compte\n"
-						+ selected + " ?",
-						"Supprimer un compte",
-						JOptionPane.YES_NO_OPTION)
-					== JOptionPane.YES_OPTION) {		// Réponse OUI
-			try {
-				selected.deleteCompte();				// Effacer
-				
-			} catch (IOException e1) {
-				LOGGER.severe("Impossible de supprimer " + selected);
-			}
-		}
-		
 		// Quitter ou recharger les données
 		if (QUITTER.equals(command) || VALIDER.equals(command)) {
 			
@@ -799,6 +791,28 @@ public class SetupCompte implements ActionListener {
 			}
 		} else {
 			fillComptesList(selection);				// Recharger les données
+		}
+	}
+	
+	/**
+	 * Demande confirmation à l'utilisateur avant de supprimer un compte. Si
+	 * l'utilisateur confirme, le compte est effectivement supprimé.
+	 */
+	public void confirmDeletion() {
+		CompteController selected = dataMediator.getController();
+		int confirm = JOptionPane.showConfirmDialog(
+				dialog,
+				String.format("Voulez-vous vraiment supprimer le compte\n%s ?",
+						selected),
+				"Supprimer un compte",
+				JOptionPane.YES_NO_OPTION);
+		
+		if (confirm == JOptionPane.YES_OPTION) {
+			try {
+				selected.deleteCompte();
+			} catch (IOException e1) {
+				LOGGER.severe("Impossible de supprimer " + selected);
+			}
 		}
 	}
 }// class SetupCompte
