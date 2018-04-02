@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.beans.EventHandler;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,8 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,15 +70,15 @@ public class SetupCompte implements ActionListener {
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupCompte.class.getName());
 	
-	/**
-	 * Commande permettant d'adapter l'interface pour un compte bancaire.
-	 */
-	static final String BANCAIRE = "bancaire";
-	
-	/**
-	 * Commande permettant d'adapter l'interface pour un compte budgétaire.
-	 */
-	static final String BUDGET = "budgétaire";
+//	/**
+//	 * Commande permettant d'adapter l'interface pour un compte bancaire.
+//	 */
+//	static final String BANCAIRE = "bancaire";
+//	
+//	/**
+//	 * Commande permettant d'adapter l'interface pour un compte budgétaire.
+//	 */
+//	static final String BUDGET = "budgétaire";
 	
 	/**
 	 * Commande pour appliquer les changements.
@@ -122,13 +121,6 @@ public class SetupCompte implements ActionListener {
 		private CompteController controller = null;
 		
 		/**
-		 * Le contrôleur de type principal.<br>
-		 * C'est celui qui gère les changements de l'interface graphique selon
-		 * qu'il s'agit d'un compte bancaire ou budgétaire.
-		 */
-		private final MainTypeController mainTypeController;
-		
-		/**
 		 * Zone de saisie du nom.
 		 */
 		private final JTextComponent nom;
@@ -162,7 +154,6 @@ public class SetupCompte implements ActionListener {
 		 * Construit un médiateur de données écoutant et modifiant les objets
 		 * spécifiés.
 		 * 
-		 * @param mainTypeController	Contrôleur de type principal.
 		 * @param nom					Champ de saisie du nom.
 		 * @param numero				Champ de saisie du numéro.
 		 * @param type					ComboBox de saisie du type secondaire.
@@ -171,14 +162,12 @@ public class SetupCompte implements ActionListener {
 		 */
 		@SuppressWarnings("serial")
 		private DataMediator(
-				MainTypeController mainTypeController,
 				JTextComponent nom,
 				JTextComponent numero,
 				JButton colorButton,
 				JComboBox<TypeCompte> type,
 				JTextComponent ouverture,
 				JTextComponent cloture) {
-			this.mainTypeController = mainTypeController;
 			
 			// Mémoriser et écouter les champs de saisie
 			this.nom = nom;
@@ -246,7 +235,11 @@ public class SetupCompte implements ActionListener {
 			type.removeItemListener(this);
 			
 			// Transcrire les données du nouveau contrôleur
-			mainTypeController.changeVue(controller.getMainType());
+			if (controller.getType().isBancaire()) {
+				setVueBancaire();
+			} else {
+				setVueBudget();
+			}
 			nom.setText(controller.getNom());
 			numero.setText(controller.getNumero() + "");
 			colorButton.setBackground(controller.getColor());
@@ -266,14 +259,6 @@ public class SetupCompte implements ActionListener {
 			ouverture.getDocument().addDocumentListener(this);
 			cloture.getDocument().addDocumentListener(this);
 			type.addItemListener(this);
-		}
-		
-		/**
-		 * Reçoit les modifications de type principal, et les renvoie au
-		 * contrôleur de type.
-		 */
-		private void setMainType(String mainType) {
-			controller.setMainType(mainType);
 		}
 		
 		/**
@@ -342,139 +327,6 @@ public class SetupCompte implements ActionListener {
 	}// inner class DataMediator
 	
 	/**
-	 * Un contrôleur gérant les changements de vue entre compte bancaire et
-	 * compte budgétaire.
-	 * <p>
-	 * En particulier, il remplit la combo box des types secondaires en fonction
-	 * du type principal.<br>
-	 * Il active ou désactive les composants de saisie du numéro en fonction du
-	 * type principal.
-	 * 
-	 * @author Olivier HAAS
-	 */
-	private class MainTypeController implements ActionListener {
-		
-		/**
-		 * Collection des types bancaires.
-		 */
-		private TreeSet<TypeCompte> typesBancaire = new TreeSet<>();
-		
-		/**
-		 * Collection des types budgétaires.
-		 */
-		private TreeSet<TypeCompte> typesBudget = new TreeSet<>();
-		
-		/**
-		 * Bouton radio de choix du type "bancaire".
-		 */
-		private JRadioButton bancaire;
-		
-		/**
-		 * Bouton radio de choix du type "budgétaire".
-		 */
-		private JRadioButton budget;
-		
-		/**
-		 * Liste déroulante des types secondaires.
-		 */
-		private JComboBox<TypeCompte> boxType;
-		
-		/**
-		 * Les composants à activer si c'est un type "compte bancaire", et à
-		 * désactiver si c'est un type "compte budgétaire"
-		 */
-		private Component[] bancaireComponents;
-		
-		/**
-		 * Construit un contrôleur de type mettant à jour les composants
-		 * spécifiés.
-		 * 
-		 * @param bancaire	Bouton radio indiquant le type "compte bancaire".
-		 * 
-		 * @param budget	Bouton radio indiquant le type "compte budgétaire".
-		 * 
-		 * @param boxType	La combo box de types secondaires à maintenir à
-		 * 					jour.
-		 * 
-		 * @param bancaireComponents
-		 * 					Les composants à activer si c'est un type "compte
-		 * 					bancaire", et à désactiver si c'est un type "compte
-		 * 					budgétaire".
-		 */
-		public MainTypeController(JRadioButton bancaire, JRadioButton budget,
-				JComboBox<TypeCompte> boxType,
-				Component... bancaireComponents) {
-			this.bancaire = bancaire;
-			this.budget = budget;
-			this.boxType = boxType;
-			this.bancaireComponents = bancaireComponents;
-			
-			// Ajouter tous les types dans la bonne collection
-			for (TypeCompte type : TypeCompte.values()) {
-				if (type.isBudgetaire()) {
-					typesBudget.add(type);
-				} else if (type.isBancaire()) {
-					typesBancaire.add(type);
-				}
-			}
-			
-			// Tous
-			types = new TreeSet<>(typesBudget);		// Budgétaires
-			types.addAll(typesBancaire);			// + bancaires
-		}
-
-		/**
-		 * Action envoyée par un objet Swing sur action de l'utilisateur.
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String command = e.getActionCommand();
-			changeVue(command);						// Modifier la vue
-			dataMediator.setMainType(command);		// Faire suivre au modèle
-		}
-		
-		/**
-		 * Modifie la vue en fonction du type principal choisi.
-		 * <p>
-		 * La méthode re-remplit la combo box de type précis avec les types
-		 * correspondant au type principal et active ou désactive les compocants
-		 * de saisie du numéro de compte.
-		 */
-		private void changeVue(String command) {
-			boolean enable;
-			
-			/*
-			 * Choisir la collection des types secondaires, sélectionner le bon
-			 * bouton radio et déterminer s'il faut activer ou désactiver les
-			 * composants.
-			 */  
-			Set<TypeCompte> typesSet = null;		// La collection
-			if (BANCAIRE.equals(command)) {
-				typesSet = typesBancaire;			// Coll des types bancaires
-				bancaire.setSelected(true);			// Sélectionner bancaire
-				enable = true;						// Activer les composants
-			} else if (BUDGET.equals(command)) {
-				typesSet = typesBudget;				// Coll des types budget
-				budget.setSelected(true);			// Sélectionner budgétaire
-				enable = false;						// Désactiver les composants
-			} else {
-				return;								// Pas normal...
-			}
-			
-			// Appliquer l'activation/désactivation des composants
-			for (Component component : bancaireComponents) {
-				component.setEnabled(enable);
-			}
-			
-			// Vider et re-remplir la liste des types secondaires
-			boxType.removeAllItems();				// Vider
-			for (TypeCompte type : typesSet) {		// Remplir
-				boxType.addItem(type);
-			}
-		}
-	}// inner class MainTypeController
-
-	/**
 	 * La boîte de dialogue.
 	 */
 	private final JDialog dialog;
@@ -483,11 +335,6 @@ public class SetupCompte implements ActionListener {
 	 * Le GUI principal.
 	 */
 	private final SimpleGUI gui;
-	
-	/**
-	 * La liste graphique des comptes.
-	 */
-	private final JList<CompteController> listComptes;
 	
 	/**
 	 * Le médiateur de données.
@@ -500,9 +347,32 @@ public class SetupCompte implements ActionListener {
 	private ArrayList<CompteController> controllers;
 	
 	/**
-	 * Les types secondaires.
+	 * La liste graphique des comptes.
 	 */
-	private TreeSet<TypeCompte> types;
+	private final JList<CompteController> listComptes;
+	
+	/**
+	 * Le bouton radio "Compte bancaire".
+	 */
+	private final JRadioButton radioBancaire =
+			new JRadioButton("Compte bancaire");
+	
+	/**
+	 * Le bouton radio "Compte budgétaire".
+	 */
+	private final JRadioButton radioBudget =
+			new JRadioButton("Compte budgétaire");
+	
+	/**
+	 * Liste déroulante des types.
+	 */
+	private final JComboBox<TypeCompte> typeComboBox =
+			new JComboBox<TypeCompte>();
+	
+	/**
+	 * Les composants à activer uniquement pour les comptes de type bancaire.
+	 */
+	private final Component[] bancairesComponents;
 	
 	/**
 	 * Construit une boîte de dialogue de gestion des comptes.
@@ -529,22 +399,17 @@ public class SetupCompte implements ActionListener {
 		JTextField fieldNumero		= new JTextField();
 		JLabel labelType			= new JLabel("Type :");
 		
-		// Liste déroulante des types
-		JComboBox<TypeCompte> boxType = new JComboBox<TypeCompte>();
+		// Composants à n'activer que pour les comptes de type bancaire
+		bancairesComponents = new Component[] {labelNumero, fieldNumero};
 		
 		// Sélection du type principal de compte (bancaire ou budgétaire)
-		JRadioButton radioBancaire = new JRadioButton("Compte bancaire");
-		JRadioButton radioBudget = new JRadioButton("Compte budgétaire");
-		MainTypeController mainTypeController =
-				new MainTypeController(radioBancaire, radioBudget, boxType,
-						labelNumero, fieldNumero);
-		radioBancaire.setActionCommand(BANCAIRE);
-		radioBudget.setActionCommand(BUDGET);
-		radioBancaire.addActionListener(mainTypeController);
-		radioBudget.addActionListener(mainTypeController);
 		ButtonGroup groupeClasse = new ButtonGroup();
 		groupeClasse.add(radioBancaire);
 		groupeClasse.add(radioBudget);
+		radioBancaire.addActionListener(EventHandler.create(
+				ActionListener.class, this, "setVueBancaire"));
+		radioBudget.addActionListener(EventHandler.create(
+				ActionListener.class, this, "setVueBudget"));
 		
 		// Boutons de validation
 		JButton valider		= new JButton("Valider");		// Bouton valider
@@ -579,11 +444,10 @@ public class SetupCompte implements ActionListener {
 		
 		// Médiateur de données
 		dataMediator = new DataMediator(
-				mainTypeController,
 				fieldNom,
 				fieldNumero,
 				colorButton,
-				boxType,
+				typeComboBox,
 				fieldOuverture,
 				fieldCloture);
 		
@@ -613,7 +477,7 @@ public class SetupCompte implements ActionListener {
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelType)
-						.addComponent(boxType))
+						.addComponent(typeComboBox))
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelOuverture)
@@ -645,7 +509,7 @@ public class SetupCompte implements ActionListener {
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)
-						.addComponent(boxType,
+						.addComponent(typeComboBox,
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)
@@ -724,6 +588,58 @@ public class SetupCompte implements ActionListener {
 						.getSelectedValue()));
 		return list;
 	}
+	
+	/**
+	 * Adapte la vue pour les comptes bancaires.
+	 * <p>
+	 * Le bouton radio "Compte bancaire" est sélectionné.
+	 * Les composants spécifiques aux comptes bancaires (en l'occurrence le
+	 * champ "Numéro" et son étiquette) sont activés.<br>
+	 * La liste déroulante des types propose les différents types bancaires.
+	 */
+	// TODO L'ancienne implémentation prévoyait de notifier un changement de type principal (mais pas de TypeCompte) à CompteController. Non repris car apparemment inutile, mais à vérifier.
+	public void setVueBancaire() {
+		radioBancaire.setSelected(true);
+		setVueMainType(true);
+	}
+	
+	/**
+	 * Adapte la vue pour les comptes budgétaires.
+	 * <p>
+	 * Le bouton radio "Compte budgétaire" est sélectionné.
+	 * Les composants spécifiques aux comptes bancaires (en l'occurrence le
+	 * champ "Numéro" et son étiquette) sont désactivés.<br>
+	 * La liste déroulante des types propose les différents types budgétaires.
+	 */
+	public void setVueBudget() {
+		radioBudget.setSelected(true);
+		setVueMainType(false);
+	}
+	
+	/**
+	 * Adapte la vue, selon le cas, pour les comptes bancaires ou pour les
+	 * comptes budgétaires.
+	 * <p>
+	 * Les composants spécifiques aux comptes bancaires (en l'occurrence le
+	 * champ Numéro" et son étiquette) sont activés ou désactivés.<br>
+	 * La liste déroulante des types est modifiée pour ne contenir que les types
+	 * bancaires, ou que les types budgétaires.
+	 * 
+	 * @param bancaire	<code>true</code> pour adapter la vue pour les comptes
+	 * 					bancaires, <code>false</code> pour adapter la vue pour
+	 * 					les comptes budgétaires.
+	 */
+	private void setVueMainType(boolean bancaire) {
+		for (Component component : bancairesComponents)
+			component.setEnabled(bancaire);
+		
+		typeComboBox.removeAll();
+		for (TypeCompte typeCompte : TypeCompte.values()) {
+			if (typeCompte.isBancaire() == bancaire)
+				typeComboBox.addItem(typeCompte);
+		}
+	}
+	
 	
 	/**
 	 * Re-remplit la liste graphique des comptes.
@@ -911,7 +827,6 @@ class CompteController implements Comparable<CompteController> {
 	 * Propriété à éditer.<br>
 	 * La valeur par défaut est celle à utiliser pour une nouvelle saisie.
 	 */
-	private String mainType	= SetupCompte.BANCAIRE;
 	private String nom		= null;
 	private Color color		= null;
 	private TypeCompte type	= TypeCompte.COMPTE_COURANT;
@@ -947,10 +862,7 @@ class CompteController implements Comparable<CompteController> {
 			// Selon le type du compte (bancaire ou budgétaire)
 			TypeCompte type = compte.getType();
 			if (type.isBancaire()) {
-				mainType = SetupCompte.BANCAIRE;
 				numero = compte.getNumero();
-			} else {
-				mainType = SetupCompte.BUDGET;
 			}
 		}
 	}
@@ -969,7 +881,6 @@ class CompteController implements Comparable<CompteController> {
 	public long getNumero()		{return numero;}
 	public Date getOuverture()	{return ouverture;}
 	public Date getCloture()	{return cloture;}
-	public String getMainType()	{return mainType;}
 	
 	// Setters
 	public void setNom(String nom) {
@@ -994,10 +905,6 @@ class CompteController implements Comparable<CompteController> {
 	}
 	public void setCloture(Date cloture) {
 		this.cloture = cloture;
-		modified = true;
-	}
-	public void setMainType(String mainType) {
-		this.mainType = mainType;
 		modified = true;
 	}
 	
