@@ -55,8 +55,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
@@ -65,7 +63,7 @@ import javax.swing.text.JTextComponent;
  * 
  * @author Olivier HAAS
  */
-public class SetupCompte implements ActionListener, ListSelectionListener {
+public class SetupCompte implements ActionListener {
 	
 	/**
 	 * Le Logger de cette classe.
@@ -114,7 +112,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		/**
 		 * Le format de date.
 		 */
-		private final SimpleDateFormat FORMAT =
+		private final SimpleDateFormat format =
 				new SimpleDateFormat("dd/MM/yyyy");
 		
 		/**
@@ -131,9 +129,24 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		private final MainTypeController mainTypeController;
 		
 		/**
-		 * Composant graphique de saisie des données.
+		 * Zone de saisie du nom.
 		 */
-		private final JTextComponent nom, numero, ouverture, cloture;	// Champs texte
+		private final JTextComponent nom;
+		
+		/**
+		 * Zone de saisie du numéro de compte bancaire.
+		 */
+		private final JTextComponent numero;
+		
+		/**
+		 * Zone de saisie de la date d'ouverture.
+		 */
+		private final JTextComponent ouverture;
+		
+		/**
+		 * Zone de saisie de la date de clôture.
+		 */
+		private final JTextComponent cloture;
 		
 		/**
 		 * Bouton de choix de la couleur.
@@ -170,12 +183,16 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			// Mémoriser et écouter les champs de saisie
 			this.nom = nom;
 			nom.getDocument().addDocumentListener(this);
+			
 			this.numero = numero;
 			numero.getDocument().addDocumentListener(this);
+			
 			this.ouverture = ouverture;
 			ouverture.getDocument().addDocumentListener(this);
+			
 			this.cloture = cloture;
 			cloture.getDocument().addDocumentListener(this);
+			
 			this.type = type;
 			type.addItemListener(this);
 			
@@ -197,10 +214,10 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 					
 					// Afficher
 					DataMediator.this.colorButton.setBackground(color);
-				}// actionPerformed
+				}
 				
 			});// classe anonyme AbstractAction
-		}// constructeur
+		}
 		
 		/**
 		 * Renvoie le contrôleur vers lequel pointe actuellement l'objet.
@@ -238,10 +255,10 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			// N'inscrire l'ouverture et la clôture que si elles sont non null
 			ouverture.setText(controller.getOuverture() == null
 					? ""
-					: FORMAT.format(controller.getOuverture()));
+					: format.format(controller.getOuverture()));
 			cloture.setText(controller.getCloture() == null
 					? ""
-					: FORMAT.format(controller.getCloture()));
+					: format.format(controller.getCloture()));
 			
 			// Ré-écouter
 			nom.getDocument().addDocumentListener(this);
@@ -289,10 +306,10 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 							Long.parseLong(numero.getText()));	// Numéro
 				} else if (doc == ouverture.getDocument()) {
 					controller.setOuverture(
-							FORMAT.parse(ouverture.getText()));	// Ouverture
+							format.parse(ouverture.getText()));	// Ouverture
 				} else if (doc == cloture.getDocument()) {
 					controller.setCloture(
-							FORMAT.parse(cloture.getText()));	// Clôture
+							format.parse(cloture.getText()));	// Clôture
 				}
 			} catch (ParseException e1) {		// Numéro illisible:rien à faire
 			} catch (NumberFormatException e2) {// Date illisible  :rien à faire
@@ -363,30 +380,34 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		private JComboBox<TypeCompte> boxType;
 		
 		/**
-		 * Composants à activer/désactiver.
+		 * Les composants à activer si c'est un type "compte bancaire", et à
+		 * désactiver si c'est un type "compte budgétaire"
 		 */
-		private Component[] components;
+		private Component[] bancaireComponents;
 		
 		/**
 		 * Construit un contrôleur de type mettant à jour les composants
 		 * spécifiés.
 		 * 
-		 * @param bancaire		Bouton radio indiquant le type "compte
-		 * 						bancaire".
-		 * @param budget		Bouton radio indiquant le type "compte
-		 * 						budgétaire".
-		 * @param boxType		La combo box de types secondaires à maintenir à
-		 * 						jour.
-		 * @param components	Les composants à activer si c'est un type
-		 * 						"compte bancaire", et à désactiver si c'est un
-		 * 						type "compte budgétaire".
+		 * @param bancaire	Bouton radio indiquant le type "compte bancaire".
+		 * 
+		 * @param budget	Bouton radio indiquant le type "compte budgétaire".
+		 * 
+		 * @param boxType	La combo box de types secondaires à maintenir à
+		 * 					jour.
+		 * 
+		 * @param bancaireComponents
+		 * 					Les composants à activer si c'est un type "compte
+		 * 					bancaire", et à désactiver si c'est un type "compte
+		 * 					budgétaire".
 		 */
 		public MainTypeController(JRadioButton bancaire, JRadioButton budget,
-				JComboBox<TypeCompte> boxType, Component... components) {
+				JComboBox<TypeCompte> boxType,
+				Component... bancaireComponents) {
 			this.bancaire = bancaire;
 			this.budget = budget;
 			this.boxType = boxType;
-			this.components = components;
+			this.bancaireComponents = bancaireComponents;
 			
 			// Ajouter tous les types dans la bonne collection
 			for (TypeCompte type : TypeCompte.values()) {
@@ -398,8 +419,8 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			}
 			
 			// Tous
-			types = new TreeSet<TypeCompte>(typesBudget);		// Budgétaires
-			types.addAll(typesBancaire);						// + bancaires
+			types = new TreeSet<>(typesBudget);		// Budgétaires
+			types.addAll(typesBancaire);			// + bancaires
 		}
 
 		/**
@@ -441,7 +462,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 			}
 			
 			// Appliquer l'activation/désactivation des composants
-			for (Component component : components) {
+			for (Component component : bancaireComponents) {
 				component.setEnabled(enable);
 			}
 			
@@ -456,22 +477,22 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 	/**
 	 * La boîte de dialogue.
 	 */
-	private JDialog dialog;
+	private final JDialog dialog;
 	
 	/**
 	 * Le GUI principal.
 	 */
-	private SimpleGUI gui;
+	private final SimpleGUI gui;
 	
 	/**
 	 * La liste graphique des comptes.
 	 */
-	private JList<CompteController> listComptes;
+	private final JList<CompteController> listComptes;
 	
 	/**
 	 * Le médiateur de données.
 	 */
-	private DataMediator dataMediator;
+	private final DataMediator dataMediator;
 	
 	/**
 	 * Les contrôleurs de comptes.
@@ -493,40 +514,35 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		this.gui = gui;
 		
 		// Liste des comptes
-		listComptes = new JList<>();					// Liste
-		listComptes.setSelectionMode(					// Mode de sélection
-				ListSelectionModel.SINGLE_SELECTION);
-		listComptes.addListSelectionListener(this);		// Écouter la sélection
+		listComptes = createComptesList();
 		
 		// Champs modifiables
 		JLabel labelNature			= new JLabel("Nature :");
 		JLabel labelCouleur			= new JLabel("Couleur :");
-		JLabel labelNom				= new JLabel("Nom :");		// Nom
+		JLabel labelNom				= new JLabel("Nom :");
 		JTextField fieldNom			= new JTextField();
-		JLabel labelOuverture		= new JLabel("Ouverture :");// Ouverture
+		JLabel labelOuverture		= new JLabel("Ouverture :");
 		JTextField fieldOuverture	= new JTextField();
-		JLabel labelCloture			= new JLabel("Clôture :");	// Clôture
+		JLabel labelCloture			= new JLabel("Clôture :");
 		JTextField fieldCloture		= new JTextField();
-		JLabel labelNumero			= new JLabel("Numéro :");	// Numéro
+		JLabel labelNumero			= new JLabel("Numéro :");
 		JTextField fieldNumero		= new JTextField();
-		JLabel labelType			= new JLabel("Type :");		// Type
+		JLabel labelType			= new JLabel("Type :");
 		
 		// Liste déroulante des types
 		JComboBox<TypeCompte> boxType = new JComboBox<TypeCompte>();
 		
 		// Sélection du type principal de compte (bancaire ou budgétaire)
-		JRadioButton radioBancaire =						// Boutons radio
-				new JRadioButton("Compte bancaire");
-		JRadioButton radioBudget =
-				new JRadioButton("Compte budgétaire");
-		MainTypeController mainTypeController =	// Contrôleur de type principal
+		JRadioButton radioBancaire = new JRadioButton("Compte bancaire");
+		JRadioButton radioBudget = new JRadioButton("Compte budgétaire");
+		MainTypeController mainTypeController =
 				new MainTypeController(radioBancaire, radioBudget, boxType,
 						labelNumero, fieldNumero);
-		radioBancaire.setActionCommand(BANCAIRE);			// Commandes
+		radioBancaire.setActionCommand(BANCAIRE);
 		radioBudget.setActionCommand(BUDGET);
-		radioBancaire.addActionListener(mainTypeController);// Listener
+		radioBancaire.addActionListener(mainTypeController);
 		radioBudget.addActionListener(mainTypeController);
-		ButtonGroup groupeClasse = new ButtonGroup(); 		// Groupe de boutons
+		ButtonGroup groupeClasse = new ButtonGroup();
 		groupeClasse.add(radioBancaire);
 		groupeClasse.add(radioBudget);
 		
@@ -618,7 +634,7 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 						.addComponent(labelCouleur)
 						.addComponent(labelNom)
 						.addComponent(labelType)
-						.addComponent(labelOuverture)
+						// Écouter la sélection.addComponent(labelOuverture)
 						.addComponent(labelCloture)
 						.addComponent(labelNumero))
 				.addGroup(layout.createParallelGroup(
@@ -692,6 +708,22 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		dialog.setLocationRelativeTo(null);			// Centrer
 		dialog.setVisible(true);
 	}// constructeur
+	
+	/**
+	 * Crée une liste de comptes dont les changements sont écoutés.
+	 * 
+	 * @return	Une nouvelle liste graphique des comptes.
+	 */
+	@SuppressWarnings("unchecked")
+	private JList<CompteController> createComptesList() {
+		JList<CompteController> list = new JList<>();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.addListSelectionListener(
+				e -> dataMediator.setController(
+						((JList<CompteController>) e.getSource())
+						.getSelectedValue()));
+		return list;
+	}
 	
 	/**
 	 * Re-remplit la liste graphique des comptes.
@@ -852,18 +884,6 @@ public class SetupCompte implements ActionListener, ListSelectionListener {
 		} else {
 			fillComptesList(selection);				// Recharger les données
 		}
-	}
-
-	/**
-	 * Actualise l'interface graphique avec les paramètres du compte
-	 * nouvellement sélectionné.
-	 */
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		
-		// Faire afficher les données de la nouvelle sélection
-		CompteController cc = listComptes.getSelectedValue();
-		dataMediator.setController(cc);
 	}
 }// class SetupCompte
 
