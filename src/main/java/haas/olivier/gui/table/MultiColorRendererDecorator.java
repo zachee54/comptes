@@ -19,7 +19,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author Olivier HAAS
  */
-public class ColouredRendererDecorator implements TableCellRenderer {
+public class MultiColorRendererDecorator implements TableCellRenderer {
 
 	/**
 	 * Le <code>TableCellrenderer</code> délégué.
@@ -52,7 +52,7 @@ public class ColouredRendererDecorator implements TableCellRenderer {
 	 * @param color1	Une couleur de ligne.
 	 * @param color2	Une autre couleur de ligne.
 	 */
-	public ColouredRendererDecorator(TableCellRenderer delegate, Color color1,
+	public MultiColorRendererDecorator(TableCellRenderer delegate, Color color1,
 			Color color2) {
 		this.delegate = delegate;
 		this.color1 = color1;
