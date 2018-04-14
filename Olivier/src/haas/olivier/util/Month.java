@@ -75,7 +75,7 @@ public class Month implements Comparable<Month>, Serializable {
 		// Conserver cette date
 		this.date = cal.getTime();
 		annee = cal.get(Calendar.YEAR);
-		mois = cal.get(Calendar.MONTH) + 1;
+		mois = cal.get(Calendar.MONTH) + 1;		// Mois de 1 à 12
 	}
 	
 	/**
@@ -84,7 +84,6 @@ public class Month implements Comparable<Month>, Serializable {
 	 * @param annee	L'année.
 	 * @param mois	Le numéro du mois.
 	 */
-	// TODO à tester
 	public Month(int annee, int mois) {
 		this.annee = annee;
 		this.mois = mois;
@@ -93,7 +92,7 @@ public class Month implements Comparable<Month>, Serializable {
 		Calendar cal = Calendar.getInstance();
 		eraseTime(cal);
 		cal.set(Calendar.YEAR, annee);
-		cal.set(Calendar.MONTH, mois);
+		cal.set(Calendar.MONTH, mois - 1);		// Les mois vont de 0 à 11
 		date = cal.getTime();
 	}
 	
@@ -184,7 +183,7 @@ public class Month implements Comparable<Month>, Serializable {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		return annee == cal.get(Calendar.YEAR)
-				&& mois == cal.get(Calendar.MONTH) + 1;
+				&& mois == cal.get(Calendar.MONTH) + 1;	// Mois de 1 à 12
 	}
 
 	/**
