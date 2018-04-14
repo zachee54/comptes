@@ -767,33 +767,60 @@ public class SetupCompte implements ActionListener {
 		
 		// Quitter ou recharger les données
 		if (QUITTER.equals(command) || VALIDER.equals(command)) {
-			
-			// Vérifier s'il y a des modifications non enregistrées
-			boolean modified = false;					// Marqueur de modifs
-			for (CompteController controller : controllers) {
-				modified = modified || controller.isModified();// Modifié ?
-			}
-			
-			if (!modified								// Pas modifié
-					|| JOptionPane.showConfirmDialog(	// Ou confirmé
-							dialog,
-							"Il y a des changements non enregistrés.\n" +
-							"Voulez-vous les abandonner ?",
-							"Abandonner les changements",
-							JOptionPane.YES_NO_OPTION)
-						== JOptionPane.YES_OPTION) {
-				dialog.dispose();					// Fermer le dialogue
-				gui.createTabs();					// Recréer les onglets
-				gui.dataModified();					// Prévenir du changement
-				
-				// Mettre à jour la liste des comptes dans le TableCellEditor
-				FinancialTable.updateComptesEditor();
-			}
+			quit();
 		} else {
 			fillComptesList(selection);				// Recharger les données
 		}
 	}
 	
+	/**
+	 * Ferme la boîte de dialogue.<br>
+	 * S'il y a des changements non enregistrés, l'utilisateur est invité à
+	 * confirmer l'action.
+	 */
+	public void quit() {
+		
+		// Vérifier s'il y a des modifications non enregistrées
+		if (isModified() && !confirm())
+			return;
+		
+		dialog.dispose();							// Fermer le dialogue
+		gui.createTabs();							// Recréer les onglets
+		gui.dataModified();							// Prévenir du changement
+
+		// Mettre à jour la liste des comptes dans le TableCellEditor
+		FinancialTable.updateComptesEditor();
+	}
+	
+	/**
+	 * Indique s'il existe des changements non validés.
+	 * 
+	 * @return	<code>true</code> s'il existe des changements non validés.
+	 */
+	private boolean isModified() {
+		for (CompteController controller : controllers) {
+			if (controller.isModified()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Affiche une boîte de dialogue pour demander à l'utilisateur q'il souhaite
+	 * quitter malgré les changements non validés.
+	 * 
+	 * @return	<code>true</code> si l'utilisateur confirme.
+	 */
+	private boolean confirm() {
+		return JOptionPane.showConfirmDialog(
+				dialog,
+				"Il y a des changements non enregistrés.\nVoulez-vous les abandonner ?",
+				"Abandonner les changements",
+				JOptionPane.YES_NO_OPTION)
+			== JOptionPane.YES_OPTION;
+	}
+
 	/**
 	 * Demande confirmation à l'utilisateur avant de supprimer un compte. Si
 	 * l'utilisateur confirme, le compte est effectivement supprimé.
