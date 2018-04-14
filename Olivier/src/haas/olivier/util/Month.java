@@ -9,44 +9,55 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-/** Un mois calendaire (mois et année).
+/**
+ * Un mois calendaire (mois et année).
  * 
  * @author Olivier HAAS
  */
 public class Month implements Comparable<Month>, Serializable {
 	private static final long serialVersionUID = 4137756502743120255L;
 
-	/** Le format d'affichage. */
-	private static final DateFormat DF = new SimpleDateFormat("MMMM yyyy");
+	/**
+	 * Le format d'affichage.
+	 */
+	private final DateFormat format = new SimpleDateFormat("MMMM yyyy");
 	
-	/** La date sous-jacente, fixée au premier jour du mois. */
+	/**
+	 * La date sous-jacente, fixée au premier jour du mois.
+	 */
 	private final Date date;
 	
-	/** L'année. */
+	/**
+	 * L'année.
+	 */
 	private final int annee;
 	
-	/** Le numéro du mois. */
+	/**
+	 * Le numéro du mois.
+	 */
 	private final int mois;
 	
-	/** Construit un mois correspondant au mois en cours. */
+	/**
+	 * Construit un mois correspondant au mois en cours.
+	 */
 	public Month() {
 		this(new Date());
-	}// constructeur
+	}
 	
-	/** Construit un mois calendaire correspondant à celui de la date
-	 * spécifiée.
+	/**
+	 * Construit un mois calendaire correspondant à celui de la date spécifiée.
 	 * 
 	 * @param date	La date dont on veut extraire le mois, ou <code>null</code>
 	 * 				pour obtenir le mois en cours.
 	 */
 	public Month(Date date) {
-		this(date == null						// Si date null
-				? new Date().getTime()			// Utiliser la date actuelle
-				: date.getTime());				// Cas général : date spécifiée
-	}// constructeur Date
+		this(date == null
+				? new Date().getTime()
+				: date.getTime());
+	}
 	
-	/** Construit un mois calendaire correspondant à celui de la date
-	 * spécifiée.
+	/**
+	 * Construit un mois calendaire correspondant à celui de la date spécifiée.
 	 * 
 	 * @param time	Un <code>long</code> correspondant à la date dont on veut
 	 * 				extraire le mois, ou <code>null</code> pour obtenir le mois
@@ -64,15 +75,15 @@ public class Month implements Comparable<Month>, Serializable {
 		// Conserver cette date
 		this.date = cal.getTime();
 		annee = cal.get(Calendar.YEAR);
-		mois = cal.get(Calendar.MONTH) + 1;
-	}// constructeur long
+		mois = cal.get(Calendar.MONTH) + 1;		// Mois de 1 à 12
+	}
 	
-	/** Construit un mois à partir de l'année et du numéro du mois.
+	/**
+	 * Construit un mois à partir de l'année et du numéro du mois.
 	 * 
 	 * @param annee	L'année.
 	 * @param mois	Le numéro du mois.
 	 */
-	// TODO à tester
 	public Month(int annee, int mois) {
 		this.annee = annee;
 		this.mois = mois;
@@ -81,11 +92,12 @@ public class Month implements Comparable<Month>, Serializable {
 		Calendar cal = Calendar.getInstance();
 		eraseTime(cal);
 		cal.set(Calendar.YEAR, annee);
-		cal.set(Calendar.MONTH, mois);
+		cal.set(Calendar.MONTH, mois - 1);		// Les mois vont de 0 à 11
 		date = cal.getTime();
-	}// constructeur année mois
+	}
 	
-	/** Supprime le jour du mois (fixé à 1), les heures, minutes, secondes et
+	/**
+	 * Supprime le jour du mois (fixé à 1), les heures, minutes, secondes et
 	 * millisecondes du calendrier spécifié.
 	 * 
 	 * @param cal	Le calendrier à modifier.
@@ -96,34 +108,47 @@ public class Month implements Comparable<Month>, Serializable {
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
-	}// eraseTime
+	}
 	
-	/** Renvoie le premier jour du mois. */
+	/**
+	 * Renvoie le premier jour du mois.
+	 */
 	public Date getFirstDay() {
 		return date;
-	}// getFirstDay
+	}
 	
-	/** Renvoie l'année. */
+	/**
+	 * Renvoie l'année.
+	 */
 	public int getYear() {
 		return annee;
-	}// getYear
+	}
 	
-	/** Renvoie le numéro du mois (dans l'année). */
+	/**
+	 * Renvoie le numéro du mois (dans l'année).
+	 * 
+	 * @return	Le numéro du mois, entre 1 (janvier) et 12 (décembre).
+	 */
 	public int getNumInYear() {
 		return mois;
-	}// getNumInYear
+	}
 	
-	/** Renvoie le mois suivant. */
+	/**
+	 * Renvoie le mois suivant.
+	 */
 	public Month getNext() {
 		return getTranslated(1);
-	}// getNext
+	}
 	
-	/** Renvoie le mois précédent. */
+	/**
+	 * Renvoie le mois précédent.
+	 */
 	public Month getPrevious() {
 		return getTranslated(-1);
-	}// getPrevious
+	}
 	
-	/** Renvoie un mois décalé par rapport à celui-ci.
+	/**
+	 * Renvoie un mois décalé par rapport à celui-ci.
 	 * 
 	 * @param n	Le nombre de mois entre celui-ci et le mois à renvoyer. Par
 	 * 			exemple si <code>n</code> est égal à 1, la méthode renvoie le
@@ -137,12 +162,13 @@ public class Month implements Comparable<Month>, Serializable {
 		cal.setTime(date);
 		cal.add(Calendar.MONTH, n);
 		return new Month(cal.getTimeInMillis());
-	}// getTranslated
+	}
 	
 	
 	// Comparaisons avec les objets Date
 	
-	/** Détermine si la date spécifiée se trouve dans ce mois calendaire.
+	/**
+	 * Détermine si la date spécifiée se trouve dans ce mois calendaire.
 	 * 
 	 * @param date	La date à examiner.
 	 * 
@@ -157,10 +183,11 @@ public class Month implements Comparable<Month>, Serializable {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		return annee == cal.get(Calendar.YEAR)
-				&& mois == cal.get(Calendar.MONTH) + 1;
-	}// includes
+				&& mois == cal.get(Calendar.MONTH) + 1;	// Mois de 1 à 12
+	}
 
-	/** Détermine si ce mois est strictement postérieur à la date spécifiée.
+	/**
+	 * Détermine si ce mois est strictement postérieur à la date spécifiée.
 	 * 
 	 * @param date	La date à examiner.
 	 * 
@@ -169,9 +196,10 @@ public class Month implements Comparable<Month>, Serializable {
 	 */
 	public boolean after(Date date) {
 		return !includes(date) && this.date.after(date);
-	}// after Date
+	}
 	
-	/** Détermine si ce mois est strictement antérieur à la date spécifiée.
+	/**
+	 * Détermine si ce mois est strictement antérieur à la date spécifiée.
 	 * 
 	 * @param date	La date à examiner.
 	 * 
@@ -180,12 +208,13 @@ public class Month implements Comparable<Month>, Serializable {
 	 */
 	public boolean before(Date date) {
 		return !includes(date) && this.date.before(date);
-	}// before Date
+	}
 	
 	
 	// Comparaison avec les autres instances Month
 	
-	/** Détermine si ce mois est strictement postérieur au mois spécifié.
+	/**
+	 * Détermine si ce mois est strictement postérieur au mois spécifié.
 	 * 
 	 * @param month	Le mois à comparer.
 	 * 
@@ -196,9 +225,10 @@ public class Month implements Comparable<Month>, Serializable {
 	public boolean after(Month month) {
 		return annee > month.annee
 				|| (annee == month.annee && mois > month.mois);
-	}// after Month
+	}
 	
-	/** Détermine si ce mois est strictement antérieur au mois spécifié.
+	/**
+	 * Détermine si ce mois est strictement antérieur au mois spécifié.
 	 * 
 	 * @param month	Le mois à comparer.
 	 * 
@@ -207,9 +237,9 @@ public class Month implements Comparable<Month>, Serializable {
 	 * 				égal.
 	 */
 	public boolean before(Month month) {
-		return annee < month.annee
-				|| (annee == month.annee && mois < month.mois);
-	}// before Month
+		return (annee < month.annee)
+				|| ((annee == month.annee) && (mois < month.mois));
+	}
 
 	@Override
 	public int compareTo(Month month) {
@@ -220,25 +250,25 @@ public class Month implements Comparable<Month>, Serializable {
 		} else {
 			return 0;
 		}
-	}// compareTo Month
+	}
 	
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Month) {
 			Month m = (Month) o;
-			return annee == m.annee && mois == m.mois;
+			return (annee == m.annee) && (mois == m.mois);
 		} else {
 			return false;
-		}// if Month
-	}// equals
+		}
+	}
 	
 	@Override
 	public int hashCode() {
 		return (mois*113 + annee)*97;
-	}// hashCode
+	}
 	
 	@Override
 	public String toString() {
-		return DF.format(date);
-	}// toString
+		return format.format(date);
+	}
 }
