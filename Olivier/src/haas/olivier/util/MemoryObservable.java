@@ -82,57 +82,20 @@ public class MemoryObservable {
 	 * 				Si la mémoire est dans un état critique.
 	 */
 	public static synchronized void check() throws CriticalMemoryException {
-		
-		/* Nettoyer la file en enlevant les références obsolètes */
+		removeEmptyObserverReferences();
+		if (isLow()) {
+			delesteAnObserver();
+		}
+	}
+	
+	/**
+	 * Nettoyer la file des observateurs en enlevant les références obsolètes.
+	 */
+	private static void removeEmptyObserverReferences() {
 		Iterator<WeakReference<MemoryObserver>> it = OBSERVERS.iterator();
 		while (it.hasNext()) {
 			if (it.next().get() == null) {
 				it.remove();
-			}
-		}
-		
-		/* Tester si la mémoire est critique */
-		if (isLow()) {
-			
-			/*
-			 * Délester les observateurs au plus une fois chacun.
-			 * 
-			 * On fait une rotation sur les observateurs pour ne pas solliciter
-			 * toujours les mêmes: avec plusieurs appels successifs rapprochés,
-			 * ça risquerait de bloquer inutilement l'application en délestant
-			 * toujours de petites données sur le même observateur.
-			 * 
-			 * Pour éviter une boucle infinie, on exécute la boucle autant de
-			 * fois qu'il y a d'observateurs, et on s'arrête quand l'un d'eux a
-			 * réussi.
-			 */
-			for (int i=OBSERVERS.size(); i>0; i--) {// Autant de fois que d'obs
-				
-				/* Récupérer l'observateur suivant et sa référence faible */
-				WeakReference<MemoryObserver> observerRef =
-						OBSERVERS.poll();
-				MemoryObserver observer = observerRef.get();
-
-				/* Si l'observateur existe encore */
-				if (observer != null) {
-					
-					/* Déplacer l'observateur à la fin de la queue */
-					OBSERVERS.add(observerRef);
-
-					/* Demander un délestage */
-					try {
-						if (observer.deleste()) {	// Si ça fonctionne
-							System.gc();			// Suggérer une collecte
-							return;					// Arrêter ici
-						}
-						
-					} catch (Exception e) {
-						Logger.getLogger(MemoryObservable.class.getName()).log(
-								Level.FINEST,
-								"Problème lors d'une tentative de délestage de la mémoire",
-								e);
-					}
-				}
 			}
 		}
 	}
@@ -158,5 +121,53 @@ public class MemoryObservable {
 		
 		/* Renvoyer le résultat (seuil d'alerte dépassé ou non) */
 		return freeMem < ALERT;
+	}
+	
+	/**
+	 * Déleste un observateur.
+	 * <p>
+	 * On fait une rotation sur les observateurs pour ne pas solliciter toujours
+	 * les mêmes au cours des appels successifs à cette méthode : avec plusieurs
+	 * appels rapprochés, cela risquerait de bloquer inutilement l'application
+	 * en délestant toujours de petites données sur le même observateur.
+	 * <p>
+	 * Ainsi, la méthode garantit qu'entre deux appels au même observateur, tous
+	 * les autres observateurs présents ont également été sollicités. Seuls ceux
+	 * qui ont été retirés ou ajoutés entre-temps peuvent ne pas avoir été
+	 * sollicités.
+	 */
+	private static void delesteAnObserver() {
+		
+		/*
+		 * Pour éviter une boucle infinie, on exécute la boucle autant de fois
+		 * qu'il y a d'observateurs, et on s'arrête quand l'un d'eux a réussi.
+		 */
+		for (int i=OBSERVERS.size(); i>0; i--) {
+			
+			/* Récupérer l'observateur suivant et sa référence faible */
+			WeakReference<MemoryObserver> observerRef = OBSERVERS.poll();
+			MemoryObserver observer = observerRef.get();
+
+			/* Si l'observateur existe encore */
+			if (observer != null) {
+				
+				/* Déplacer l'observateur à la fin de la queue */
+				OBSERVERS.add(observerRef);
+
+				/* Demander un délestage */
+				try {
+					if (observer.deleste()) {	// Si ça fonctionne
+//						System.gc();			// Suggérer une collecte
+						return;					// Arrêter ici
+					}
+					
+				} catch (Exception e) {
+					Logger.getLogger(MemoryObservable.class.getName()).log(
+							Level.FINEST,
+							"Problème lors d'une tentative de délestage de la mémoire",
+							e);
+				}
+			}
+		}
 	}
 }
