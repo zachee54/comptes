@@ -6,7 +6,8 @@ package haas.olivier.util;
 import java.util.HashSet;
 import java.util.Set;
 
-/** Une class abstraite commune pour les observables, permettant notamment de
+/**
+ * Une classe abstraite commune pour les observables, permettant notamment de
  * centraliser la gestion de la collection des observateurs.
  *
  * @param <T>	Le type d'observateurs gérés par cet observable.
@@ -15,10 +16,13 @@ import java.util.Set;
  */
 public abstract class Observable<T> {
 
-	/** La collection des observateurs. */
+	/**
+	 * La collection des observateurs.
+	 */
 	protected Set<T> observers = new HashSet<T>();
 	
-	/** Ajoute un observateur.
+	/**
+	 * Ajoute un observateur.
 	 * 
 	 * @param observer	Le nouvel observateur.
 	 */
@@ -26,7 +30,8 @@ public abstract class Observable<T> {
 		observers.add(observer);
 	}
 	
-	/** Retire un observateur.
+	/**
+	 * Retire un observateur.
 	 * 
 	 * @param observer	L'observateur à retirer.
 	 */
