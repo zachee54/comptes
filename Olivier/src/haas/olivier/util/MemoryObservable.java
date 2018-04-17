@@ -79,7 +79,7 @@ public class MemoryObservable {
 	 * @throws CriticalMemoryException
 	 * 				Si la mémoire est dans un état critique.
 	 */
-	public static synchronized void check() throws CriticalMemoryException {
+	public static synchronized void check() {
 		removeEmptyObserverReferences();
 		if (isLow()) {
 			delesteAnObserver();
@@ -104,7 +104,7 @@ public class MemoryObservable {
 	 * @throws CriticalMemoryException
 	 * 				Si la mémoire est dans un état critique.
 	 */
-	private static boolean isLow() throws CriticalMemoryException {
+	private static boolean isLow() {
 		
 		/* Calculer la mémoire encore libre */
 		final long freeMem = RUNTIME.freeMemory()
