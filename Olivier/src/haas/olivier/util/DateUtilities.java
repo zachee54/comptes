@@ -6,13 +6,18 @@ package haas.olivier.util;
 import java.util.Calendar;
 import java.util.Date;
 
-/** Une classe utilitaire traitant les dates.
+/**
+ * Une classe utilitaire traitant les dates.
  * 
  * @author Olivier HAAS
  */
 public class DateUtilities {
 	
-	/** Renvoie la date en fixant l'heure à minuit.<br>
+	private DateUtilities() {
+	}
+	
+	/**
+	 * Renvoie la date en fixant l'heure à minuit.<br>
 	 * En pratique, il s'agit de supprimer les heures, minutes, secondes et
 	 * millisecondes.
 	 * 
@@ -29,5 +34,5 @@ public class DateUtilities {
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
-	}// getDay
+	}
 }
