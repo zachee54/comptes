@@ -7,7 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Un pool de valeurs réutilisables.<br>
+/**
+ * Un pool de valeurs réutilisables.<br>
  * Pattern Flyweight.
  * <p>
  * Cette classe permet d'utiliser une instance unique pour des valeurs utilisées
@@ -23,11 +24,14 @@ import java.util.Map;
  */
 public class Pool {
 
-	/** La collection des valeurs stockées dans le pool. */
+	/**
+	 * La collection des valeurs stockées dans le pool.
+	 */
 	private Map<Object,Object> valeurs =
 			Collections.synchronizedMap(new HashMap<Object,Object>());
 	
-	/** Renvoie l'objet unique, parmi les objets du pool, égal à un objet donné.
+	/**
+	 * Renvoie l'objet unique, parmi les objets du pool, égal à un objet donné.
 	 * <br>Si le pool ne contient pas d'objet égal à l'objet spécifié, alors cet
 	 * objet est inséré dans le pool et renvoyé.
 	 * <p>
@@ -45,17 +49,16 @@ public class Pool {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T get(T t) {
-		
-		// Compléter si besoin
-		if (!valeurs.containsKey(t))
+		if (!valeurs.containsKey(t)) {
 			valeurs.put(t, t);
-		
-		// Récupérer la valeur
+		}
 		return (T) valeurs.get(t);
-	}// get
+	}
 	
-	/** Renvoie le nombre de valeurs actuellement dans le pool. */
+	/**
+	 * Renvoie le nombre de valeurs actuellement dans le pool.
+	 */
 	public int size() {
 		return valeurs.size();
-	}// size
+	}
 }
