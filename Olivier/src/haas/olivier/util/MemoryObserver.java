@@ -19,5 +19,5 @@ public interface MemoryObserver {
 	 * @return	<code>true</code> si de la mémoire a pu être libérée,
 	 * 			<code>false</code> sinon.
 	 */
-	boolean deleste() throws Exception;
+	boolean deleste();
 }

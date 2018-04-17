@@ -7,8 +7,6 @@ import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Un observable statique qui surveille l'état de la mémoire heap.
@@ -150,22 +148,14 @@ public class MemoryObservable {
 
 			/* Si l'observateur existe encore */
 			if (observer != null) {
-				
+
 				/* Déplacer l'observateur à la fin de la queue */
 				OBSERVERS.add(observerRef);
 
 				/* Demander un délestage */
-				try {
-					if (observer.deleste()) {	// Si ça fonctionne
-//						System.gc();			// Suggérer une collecte
-						return;					// Arrêter ici
-					}
-					
-				} catch (Exception e) {
-					Logger.getLogger(MemoryObservable.class.getName()).log(
-							Level.FINEST,
-							"Problème lors d'une tentative de délestage de la mémoire",
-							e);
+				if (observer.deleste()) {		// Si ça fonctionne
+//					System.gc();				// Suggérer une collecte
+					return;						// Arrêter ici
 				}
 			}
 		}
