@@ -182,7 +182,7 @@ class DebugFormatter extends Formatter {
 		
 		// Horodatage de ligne et message principal
 		result += df.format(record.getMillis()) + " : "		// Horodatage
-				+ record.getMessage()						// Message
+				+ formatMessage(record)						// Message
 				+ " (" + Thread.currentThread().getName() + ")" + eol;// Thread
 		
 		// Décrire l'exception s'il y en a une
