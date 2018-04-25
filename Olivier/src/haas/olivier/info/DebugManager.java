@@ -5,79 +5,110 @@ package haas.olivier.info;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-/** Une classe utilitaire statique de gestion des modes de débogage.
+/**
+ * Une classe utilitaire statique de gestion des modes de débogage.
  *
  * @author Olivier HAAS
  */
 public class DebugManager {
 	
-	/** Le <code>Logger</code> racine. */
+	/**
+	 * Le <code>Logger</code> racine.
+	 */
 	private static Logger rootLogger = Logger.getLogger("haas.olivier");
 	
-	/** Gestionnaire de sortie des logs vers la console. */
+	/**
+	 * Gestionnaire de sortie des logs vers la console.
+	 */
 	private static ConsoleHandler consoleHandler = null;
 	
-	/** Gestionnaire de sortie des logs vers un fichier. */
+	/**
+	 * Gestionnaire de sortie des logs vers un fichier.
+	 */
 	private static FileHandler fileHandler = null;
 	
-	/** Niveau actuel de déclenchement des <code>Handler</code>s.<br>
-	 * Par défaut, c'est <code>Level.OFF</code>. */
+	/**
+	 * Niveau actuel de déclenchement des <code>Handler</code>s.<br>
+	 * Par défaut, c'est {@link java.util.logging.Level#OFF Level.OFF}.
+	 */
 	private static Level level = Level.OFF;
 	
-	/** Active la sortie des logs vers la console et vers un fichier.
+	private DebugManager() {
+	}
+	
+	/**
+	 * Active la sortie des logs vers la console et vers un fichier.
 	 * 
-	 * @param prefix	Le préfix dans le nom des fichiers de log.
+	 * @param prefix	Le préfixe dans le nom des fichiers de log.
 	 * @param title		Le titre à donner en en-tête des fichiers de log.
 	 */
 	private static void enableLogOutput(String prefix, String title) {
+		Logger logger = Logger.getLogger(DebugManager.class.getName());
 		
 		// Sortie des logs sur la console
-		consoleHandler = new ConsoleHandler();	// Définir le Handler
-		consoleHandler.setFormatter(			// Mise en forme personnalisée
-				new DebugFormatter(title));
-		rootLogger.addHandler(consoleHandler);	// Enregistrer
+		addConsoleHandler(title);
 		
 		// Sortie des logs en fichier
 		try {
-			
-			// Créer le sous-répertoire des fichiers log
-			prefix = prefix.toLowerCase();		// Répertoire en minuscules
-			File logDir =						// Nom du sous-répertoire
-					new File(prefix+".log");
-			if (!logDir.exists())				// S'il n'existe pas
-				logDir.mkdirs();				// On le crée
-			
-			// Créer le gestionnaire de fichiers de logs
-			fileHandler = new FileHandler(		// Fichiers de log (rép courant)
-					logDir.getName() + File.separator	// Répertoire
-							+ prefix + "%g.%u.log.txt",	// Nom fichier log
-					524288,						// Taille maxi des fichiers log
-					10,							// Nombre maxi des fichiers log
-					false);						// Ne pas cumuler
-			
-			fileHandler.setFormatter(			// Mise en forme personnalisée
-					new DebugFormatter(title));
-			
-			rootLogger.addHandler(fileHandler);	// Enregistrer
-			rootLogger.addHandler(new DialogHandler(null));
-			
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}// try FileHandler
-	}// enableLogOutput
+			addFileHandler(prefix, title);
+		} catch (Exception e) {
+			logger.log(Level.CONFIG,
+					"Impossible de créer des fichiers de log", e);
+		}
+	}
 	
-	/** Désactive l'exportation des logs vers la console et vers les fichiers de
+	/**
+	 * Ajoute un log vers la console.
+	 *
+	 * @param title	Le titre à donner aux en-têtes de fichiers de log.
+	 */
+	private static void addConsoleHandler(String title) {
+		consoleHandler = new ConsoleHandler();
+		consoleHandler.setFormatter(new DebugFormatter(title));
+		rootLogger.addHandler(consoleHandler);
+	}
+	
+	/**
+	 * Ajoute un log vers des fichiers.
+	 * 
+	 * @param prefix	Le préfixe dans le nom des fichiers de log.
+	 * @param title		Le titre à donner en en-tête des fichiers de log.
+	 * 
+	 * @throws IOException
+	 * @throws SecurityException
+	 */
+	private static void addFileHandler(String prefix, String title)
+			throws IOException {
+		
+		// Créer le sous-répertoire des fichiers log
+		String lowerPrefix = prefix.toLowerCase();
+		File logDir = new File(lowerPrefix + ".log");
+		if (!logDir.exists()) {
+			logDir.mkdirs();
+		}
+		
+		// Créer le gestionnaire de fichiers de logs
+		File logFile = new File(logDir, lowerPrefix + "%g.%u.log.txt");
+		fileHandler = new FileHandler(
+				logFile.getAbsolutePath(),
+				524288,						// Taille maxi des fichiers log
+				10,							// Nombre maxi des fichiers log
+				false);						// Ne pas cumuler
+		
+		// Mise en forme personnalisée
+		fileHandler.setFormatter(new DebugFormatter(title));
+		
+		// Enregistrer
+		rootLogger.addHandler(fileHandler);
+	}
+	
+	/**
+	 * Désactive l'exportation des logs vers la console et vers les fichiers de
 	 * log.
 	 */
 	private static void disableLogOutput() {
@@ -88,25 +119,27 @@ public class DebugManager {
 		
 		// Fermer les Handlers
 		consoleHandler.close();
-		fileHandler.close();	// Important pour les ressources fichiers
+		fileHandler.close();		// Important pour les ressources fichiers
 		
 		// Oublier les objets
 		consoleHandler = null;
 		fileHandler = null;
-	}// disableLogOutput
+	}
 	
-	/** Renvoie le niveau actuel à partir duquel les logs sont exportés vers la
+	/**
+	 * Renvoie le niveau actuel à partir duquel les logs sont exportés vers la
 	 * console et aux fichiers de log.
 	 */
 	public static Level getLogOutputLevel() {
 		return level;
-	}// getLogOutputLevel
+	}
 	
-	/** Définit le niveau minimal des logs à exporter vers la console et vers
-	 * les fichiers de log.
+	/**
+	 * Définit le niveau minimal des logs à exporter vers la console et vers les
+	 * fichiers de log.
 	 * 
 	 * @param newLevel	Le niveau minimal des logs à exporter.
-	 * @param prefix	Le préfixe à utiliser pour le nom des fichiers de log.
+	 * @param prefix	Le préfixe à utiliser pour les noms des fichiers de log.
 	 * @param title		Le titre à inscrire en en-tête des logs.
 	 */
 	public static void setLogOutputLevel(Level newLevel, String prefix,
@@ -118,102 +151,18 @@ public class DebugManager {
 		} else {										// On veut quelque chose
 			
 			// Définir les handlers s'ils n'existent pas encore
-			if (level == Level.OFF)
+			if (level == Level.OFF) {
 				enableLogOutput(prefix, title);
+			}
 			
 			// Définir le niveau de chaque handler
 			rootLogger.setLevel(newLevel);
 			consoleHandler.setLevel(newLevel);
 			fileHandler.setLevel(newLevel);
-		}// if level
+		}
 		
 		// Mémoriser le nouveau niveau
 		level = newLevel;
-	}// setLogOutputLevel
+	}
 
-}// class DebugManager
-
-/** Classe de mise en forme des logs en vue du débogage.
- * <p>
- * Les logs formatés par cette classe indiquent un horodatage complet au début,
- * puis un horodatage plus bref en début de chaque ligne.<br>
- * Chaque instance est faite pour n'être utilisée qu'avec un seul
- * <code>Handler</code> à la fois. Si la même instance est utilisée pour
- * plusieurs <code>Handler</code>s, un seul d'entre eux aura l'horodatage de
- * départ. 
- * 
- * @author Olivier HAAS
- */
-class DebugFormatter extends Formatter {
-
-	/** Format de temps pour l'horodatage ligne par ligne. */
-	private static final DateFormat df =
-			new SimpleDateFormat("kk:mm:ss.SSS");
-	
-	/** Titre du log */
-	private final String title;
-	
-	/** Drapeau indiquant si le log à traiter est le premier depuis
-	 * l'instanciation.
-	 */
-	private boolean debut = true;
-	
-	/** Constructeur un formateur de logs avec horodatage simple.
-	 * 
-	 * @param title	Le titre à donner au log.
-	 */
-	public DebugFormatter(String title) {
-		this.title = title;
-	}// constructeur
-	
-	@Override
-	public String format(LogRecord record) {
-		String eol = System.getProperty("line.separator");	// Char fin de ligne
-		String result = "";
-		
-		// Horodater le début du premier log
-		if (debut) {
-			result += title + ", "
-					+ new SimpleDateFormat("EEEE d MMMM yyyy").format(
-							record.getMillis())
-					+ eol;
-			debut = false;									// Seulement 1 fois
-		}// if debut
-		
-		// Horodatage de ligne et message principal
-		result += df.format(record.getMillis()) + " : "		// Horodatage
-				+ formatMessage(record)						// Message
-				+ " (" + Thread.currentThread().getName() + ")" + eol;// Thread
-		
-		// Décrire l'exception s'il y en a une
-		Throwable thrown = record.getThrown();				// L'exception
-		boolean first = true;								// Drapeau niveau 1
-		while (thrown != null) {							// Chaque niveau
-			
-			// Traiter différemment la première exception et les suivantes
-			if (first) {									// La première
-				first = false;
-			} else {										// Les suivantes
-				result += "Causée par : ";
-			}// if first
-			
-			// Type et message de l'exception
-			result += thrown.getClass().getName()+": "		// Classe exception
-					+ thrown.getMessage() + eol;			// Message
-			
-			// StackTrace
-			for (StackTraceElement stackElement : thrown.getStackTrace()) {
-				result += "\tà "
-						+ stackElement.getClassName()		// Classe traversée
-						+ "." + stackElement.getMethodName()// Méthode et ligne
-						+ " (" + stackElement.getLineNumber() + ")" + eol;
-			}
-			
-			// Continuer par récursivité sur la cause
-			thrown = thrown.getCause();
-		}// while thrown
-		
-		return result;
-	}// format
-	
-}// class debugFormatter
+}

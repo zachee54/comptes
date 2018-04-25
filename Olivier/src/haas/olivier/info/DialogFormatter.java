@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 DGFiP - Tous droits réservés
+ * Copyright (c) 2018 Olivier HAAS - Tous droits réservés
  * 
  */
 package haas.olivier.info;
