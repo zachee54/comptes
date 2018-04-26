@@ -142,7 +142,7 @@ public class DialogHandler extends Handler {
 		area.setEditable(false);
 		area.setLineWrap(true);
 		area.setWrapStyleWord(true);
-//		area.setFont(errorLabel.getFont());			// Même police que étiquette
+		area.setFont(frame.getFont());				// Même police que frame
 		return area;
 	}
 	
