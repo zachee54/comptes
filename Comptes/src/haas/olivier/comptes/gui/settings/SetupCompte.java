@@ -91,9 +91,10 @@ public class SetupCompte implements ActionListener {
 	static final String VALIDER = "valider";
 	
 	/**
-	 * Commande pour quitter.
+	 * Action pour quitter.
 	 */
-	static final String QUITTER = "quitter";
+	final ActionListener quitActionListener =
+			EventHandler.create(ActionListener.class, this, "quit");
 	
 	/**
 	 * Commande pour supprimer un compte.
@@ -411,7 +412,7 @@ public class SetupCompte implements ActionListener {
 		JButton quitter		= new JButton("Quitter");		// Bouton quitter
 		valider		.setActionCommand(VALIDER);				// Commandes
 		appliquer	.setActionCommand(APPLIQUER);
-		quitter		.setActionCommand(QUITTER);
+		quitter.addActionListener(quitActionListener);
 		valider		.addActionListener(this);				// Listener
 		appliquer	.addActionListener(this);
 		quitter		.addActionListener(this);
@@ -550,7 +551,7 @@ public class SetupCompte implements ActionListener {
 		main.add(bas, BorderLayout.SOUTH);				// Boutons de validation
 		
 		// Lier la touche Echap à l'action de quitter
-		UniversalAction actionQuitter = new UniversalAction(this, QUITTER);
+		UniversalAction actionQuitter = new UniversalAction(quitActionListener);
 		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
 		main.getActionMap().put("quitter", actionQuitter);
@@ -766,7 +767,7 @@ public class SetupCompte implements ActionListener {
 		}
 		
 		// Quitter ou recharger les données
-		if (QUITTER.equals(command) || VALIDER.equals(command)) {
+		if (VALIDER.equals(command)) {
 			quit();
 		} else {
 			fillComptesList(selection);				// Recharger les données
