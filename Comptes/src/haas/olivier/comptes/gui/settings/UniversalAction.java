@@ -16,6 +16,7 @@ import javax.swing.Action;
  * 
  * @author Olivier HAAS
  */
+// FIXME WindowListener est devenu inutile ici pour SetupComptes
 @SuppressWarnings("serial")
 class UniversalAction extends AbstractAction implements WindowListener {
 

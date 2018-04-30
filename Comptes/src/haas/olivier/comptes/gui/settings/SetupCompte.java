@@ -557,10 +557,6 @@ public class SetupCompte {
 		// Fenêtre principale
 		dialog = new JDialog(owner, "Gestion des comptes");
 		
-		// Remplacer la fermeture de la boîte de dialogue par l'action perso
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.addWindowListener(actionQuitter);
-		
 		dialog.add(main);
 		dialog.pack();
 		dialog.setLocationRelativeTo(null);			// Centrer
