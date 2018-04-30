@@ -125,6 +125,13 @@ public class SetupCompte {
 		private final JComboBox<TypeCompte> type;
 		
 		/**
+		 * Drapeau indiquant si un changement de contrôleur est en cours. Auquel
+		 * cas, les changements de contenu sont dus au basculement de contrôleur
+		 * et non à une modification directe par l'utilisateur.
+		 */
+		private boolean updating = false;
+		
+		/**
 		 * Construit un médiateur de données écoutant et modifiant les objets
 		 * spécifiés.
 		 * 
@@ -190,21 +197,12 @@ public class SetupCompte {
 		 * contrôleur sont retranscrites dans l'interface graphique.
 		 */
 		private void setController(CompteController controller) {
-			
-			// Ignorer la valeur null
 			if (controller == null)
 				return;
-			
 			this.controller = controller;
 			
-			// Cesser d'écouter pour éviter un callback
-			nom.getDocument().removeDocumentListener(this);
-			numero.getDocument().removeDocumentListener(this);
-			ouverture.getDocument().removeDocumentListener(this);
-			cloture.getDocument().removeDocumentListener(this);
-			type.removeItemListener(this);
-			
 			// Transcrire les données du nouveau contrôleur
+			updating = true;
 			if (controller.getType().isBancaire()) {
 				setVueBancaire();
 			} else {
@@ -214,21 +212,21 @@ public class SetupCompte {
 			numero.setText(controller.getNumero() + "");
 			colorButton.setBackground(controller.getColor());
 			type.setSelectedItem(controller.getType());
-			
-			// N'inscrire l'ouverture et la clôture que si elles sont non null
-			ouverture.setText(controller.getOuverture() == null
-					? ""
-					: format.format(controller.getOuverture()));
-			cloture.setText(controller.getCloture() == null
-					? ""
-					: format.format(controller.getCloture()));
-			
-			// Ré-écouter
-			nom.getDocument().addDocumentListener(this);
-			numero.getDocument().addDocumentListener(this);
-			ouverture.getDocument().addDocumentListener(this);
-			cloture.getDocument().addDocumentListener(this);
-			type.addItemListener(this);
+			ouverture.setText(getNotNullDateText(controller.getOuverture()));
+			cloture.setText(getNotNullDateText(controller.getCloture()));
+			updating = false;
+		}
+		
+		/**
+		 * Renvoie la date au format texte, ou une chaîne vide si la date est
+		 * <code>null</code>.
+		 * 
+		 * @param date	La date à formater.
+		 * @return		La date au format {@link #format}, ou une chaîne vide si
+		 * 				<code>date == null</code>.
+		 */
+		private String getNotNullDateText(Date date) {
+			return (date == null) ? "" : format.format(date);
 		}
 		
 		/**
@@ -237,10 +235,14 @@ public class SetupCompte {
 		 */
 		@Override
 		public void itemStateChanged(ItemEvent e) {
+			
+			// Si l'interface est en cours de mise à jour, ignorer l'événement
+			if (updating)
+				return;
+			
 			Object typeValue = type.getSelectedItem();
-			if (typeValue instanceof TypeCompte) {		// Si type de compte
-				controller.setType(
-						(TypeCompte) typeValue);		// Affecter le type
+			if (typeValue instanceof TypeCompte) {
+				controller.setType((TypeCompte) typeValue);
 			}
 		}
 		
@@ -293,7 +295,9 @@ public class SetupCompte {
 		 * Interface <code>DocumentListener</code>. Aucune implémentation.
 		 */
 		@Override
-		public void changedUpdate(DocumentEvent e) {}
+		public void changedUpdate(DocumentEvent e) {
+			/* Seuls les changements de texte ont un intérêt */
+		}
 	}// inner class DataMediator
 	
 	/**
