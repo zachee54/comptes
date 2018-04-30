@@ -10,26 +10,45 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 /**
- * Une <code>Action</code> qui puisse être déclenchée aussi à la fermeture d'une
- * fenêtre.
+ * Une implémentation générique d'<code>Action</code> pour permettre
+ * d'encapsuler un <code>ActionListener</code> ou pour être déclenchée aussi à
+ * la fermeture d'une fenêtre.
  * 
  * @author Olivier HAAS
  */
 @SuppressWarnings("serial")
 class UniversalAction extends AbstractAction implements WindowListener {
 
-	private ActionListener cible;
+	/**
+	 * L'objet à notifier lorsque l'action est déclenchée.
+	 */
+	private transient ActionListener target;
 	
-	public UniversalAction(ActionListener cible, String command) {
-		this.cible = cible;								// La cible
-		putValue(Action.ACTION_COMMAND_KEY, command);	// La commande
+	/**
+	 * Construit une action générique.
+	 * 
+	 * @param target	L'objet à notifier lorsque l'action est déclenchée.
+	 */
+	UniversalAction(ActionListener target) {
+		this(target, null);
+	}
+	
+	/**
+	 * Construit une action générique.
+	 * 
+	 * @param target	L'objet à notifier lorsque l'action est déclenchée.
+	 * @param command	La commande de l'action.
+	 */
+	public UniversalAction(ActionListener target, String command) {
+		this.target = target;
+		putValue(Action.ACTION_COMMAND_KEY, command);
 	}
 	
 	/**
 	 * Réalise l'action sur la cible.
 	 */
 	private void perform(EventObject e) {
-		cible.actionPerformed(new ActionEvent(
+		target.actionPerformed(new ActionEvent(
 				e.getSource(),
 				ActionEvent.ACTION_PERFORMED,
 				(String) getValue(Action.ACTION_COMMAND_KEY)));
@@ -42,6 +61,7 @@ class UniversalAction extends AbstractAction implements WindowListener {
 
 	@Override
 	public void windowOpened(WindowEvent e) {
+		/* Rien à faire */
 	}
 
 	@Override
@@ -51,21 +71,26 @@ class UniversalAction extends AbstractAction implements WindowListener {
 
 	@Override
 	public void windowClosed(WindowEvent e) {
+		/* Rien à faire */
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
+		/* Rien à faire */
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
+		/* Rien à faire */
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
+		/* Rien à faire */
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+		/* Rien à faire */
 	}
 }
