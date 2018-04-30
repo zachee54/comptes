@@ -62,7 +62,7 @@ import javax.swing.text.JTextComponent;
  * 
  * @author Olivier HAAS
  */
-public class SetupCompte implements ActionListener {
+public class SetupCompte {
 	
 	/**
 	 * Le Logger de cette classe.
@@ -79,16 +79,16 @@ public class SetupCompte implements ActionListener {
 //	 * Commande permettant d'adapter l'interface pour un compte budgétaire.
 //	 */
 //	static final String BUDGET = "budgétaire";
-	
-	/**
-	 * Commande pour appliquer les changements.
-	 */
-	private static final String APPLIQUER = "appliquer";
-	
-	/**
-	 * Commande pour valider (appliquer les changements et quitter).
-	 */
-	static final String VALIDER = "valider";
+//	
+//	/**
+//	 * Commande pour appliquer les changements.
+//	 */
+//	private static final String APPLIQUER = "appliquer";
+//	
+//	/**
+//	 * Commande pour valider (appliquer les changements et quitter).
+//	 */
+//	static final String VALIDER = "valider";
 	
 	/**
 	 * Action pour quitter.
@@ -367,8 +367,7 @@ public class SetupCompte implements ActionListener {
 	/**
 	 * Liste déroulante des types.
 	 */
-	private final JComboBox<TypeCompte> typeComboBox =
-			new JComboBox<TypeCompte>();
+	private final JComboBox<TypeCompte> typeComboBox = new JComboBox<>();
 	
 	/**
 	 * Les composants à activer uniquement pour les comptes de type bancaire.
@@ -410,12 +409,11 @@ public class SetupCompte implements ActionListener {
 		JButton valider		= new JButton("Valider");		// Bouton valider
 		JButton appliquer	= new JButton("Appliquer");		// Bouton appliquer
 		JButton quitter		= new JButton("Quitter");		// Bouton quitter
-		valider		.setActionCommand(VALIDER);				// Commandes
-		appliquer	.setActionCommand(APPLIQUER);
 		quitter.addActionListener(quitActionListener);
-		valider		.addActionListener(this);				// Listener
-		appliquer	.addActionListener(this);
-		quitter		.addActionListener(this);
+		valider.addActionListener(
+				EventHandler.create(ActionListener.class, this, "validate"));
+		appliquer.addActionListener(
+				EventHandler.create(ActionListener.class, this, "apply"));
 		
 		JButton supprimer = new JButton("Supprimer");
 		supprimer.addActionListener(EventHandler.create(
@@ -697,81 +695,79 @@ public class SetupCompte implements ActionListener {
 	}
 
 	/**
-	 * Reçoit les actions des boutons de validation.
+	 * Valide l'ensemble des modifications.
 	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
+	public void apply() {
 		
 		// Mémoriser la sélection actuelle
 		CompteController selected =						//Contrôleur sélectionné
 				dataMediator.getController();
 		Compte selection = selected.getCompte();		// Compte lié
 		
-		// Appliquer les changements si nécessaire
-		if (VALIDER.equals(command) || APPLIQUER.equals(command)) {
-			Compte compte;								// Curseur de Compte
 			
-			// Pour chaque contrôleur
-			Month toUpdate = null;
-			for (CompteController controller : controllers) {
-				try {
-					Compte oldCompte =
-							controller.getCompte();		// Ancien compte
-					
-					// Appliquer les modifs
-					compte = controller.applyChanges();
-					
-					// Noter de mettre à jour les bases en cas de changement
-					if (oldCompte != null && compte != oldCompte) {
-						
-						// Comparer la date de mise à jour et l'ancien compte
-						if (toUpdate == null
-								|| toUpdate.before(oldCompte.getOuverture())) {
-							// L'ancien compte est plus vieux: reculer la date
-							toUpdate = new Month(oldCompte.getOuverture());
-						}
-						
-						// Comparer aussi le nouveau compte
-						if (toUpdate.before(compte.getOuverture())) {
-							// Le nouveau compte remonte plus loin: reculer
-							toUpdate = new Month(compte.getOuverture());
-						}
+		// Pour chaque contrôleur
+		Compte compte;								// Curseur de Compte
+		Month toUpdate = null;
+		for (CompteController controller : controllers) {
+			try {
+				Compte oldCompte =
+						controller.getCompte();		// Ancien compte
+
+				// Appliquer les modifs
+				compte = controller.applyChanges();
+
+				// Noter de mettre à jour les bases en cas de changement
+				if (oldCompte != null && compte != oldCompte) {
+
+					// Comparer la date de mise à jour et l'ancien compte
+					if (toUpdate == null
+							|| toUpdate.before(oldCompte.getOuverture())) {
+						// L'ancien compte est plus vieux: reculer la date
+						toUpdate = new Month(oldCompte.getOuverture());
 					}
-					
-				} catch (IOException e1) {
-					LOGGER.severe("Impossible de sauvegarder le compte "
-							+ controller);
-					
-					// Arrêter ici sans recharger les données
-					return;
+
+					// Comparer aussi le nouveau compte
+					if (toUpdate.before(compte.getOuverture())) {
+						// Le nouveau compte remonte plus loin: reculer
+						toUpdate = new Month(compte.getOuverture());
+					}
 				}
-				
-				// Actualiser la sélection si besoin
-				if (controller == selected) {
-					selection = compte;
-				}
+
+			} catch (IOException e1) {
+				LOGGER.severe("Impossible de sauvegarder le compte "
+						+ controller);
+
+				// Arrêter ici sans recharger les données
+				return;
 			}
-			
-			// Appliquer une mise à jour
-			if (toUpdate != null) {
-				try {
-					EcritureController.updateSuivis(toUpdate);
-				} catch (IOException e1) {
-					LOGGER.log(
-							Level.WARNING,
-							"Échec de mise à jour des suivis",
-							e1);
-				}
+
+			// Actualiser la sélection si besoin
+			if (controller == selected) {
+				selection = compte;
+			}
+		}
+
+		// Appliquer une mise à jour
+		if (toUpdate != null) {
+			try {
+				EcritureController.updateSuivis(toUpdate);
+			} catch (IOException e1) {
+				LOGGER.log(
+						Level.WARNING,
+						"Échec de mise à jour des suivis",
+						e1);
 			}
 		}
 		
-		// Quitter ou recharger les données
-		if (VALIDER.equals(command)) {
-			quit();
-		} else {
-			fillComptesList(selection);				// Recharger les données
-		}
+		fillComptesList(selection);				// Recharger les données
+	}
+	
+	/**
+	 * Applique l'ensemble des modifications et ferme la boîte de dialogue.
+	 */
+	public void validate() {
+		apply();
+		quit();
 	}
 	
 	/**
