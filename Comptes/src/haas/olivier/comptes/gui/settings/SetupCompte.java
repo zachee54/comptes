@@ -13,7 +13,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.beans.EventHandler;
@@ -80,7 +79,7 @@ public class SetupCompte {
 	 * 
 	 * @author Olivier HAAS
 	 */
-	public class DataMediator implements DocumentListener, ItemListener {
+	public class DataMediator implements DocumentListener {
 		
 		/**
 		 * Le format de date.
@@ -147,10 +146,14 @@ public class SetupCompte {
 			
 			// Mémoriser et écouter les champs de saisie
 			this.nom = nom;
-			nom.getDocument().addDocumentListener(this);
+			nom.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, controller, "setNom",
+					"source.text"));
 			
 			this.numero = numero;
-			numero.getDocument().addDocumentListener(this);
+			numero.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, controller, "setNumero",
+					"source.text"));
 			
 			this.ouverture = ouverture;
 			ouverture.getDocument().addDocumentListener(this);
@@ -159,7 +162,8 @@ public class SetupCompte {
 			cloture.getDocument().addDocumentListener(this);
 			
 			this.type = type;
-			type.addItemListener(this);
+			type.addItemListener(EventHandler.create(ItemListener.class,
+					this, "setTypeCompte", "source.selectedItem"));
 			
 			// Mémoriser le bouton couleur et définir l'action
 			this.colorButton = colorButton;
@@ -230,20 +234,24 @@ public class SetupCompte {
 		}
 		
 		/**
-		 * Interface <code>ItemListener</code>. Reçoit les notifications de
-		 * changement de la ComboBox de type secondaire.
+		 * Modifie le type de compte.
+		 * <p>
+		 * Si l'interface est en cours de mise à jour, cette méthode ne fait
+		 * rien car il ne s'agit pas d'une demande de modification du type du
+		 * compte affiché.
+		 * 
+		 * @param typeCompte	Le nouveau type sélectionné. Toutefois, le
+		 * 						contexte ne permet pas de garantir qu'il
+		 * 						s'agisse d'une instance <code>TypeCompte</code>.
 		 */
-		@Override
-		public void itemStateChanged(ItemEvent e) {
+		public void setTypeCompte(Object typeCompte) {
 			
 			// Si l'interface est en cours de mise à jour, ignorer l'événement
 			if (updating)
 				return;
 			
-			Object typeValue = type.getSelectedItem();
-			if (typeValue instanceof TypeCompte) {
-				controller.setType((TypeCompte) typeValue);
-			}
+			if (typeCompte instanceof TypeCompte)
+				controller.setType((TypeCompte) typeCompte);
 		}
 		
 		/**
@@ -256,12 +264,7 @@ public class SetupCompte {
 		private void textChanged(DocumentEvent e) {
 			try {
 				Document doc = e.getDocument();
-				if (doc == nom.getDocument()) {
-					controller.setNom(nom.getText());			// Nom
-				} else if (doc == numero.getDocument()) {
-					controller.setNumero(
-							Long.parseLong(numero.getText()));	// Numéro
-				} else if (doc == ouverture.getDocument()) {
+				if (doc == ouverture.getDocument()) {
 					controller.setOuverture(
 							format.parse(ouverture.getText()));	// Ouverture
 				} else if (doc == cloture.getDocument()) {
@@ -902,8 +905,14 @@ class CompteController implements Comparable<CompteController> {
 		this.type = type;
 		modified = true;
 	}
-	public void setNumero(long numero) {
-		this.numero = numero;
+	
+	/**
+	 * Modifie le numéro.
+	 * 
+	 * @param numeroText	Le numéro, au format texte.
+	 */
+	public void setNumero(String numeroText) {
+		this.numero = Long.parseLong(numeroText);
 		modified = true;
 	}
 	public void setOuverture(Date ouverture) {
