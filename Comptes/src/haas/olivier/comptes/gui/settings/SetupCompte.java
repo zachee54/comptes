@@ -50,6 +50,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -145,7 +146,7 @@ public class SetupCompte {
 		 * Remplace le contrôleur de référence. Les données du nouveau
 		 * contrôleur sont retranscrites dans l'interface graphique.
 		 */
-		private void setController(CompteController controller) {
+		public void setController(CompteController controller) {
 			if (controller == null)
 				return;
 			this.controller = controller;
@@ -490,14 +491,12 @@ public class SetupCompte {
 	 * 
 	 * @return	Une nouvelle liste graphique des comptes.
 	 */
-	@SuppressWarnings("unchecked")
 	private JList<CompteController> createComptesList() {
 		JList<CompteController> list = new JList<>();
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.addListSelectionListener(
-				e -> dataMediator.setController(
-						((JList<CompteController>) e.getSource())
-						.getSelectedValue()));
+		list.addListSelectionListener(EventHandler.create(
+				ListSelectionListener.class, dataMediator, "setController",
+				"source.selectedValue"));
 		return list;
 	}
 	
