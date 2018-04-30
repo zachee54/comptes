@@ -49,9 +49,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -79,7 +77,7 @@ public class SetupCompte {
 	 * 
 	 * @author Olivier HAAS
 	 */
-	public class DataMediator implements DocumentListener {
+	public class DataMediator {
 		
 		/**
 		 * Le format de date.
@@ -144,22 +142,26 @@ public class SetupCompte {
 				JButton colorButton, JComboBox<TypeCompte> type,
 				JTextComponent ouverture, JTextComponent cloture) {
 			
+			// La codification EventHandler pour obtenir le texte de la source
+			String eventText = "source.text";
+			
 			// Mémoriser et écouter les champs de saisie
 			this.nom = nom;
 			nom.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, controller, "setNom",
-					"source.text"));
+					DocumentListener.class, controller, "setNom", eventText));
 			
 			this.numero = numero;
 			numero.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, controller, "setNumero",
-					"source.text"));
+					eventText));
 			
 			this.ouverture = ouverture;
-			ouverture.getDocument().addDocumentListener(this);
+			ouverture.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, this, "setOuverture", eventText));
 			
 			this.cloture = cloture;
-			cloture.getDocument().addDocumentListener(this);
+			cloture.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, this, "setCloture", eventText));
 			
 			this.type = type;
 			type.addItemListener(EventHandler.create(ItemListener.class,
@@ -255,51 +257,33 @@ public class SetupCompte {
 		}
 		
 		/**
-		 * Reçoit les modifications des zones de texte dans l'interface et les
-		 * envoie vers le modèle.
+		 * Modifie la date d'ouverture du contrôleur actuel.
 		 * 
-		 * @param e	Le <code>DocumentEvent</code> généré par le
-		 * 			<code>JTextComponent</code> modifié.
+		 * @param dateText	La date d'ouverture, au format texte.
+		 * 
+		 * @throws ParseException
 		 */
-		private void textChanged(DocumentEvent e) {
+		public void setOuverture(String dateText) {
 			try {
-				Document doc = e.getDocument();
-				if (doc == ouverture.getDocument()) {
-					controller.setOuverture(
-							format.parse(ouverture.getText()));	// Ouverture
-				} else if (doc == cloture.getDocument()) {
-					controller.setCloture(
-							format.parse(cloture.getText()));	// Clôture
-				}
-			} catch (ParseException e1) {		// Numéro illisible:rien à faire
-			} catch (NumberFormatException e2) {// Date illisible  :rien à faire
+				controller.setOuverture(format.parse(dateText));
+			} catch (ParseException e) {
+				LOGGER.log(Level.FINEST, "Date d'ouverture illisible", e);
 			}
 		}
 		
 		/**
-		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
-		 * changement sur le nom.
+		 * Modifie la date de clôture du contrôleur actuel.
+		 * 
+		 * @param dateText	La date de clôture, au format texte.
+		 * 
+		 * @throws ParseException
 		 */
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			textChanged(e);
-		}
-
-		/**
-		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
-		 * changement sur le nom.
-		 */
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			textChanged(e);
-		}
-
-		/**
-		 * Interface <code>DocumentListener</code>. Aucune implémentation.
-		 */
-		@Override
-		public void changedUpdate(DocumentEvent e) {
-			/* Seuls les changements de texte ont un intérêt */
+		public void setCloture(String dateText) {
+			try {
+				controller.setCloture(format.parse(dateText));
+			} catch (ParseException e) {
+				LOGGER.log(Level.FINEST, "Date de clôture illisible", e);
+			}
 		}
 	}// inner class DataMediator
 	
