@@ -12,7 +12,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -29,7 +28,6 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -70,26 +68,6 @@ public class SetupCompte {
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupCompte.class.getName());
 	
-//	/**
-//	 * Commande permettant d'adapter l'interface pour un compte bancaire.
-//	 */
-//	static final String BANCAIRE = "bancaire";
-//	
-//	/**
-//	 * Commande permettant d'adapter l'interface pour un compte budgétaire.
-//	 */
-//	static final String BUDGET = "budgétaire";
-//	
-//	/**
-//	 * Commande pour appliquer les changements.
-//	 */
-//	private static final String APPLIQUER = "appliquer";
-//	
-//	/**
-//	 * Commande pour valider (appliquer les changements et quitter).
-//	 */
-//	static final String VALIDER = "valider";
-	
 	/**
 	 * Action pour quitter.
 	 */
@@ -97,17 +75,12 @@ public class SetupCompte {
 			EventHandler.create(ActionListener.class, this, "quit");
 	
 	/**
-	 * Commande pour supprimer un compte.
-	 */
-	static final String SUPPRIMER = "supprimer";
-	
-	/**
 	 * Un médiateur entre les données de l'interface graphique et les données du
 	 * modèle.
 	 * 
 	 * @author Olivier HAAS
 	 */
-	private class DataMediator implements DocumentListener, ItemListener {
+	public class DataMediator implements DocumentListener, ItemListener {
 		
 		/**
 		 * Le format de date.
@@ -155,20 +128,15 @@ public class SetupCompte {
 		 * Construit un médiateur de données écoutant et modifiant les objets
 		 * spécifiés.
 		 * 
-		 * @param nom					Champ de saisie du nom.
-		 * @param numero				Champ de saisie du numéro.
-		 * @param type					ComboBox de saisie du type secondaire.
-		 * @param ouverture				Champ de saisie de la date d'ouverture.
-		 * @param cloture				Champ de saisie de la date de clôture.
+		 * @param nom		Champ de saisie du nom.
+		 * @param numero	Champ de saisie du numéro.
+		 * @param type		ComboBox de saisie du type secondaire.
+		 * @param ouverture	Champ de saisie de la date d'ouverture.
+		 * @param cloture	Champ de saisie de la date de clôture.
 		 */
-		@SuppressWarnings("serial")
-		private DataMediator(
-				JTextComponent nom,
-				JTextComponent numero,
-				JButton colorButton,
-				JComboBox<TypeCompte> type,
-				JTextComponent ouverture,
-				JTextComponent cloture) {
+		private DataMediator(JTextComponent nom, JTextComponent numero,
+				JButton colorButton, JComboBox<TypeCompte> type,
+				JTextComponent ouverture, JTextComponent cloture) {
 			
 			// Mémoriser et écouter les champs de saisie
 			this.nom = nom;
@@ -188,25 +156,26 @@ public class SetupCompte {
 			
 			// Mémoriser le bouton couleur et définir l'action
 			this.colorButton = colorButton;
-			colorButton.setAction(new AbstractAction(" ") {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					
-					// Laisser choisir la nouvelle couleur
-					Color color = JColorChooser.showDialog(
-							dialog,
-							"Choisissez une couleur",
-							controller.getColor());
-					
-					// Mémoriser
-					controller.setColor(color);
-					
-					// Afficher
-					DataMediator.this.colorButton.setBackground(color);
-				}
-				
-			});// classe anonyme AbstractAction
+			colorButton.addActionListener(EventHandler.create(
+					ActionListener.class, DataMediator.this, "chooseColor"));
+		}
+		
+		/**
+		 * Permet à l'utilisateur de modifier la couleur.
+		 */
+		public void chooseColor() {
+			Color color = JColorChooser.showDialog(
+					dialog,
+					"Choisissez une couleur",
+					controller.getColor());
+			if (color == null)
+				return;
+			
+			// Mémoriser
+			controller.setColor(color);
+			
+			// Afficher
+			DataMediator.this.colorButton.setBackground(color);
 		}
 		
 		/**
