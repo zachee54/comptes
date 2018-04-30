@@ -645,29 +645,27 @@ public class SetupCompte {
 		Compte selection = selected.getCompte();
 		
 		// Appliquer toutes les modifications
-		Compte compte;
 		Month toUpdate = null;
 		for (CompteController controller : controllers) {
+			if (!controller.isModified())
+				continue;
+			
+			Compte compte = controller.getCompte();
+			Date oldOuverture = null;
+			Date oldCloture = null;
+			if (compte != null) {
+				oldOuverture = compte.getOuverture();
+				oldCloture = compte.getCloture();
+			}
+			
 			try {
-				Compte oldCompte = controller.getCompte();
 				compte = controller.applyChanges();
 
 				// Noter de mettre à jour les bases en cas de changement
-				if (oldCompte != null && compte != oldCompte) {
-
-					// Comparer la date de mise à jour et l'ancien compte
-					if (toUpdate == null
-							|| toUpdate.before(oldCompte.getOuverture())) {
-						// L'ancien compte est plus vieux: reculer la date
-						toUpdate = new Month(oldCompte.getOuverture());
-					}
-
-					// Comparer aussi le nouveau compte
-					if (toUpdate.before(compte.getOuverture())) {
-						// Le nouveau compte remonte plus loin: reculer
-						toUpdate = new Month(compte.getOuverture());
-					}
-				}
+				toUpdate = getOlderMonth(toUpdate, oldOuverture);
+				toUpdate = getOlderMonth(toUpdate, oldCloture);
+				toUpdate = getOlderMonth(toUpdate, compte.getOuverture());
+				toUpdate = getOlderMonth(toUpdate, compte.getCloture());
 
 			} catch (IOException e1) {
 				LOGGER.severe(
@@ -683,19 +681,41 @@ public class SetupCompte {
 			}
 		}
 
-		// Appliquer une mise à jour
+		// Mettre à jour les suivis
 		if (toUpdate != null) {
 			try {
 				EcritureController.updateSuivis(toUpdate);
-			} catch (IOException e1) {
-				LOGGER.log(
-						Level.WARNING,
-						"Échec de mise à jour des suivis",
-						e1);
+			} catch (IOException e) {
+				LOGGER.log(Level.WARNING, "Échec de mise à jour des suivis", e);
 			}
 		}
 		
-		fillComptesList(selection);				// Recharger les données
+		// Recharger la (nouvelle) liste des comptes
+		fillComptesList(selection);
+	}
+	
+	/**
+	 * Renvoie le mois le plus ancien : soit le mois spécifié, soit le mois de
+	 * la date spécifiée.
+	 * 
+	 * @param month	Un mois. Peut être <code>null</code>.
+	 * @param date	Une date. Peut être <code>null</code>.
+	 * 
+	 * @return		<code>null</code> si <code>month/code> et <code>date</code>
+	 * 				sont <code>null</code> ; si l'un des deux est
+	 * 				<code>null</code>, alors le mois de l'autre ; si
+	 * 				<code>month</code> est plus ancien que <code>date</code>,
+	 * 				alors <code>month</code> ; sinon, le mois de
+	 * 				<code>date</code>.
+	 */
+	private Month getOlderMonth(Month month, Date date) {
+		if (month == null) {
+			return (date == null) ? null : new Month(date);
+		} else if (date == null) {
+			return month;
+		} else {
+			return month.before(date) ? month : new Month(date);
+		}
 	}
 	
 	/**
