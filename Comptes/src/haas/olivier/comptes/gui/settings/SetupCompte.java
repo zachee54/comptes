@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -121,18 +120,12 @@ public class SetupCompte {
 		 * Permet à l'utilisateur de modifier la couleur.
 		 */
 		public void chooseColor() {
-			Color color = JColorChooser.showDialog(
-					dialog,
-					"Choisissez une couleur",
-					controller.getColor());
+			Color color = JColorChooser.showDialog(dialog,
+					"Choisissez une couleur", controller.getColor());
 			if (color == null)
 				return;
-			
-			// Mémoriser
-			controller.setColor(color);
-			
-			// Afficher
-			colorButton.setBackground(color);
+			controller.setColor(color);					// Mémoriser
+			colorButton.setBackground(color);			// Afficher
 		}
 		
 		/**
@@ -238,11 +231,6 @@ public class SetupCompte {
 			EventHandler.create(ActionListener.class, this, "quit");
 	
 	/**
-	 * La boîte de dialogue.
-	 */
-	private final JDialog dialog;
-	
-	/**
 	 * Le GUI principal.
 	 */
 	private final SimpleGUI gui;
@@ -270,8 +258,13 @@ public class SetupCompte {
 	/**
 	 * Bouton de choix de la couleur.
 	 */
-	private final JButton colorButton = new JButton();
+	private final JButton colorButton = new JButton(" ");
 	
+	/**
+	 * La boîte de dialogue.
+	 */
+	private final JDialog dialog;
+
 	/**
 	 * Le médiateur de données.
 	 */
@@ -307,7 +300,7 @@ public class SetupCompte {
 	/**
 	 * Les composants à activer uniquement pour les comptes de type bancaire.
 	 */
-	private final Component[] bancairesComponents;
+	private final Collection<Component> bancaireComponents = new ArrayList<>(2);
 	
 	/**
 	 * Construit une boîte de dialogue de gestion des comptes.
@@ -317,6 +310,148 @@ public class SetupCompte {
 	 */
 	public SetupCompte(SimpleGUI gui, JFrame owner) {
 		this.gui = gui;
+		dataMediator = new DataMediator();
+		listComptes = createComptesList();
+		fillComptesList(null);
+		configureTypeRadioButtons();
+		UniversalAction actionQuitter = new UniversalAction(quitActionListener);
+		
+		// Panneau principal
+		JPanel main = new JPanel(new BorderLayout());
+		main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		main.add(createListComptesPanel(), BorderLayout.WEST);
+		main.add(createEditionPanel());
+		main.add(createValidationPanel(), BorderLayout.SOUTH);
+		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
+		main.getActionMap().put("quitter", actionQuitter);
+		
+		// Fenêtre principale
+		dialog = new JDialog(owner, "Gestion des comptes");
+		dialog.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		dialog.addWindowListener(actionQuitter);
+		dialog.add(main);
+		dialog.pack();
+		dialog.setLocationRelativeTo(null);					// Centrer
+		dialog.setVisible(true);
+	}
+	
+	/**
+	 * Renvoie tous les comptes du modèle.
+	 * 
+	 * @return	Tous les comptes. En cas d'erreur, l'utilisateur est averti et
+	 * 			la méthode renvoie une collection vide.
+	 */
+	private static Collection<Compte> getAllComptes() {
+		try {
+			return DAOFactory.getFactory().getCompteDAO().getAll();
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE,
+					"Erreur lors de la récupération des comptes", e);
+			return Collections.emptyList();
+		}
+	}
+	
+	/**
+	 * Crée une liste de comptes et écoute les changements de sélection.
+	 * <p>
+	 * Attention : {@link #dataMediator} doit être préalablement instancié.
+	 * 
+	 * @param dataMediator	Le médiateur de données auquel notifier les
+	 * 						changements de sélection.
+	 * 
+	 * @return				Une nouvelle liste graphique des comptes.
+	 */
+	private JList<CompteController> createComptesList() {
+		JList<CompteController> list = new JList<>();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.addListSelectionListener(EventHandler.create(
+				ListSelectionListener.class, dataMediator, "setController",
+				"source.selectedValue"));
+		return list;
+	}
+
+	/**
+	 * Re-remplit la liste graphique des comptes.
+	 * 
+	 * @param selection	Le compte à sélectionner après la mise à jour. Utiliser
+	 * 					<code>null</code> pour un nouveau compte.
+	 */
+	private void fillComptesList(Compte selection) {
+		
+		// Tout insérer dans le modèle
+		DefaultListModel<CompteController> listModel = new DefaultListModel<>();
+		for (CompteController controller : createControllers(selection))
+			listModel.addElement(controller);
+		listComptes.setModel(listModel);
+		
+		// Sélectionner le bon item
+		listComptes.setSelectedValue(dataMediator.getController(), true);
+	}
+
+	/**
+	 * Crée les contrôleurs de comptes.
+	 * 
+	 * @param selection		Le compte à sélectionner, ou <code>null</code> pour
+	 * 						sélectionner le contrôleur qui permet de définir un
+	 * 						nouveau compte.
+	 * 
+	 * @param dataMediator	Le médiateur de données auquel notifier le
+	 * 						contrôleur du compte sélectionné.
+	 * 
+	 * @return				Les contrôleurs des comptes, triés selon leur ordre
+	 * 						naturel.
+	 */
+	private Iterable<CompteController> createControllers(Compte selection) {
+		Collection<Compte> comptes = getAllComptes();
+		
+		// Ajouter un compte null qui servira pour le contrôleur "Nouveau..."
+		comptes.add(null);
+		
+		controllers = new ArrayList<>();
+		for (Compte compte : getAllComptes()) {
+			CompteController controller = new CompteController(compte); 
+			controllers.add(controller);
+			if (compte == selection) {					// Éventuellement null
+				dataMediator.setController(controller);
+			}
+		}
+		Collections.sort(controllers);
+		return controllers;
+	}
+
+	/**
+	 * Configure le comportement des boutons radio "Compte bancaire" et
+	 * "Compte budgétaire".
+	 */
+	private void configureTypeRadioButtons() {
+		ButtonGroup groupeClasse = new ButtonGroup();
+		groupeClasse.add(radioBancaire);
+		groupeClasse.add(radioBudget);
+		radioBancaire.addActionListener(EventHandler.create(
+				ActionListener.class, this, "setVueBancaire"));
+		radioBudget.addActionListener(EventHandler.create(
+				ActionListener.class, this, "setVueBudget"));
+	}
+	
+	/**
+	 * Crée un panneau défilable contenant la liste des comptes.
+	 * 
+	 * @return	Un nouveau panneau défilable contenant la liste des comptes.
+	 */
+	private JComponent createListComptesPanel() {
+		JScrollPane scrollList = new JScrollPane(listComptes);
+		scrollList.setPreferredSize(					// Largeur préférée
+				new Dimension(150, scrollList.getPreferredSize().height));
+		return scrollList;
+	}
+
+	/**
+	 * Crée le panneau d'édition contenant les champs de saisie pour un compte.
+	 * 
+	 * @return	Un panneau contenant tous les champs de saisie pour un compte.
+	 */
+	private JComponent createEditionPanel() {
 		
 		// Champs modifiables
 		JLabel labelNature		= new JLabel("Nature :");
@@ -327,57 +462,28 @@ public class SetupCompte {
 		JLabel labelNumero		= new JLabel("Numéro :");
 		JLabel labelType		= new JLabel("Type :");
 		
-		// Liste des comptes
-		listComptes = createComptesList();
-		
-		// Composants à n'activer que pour les comptes de type bancaire
-		bancairesComponents = new Component[] {labelNumero, numero};
-		
-		// Sélection du type principal de compte (bancaire ou budgétaire)
-		prepareTypeRadioButtons();
-		
-		// Boutons de validation
-		JButton valider		= new JButton("Valider");		// Bouton valider
-		JButton appliquer	= new JButton("Appliquer");		// Bouton appliquer
-		JButton quitter		= new JButton("Quitter");		// Bouton quitter
-		JButton supprimer	= new JButton("Supprimer");
-		valider.addActionListener(
-				EventHandler.create(ActionListener.class, this, "validate"));
-		appliquer.addActionListener(
-				EventHandler.create(ActionListener.class, this, "apply"));
-		quitter.addActionListener(quitActionListener);
-		supprimer.addActionListener(EventHandler.create(
-				ActionListener.class, this, "confirmDeletion"));
-		
-		// Agencement général
+		// Composants à n'activer que pour les comptes bancaires
+		bancaireComponents.add(labelNumero);
+		bancaireComponents.add(numero);
 		
 		// Panneau de sélection du type principal (bancaire ou budgétaire)
-		JPanel hautDroite = new JPanel();				// Panneau
-		hautDroite.setLayout(							// Agencement vertical
-				new BoxLayout(hautDroite, BoxLayout.PAGE_AXIS));
-		hautDroite.setBorder(							// Bordure avec titre
-				BorderFactory.createTitledBorder((Border) null));
-		hautDroite.add(radioBancaire);					// Boutons radio
+		JPanel hautDroite = new JPanel();
+		hautDroite.setLayout(new BoxLayout(hautDroite, BoxLayout.PAGE_AXIS));
+		hautDroite.setBorder(BorderFactory.createTitledBorder((Border) null));
+		hautDroite.add(radioBancaire);
 		hautDroite.add(radioBudget);
 		
 		// Panneau de couleur pour les diagrammes
-		JPanel couleurPanel = new JPanel(				// Panneau
-				new BorderLayout());
-		couleurPanel.add(colorButton);					// Ajouter le bouton
-		
-		// Médiateur de données
-		dataMediator = new DataMediator();
-		
-		// Remplir la liste des comptes en sélectionnant "Nouveau..."
-		fillComptesList(null);
+		JPanel couleurPanel = new JPanel(new BorderLayout());
+		couleurPanel.add(colorButton);
 
-		// Corps de la fenêtre
-		JPanel corps = new JPanel();					// Le panneau
-		GroupLayout layout = new GroupLayout(corps);	// Agencement en groupes
-		corps.setLayout(layout);
+		// Assembler tout
+		JPanel editionPanel = new JPanel();
+		GroupLayout layout = new GroupLayout(editionPanel);
+		editionPanel.setLayout(layout);
 		layout.setAutoCreateGaps(true);					// Espaces automatiques
 		layout.setAutoCreateContainerGaps(true);
-		layout.setVerticalGroup(						// Insertion verticals
+		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.CENTER)
@@ -407,7 +513,7 @@ public class SetupCompte {
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelNumero)
 						.addComponent(numero)));
-		layout.setHorizontalGroup(						// Insertion horizontale
+		layout.setHorizontalGroup(
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.TRAILING)
@@ -415,7 +521,7 @@ public class SetupCompte {
 						.addComponent(labelCouleur)
 						.addComponent(labelNom)
 						.addComponent(labelType)
-						// Écouter la sélection.addComponent(labelOuverture)
+						.addComponent(labelOuverture)
 						.addComponent(labelCloture)
 						.addComponent(labelNumero))
 				.addGroup(layout.createParallelGroup(
@@ -442,76 +548,40 @@ public class SetupCompte {
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)));
-
-		// Partie basse
-		JPanel bas = new JPanel();						// Le panneau
-		bas.setLayout(
-				new BoxLayout(bas, BoxLayout.X_AXIS));	// Agencement horizontal
-		bas.setBorder(									// Bordure 10px en haut
-				BorderFactory.createEmptyBorder(10, 0, 0, 0));
-		bas.add(supprimer);								// Bouton supprimer
-		bas.add(Box.createHorizontalGlue());			// Glue à gauche
-		bas.add(appliquer);								// Bouton appliquer
-		bas.add(valider);								// Bouton valider
-//		bas.add(Box.createRigidArea(					// Un peu de place
-//				new Dimension(10,0)));
-		bas.add(quitter);								// Bouton quitter
-
-		// Panneau défilable de liste des comptes
-		JScrollPane scrollList =						// ScrollPane
-				new JScrollPane(listComptes);
-		scrollList.setPreferredSize(					// Dimensions
-				new Dimension(150, scrollList.getPreferredSize().height));
-
-		// Panneau principal
-		JPanel main = new JPanel(new BorderLayout());
-		main.setBorder(									// Marge extérieure
-				BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		main.add(scrollList, BorderLayout.WEST);		// Liste des comptes
-		main.add(corps);								// Corps de la fenêtre
-		main.add(bas, BorderLayout.SOUTH);				// Boutons de validation
-		
-		// Lier la touche Echap à l'action de quitter
-		UniversalAction actionQuitter = new UniversalAction(quitActionListener);
-		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
-		main.getActionMap().put("quitter", actionQuitter);
-		
-		// Fenêtre principale
-		dialog = new JDialog(owner, "Gestion des comptes");
-		
-		dialog.add(main);
-		dialog.pack();
-		dialog.setLocationRelativeTo(null);			// Centrer
-		dialog.setVisible(true);
-	}// constructeur
-	
-	/**
-	 * Crée une liste de comptes dont les changements sont écoutés.
-	 * 
-	 * @return	Une nouvelle liste graphique des comptes.
-	 */
-	private JList<CompteController> createComptesList() {
-		JList<CompteController> list = new JList<>();
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.addListSelectionListener(EventHandler.create(
-				ListSelectionListener.class, dataMediator, "setController",
-				"source.selectedValue"));
-		return list;
+		return editionPanel;
 	}
 	
 	/**
-	 * Configure le comportement des boutons radio "Compte bancaire" et
-	 * "Compte budgétaire".
+	 * Crée un panneau horizontal contenant les boutons d'action.
+	 * 
+	 * @return	Le composant graphique contenant tous les boutons.
 	 */
-	private void prepareTypeRadioButtons() {
-		ButtonGroup groupeClasse = new ButtonGroup();
-		groupeClasse.add(radioBancaire);
-		groupeClasse.add(radioBudget);
-		radioBancaire.addActionListener(EventHandler.create(
-				ActionListener.class, this, "setVueBancaire"));
-		radioBudget.addActionListener(EventHandler.create(
-				ActionListener.class, this, "setVueBudget"));
+	private JComponent createValidationPanel() {
+		
+		// Les boutons
+		JButton valider		= new JButton("Valider");
+		JButton appliquer	= new JButton("Appliquer");
+		JButton supprimer	= new JButton("Supprimer");
+		JButton quitter		= new JButton("Quitter");
+		valider.addActionListener(
+				EventHandler.create(ActionListener.class, this, "validate"));
+		appliquer.addActionListener(
+				EventHandler.create(ActionListener.class, this, "apply"));
+		supprimer.addActionListener(
+				EventHandler.create(ActionListener.class, this,
+						"confirmDeletion"));
+		quitter.addActionListener(quitActionListener);
+
+		// Barre contenant les boutons
+		JPanel bar = new JPanel();
+		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
+		bar.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+		bar.add(supprimer);
+		bar.add(Box.createHorizontalGlue());
+		bar.add(appliquer);
+		bar.add(valider);
+		bar.add(quitter);
+		return bar;
 	}
 	
 	/**
@@ -555,7 +625,7 @@ public class SetupCompte {
 	 * 					les comptes budgétaires.
 	 */
 	private void setVueMainType(boolean bancaire) {
-		for (Component component : bancairesComponents)
+		for (Component component : bancaireComponents)
 			component.setEnabled(bancaire);
 		
 		typeComboBox.removeAll();
@@ -565,72 +635,21 @@ public class SetupCompte {
 		}
 	}
 	
-	
-	/**
-	 * Re-remplit la liste graphique des comptes.
-	 * 
-	 * @param selection	Le compte à sélectionner après la mise à jour. Utiliser
-	 * 					<code>null</code> pour un nouveau compte.
-	 */
-	private void fillComptesList(Compte selection) {
-		
-		// Obtenir la liste de tous les comptes
-		Collection<Compte> comptes;
-		try {
-			comptes = DAOFactory.getFactory().getCompteDAO().getAll();
-		} catch (IOException e) {
-			comptes = new HashSet<Compte>();
-			e.printStackTrace();
-		}
-		
-		// Ajouter un null pour une nouvelle saisie
-		comptes.add(null);
-		
-		// Liste de contrôleurs de comptes
-		controllers = new ArrayList<CompteController>();// Créer la liste 
-		CompteController selected = null;				// Curseur de contrôleur
-		for (Compte compte : comptes) {
-			CompteController controller =				// Nouveau contrôleur
-					new CompteController(compte); 
-			controllers.add(controller);				// Insérer le contrôleur
-			if (compte == selection) {
-				selected = controller;					// Repérer la sélection
-			}
-		}
-		Collections.sort(controllers);					// Trier les contrôleurs
-		
-		// Tout insérer dans le modèle
-		DefaultListModel<CompteController> listModel =
-				new DefaultListModel<CompteController>();
-		for (CompteController cc : controllers) {
-			listModel.addElement(cc);						// Remplir modèle
-		}
-		listComptes.setModel(listModel);					// Affecter modèle
-		
-		// Sélectionner le bon item
-		listComptes.setSelectedValue(selected, true);
-	}
-
 	/**
 	 * Valide l'ensemble des modifications.
 	 */
 	public void apply() {
 		
 		// Mémoriser la sélection actuelle
-		CompteController selected =						//Contrôleur sélectionné
-				dataMediator.getController();
-		Compte selection = selected.getCompte();		// Compte lié
+		CompteController selected = dataMediator.getController();
+		Compte selection = selected.getCompte();
 		
-			
-		// Pour chaque contrôleur
-		Compte compte;								// Curseur de Compte
+		// Appliquer toutes les modifications
+		Compte compte;
 		Month toUpdate = null;
 		for (CompteController controller : controllers) {
 			try {
-				Compte oldCompte =
-						controller.getCompte();		// Ancien compte
-
-				// Appliquer les modifs
+				Compte oldCompte = controller.getCompte();
 				compte = controller.applyChanges();
 
 				// Noter de mettre à jour les bases en cas de changement
@@ -651,8 +670,8 @@ public class SetupCompte {
 				}
 
 			} catch (IOException e1) {
-				LOGGER.severe("Impossible de sauvegarder le compte "
-						+ controller);
+				LOGGER.severe(
+						"Impossible de sauvegarder le compte " + controller);
 
 				// Arrêter ici sans recharger les données
 				return;
