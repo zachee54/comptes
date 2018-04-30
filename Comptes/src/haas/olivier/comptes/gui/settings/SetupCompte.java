@@ -66,12 +66,6 @@ public class SetupCompte {
 			Logger.getLogger(SetupCompte.class.getName());
 	
 	/**
-	 * Action pour quitter.
-	 */
-	final ActionListener quitActionListener =
-			EventHandler.create(ActionListener.class, this, "quit");
-	
-	/**
 	 * Un médiateur entre les données de l'interface graphique et les données du
 	 * modèle.
 	 * 
@@ -92,36 +86,6 @@ public class SetupCompte {
 		private CompteController controller = null;
 		
 		/**
-		 * Zone de saisie du nom.
-		 */
-		private final JTextComponent nom;
-		
-		/**
-		 * Zone de saisie du numéro de compte bancaire.
-		 */
-		private final JTextComponent numero;
-		
-		/**
-		 * Zone de saisie de la date d'ouverture.
-		 */
-		private final JTextComponent ouverture;
-		
-		/**
-		 * Zone de saisie de la date de clôture.
-		 */
-		private final JTextComponent cloture;
-		
-		/**
-		 * Bouton de choix de la couleur.
-		 */
-		private final JButton colorButton;
-		
-		/**
-		 * Liste déroulante pour choisir le type secondaire.
-		 */
-		private final JComboBox<TypeCompte> type;
-		
-		/**
 		 * Drapeau indiquant si un changement de contrôleur est en cours. Auquel
 		 * cas, les changements de contenu sont dus au basculement de contrôleur
 		 * et non à une modification directe par l'utilisateur.
@@ -129,46 +93,25 @@ public class SetupCompte {
 		private boolean updating = false;
 		
 		/**
-		 * Construit un médiateur de données écoutant et modifiant les objets
-		 * spécifiés.
-		 * 
-		 * @param nom		Champ de saisie du nom.
-		 * @param numero	Champ de saisie du numéro.
-		 * @param type		ComboBox de saisie du type secondaire.
-		 * @param ouverture	Champ de saisie de la date d'ouverture.
-		 * @param cloture	Champ de saisie de la date de clôture.
+		 * Construit un médiateur de données écoutant et modifiant les champs de
+		 * saisie.
 		 */
-		private DataMediator(JTextComponent nom, JTextComponent numero,
-				JButton colorButton, JComboBox<TypeCompte> type,
-				JTextComponent ouverture, JTextComponent cloture) {
+		private DataMediator() {
 			
 			// La codification EventHandler pour obtenir le texte de la source
 			String eventText = "source.text";
 			
-			// Mémoriser et écouter les champs de saisie
-			this.nom = nom;
 			nom.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, controller, "setNom", eventText));
-			
-			this.numero = numero;
 			numero.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, controller, "setNumero",
 					eventText));
-			
-			this.ouverture = ouverture;
 			ouverture.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, this, "setOuverture", eventText));
-			
-			this.cloture = cloture;
 			cloture.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, this, "setCloture", eventText));
-			
-			this.type = type;
-			type.addItemListener(EventHandler.create(ItemListener.class,
+			typeComboBox.addItemListener(EventHandler.create(ItemListener.class,
 					this, "setTypeCompte", "source.selectedItem"));
-			
-			// Mémoriser le bouton couleur et définir l'action
-			this.colorButton = colorButton;
 			colorButton.addActionListener(EventHandler.create(
 					ActionListener.class, DataMediator.this, "chooseColor"));
 		}
@@ -188,7 +131,7 @@ public class SetupCompte {
 			controller.setColor(color);
 			
 			// Afficher
-			DataMediator.this.colorButton.setBackground(color);
+			colorButton.setBackground(color);
 		}
 		
 		/**
@@ -197,7 +140,7 @@ public class SetupCompte {
 		private CompteController getController() {
 			return controller;
 		}
-
+	
 		/**
 		 * Remplace le contrôleur de référence. Les données du nouveau
 		 * contrôleur sont retranscrites dans l'interface graphique.
@@ -217,7 +160,7 @@ public class SetupCompte {
 			nom.setText(controller.getNom());
 			numero.setText(controller.getNumero() + "");
 			colorButton.setBackground(controller.getColor());
-			type.setSelectedItem(controller.getType());
+			typeComboBox.setSelectedItem(controller.getType());
 			ouverture.setText(getNotNullDateText(controller.getOuverture()));
 			cloture.setText(getNotNullDateText(controller.getCloture()));
 			updating = false;
@@ -285,7 +228,13 @@ public class SetupCompte {
 				LOGGER.log(Level.FINEST, "Date de clôture illisible", e);
 			}
 		}
-	}// inner class DataMediator
+	}// inner class DataMediator	
+	
+	/**
+	 * Action pour quitter.
+	 */
+	private final ActionListener quitActionListener =
+			EventHandler.create(ActionListener.class, this, "quit");
 	
 	/**
 	 * La boîte de dialogue.
@@ -296,6 +245,31 @@ public class SetupCompte {
 	 * Le GUI principal.
 	 */
 	private final SimpleGUI gui;
+
+	/**
+	 * Zone de saisie du nom.
+	 */
+	private final JTextComponent nom = new JTextField();
+	
+	/**
+	 * Zone de saisie du numéro de compte bancaire.
+	 */
+	private final JTextComponent numero = new JTextField();
+	
+	/**
+	 * Zone de saisie de la date d'ouverture.
+	 */
+	private final JTextComponent ouverture = new JTextField();
+	
+	/**
+	 * Zone de saisie de la date de clôture.
+	 */
+	private final JTextComponent cloture = new JTextField();
+	
+	/**
+	 * Bouton de choix de la couleur.
+	 */
+	private final JButton colorButton = new JButton();
 	
 	/**
 	 * Le médiateur de données.
@@ -344,23 +318,19 @@ public class SetupCompte {
 		this.gui = gui;
 		
 		// Champs modifiables
-		JLabel labelNature			= new JLabel("Nature :");
-		JLabel labelCouleur			= new JLabel("Couleur :");
-		JLabel labelNom				= new JLabel("Nom :");
-		JTextField fieldNom			= new JTextField();
-		JLabel labelOuverture		= new JLabel("Ouverture :");
-		JTextField fieldOuverture	= new JTextField();
-		JLabel labelCloture			= new JLabel("Clôture :");
-		JTextField fieldCloture		= new JTextField();
-		JLabel labelNumero			= new JLabel("Numéro :");
-		JTextField fieldNumero		= new JTextField();
-		JLabel labelType			= new JLabel("Type :");
+		JLabel labelNature		= new JLabel("Nature :");
+		JLabel labelCouleur		= new JLabel("Couleur :");
+		JLabel labelNom			= new JLabel("Nom :");
+		JLabel labelOuverture	= new JLabel("Ouverture :");
+		JLabel labelCloture		= new JLabel("Clôture :");
+		JLabel labelNumero		= new JLabel("Numéro :");
+		JLabel labelType		= new JLabel("Type :");
 		
 		// Liste des comptes
 		listComptes = createComptesList();
 		
 		// Composants à n'activer que pour les comptes de type bancaire
-		bancairesComponents = new Component[] {labelNumero, fieldNumero};
+		bancairesComponents = new Component[] {labelNumero, numero};
 		
 		// Sélection du type principal de compte (bancaire ou budgétaire)
 		prepareTypeRadioButtons();
@@ -369,13 +339,12 @@ public class SetupCompte {
 		JButton valider		= new JButton("Valider");		// Bouton valider
 		JButton appliquer	= new JButton("Appliquer");		// Bouton appliquer
 		JButton quitter		= new JButton("Quitter");		// Bouton quitter
-		quitter.addActionListener(quitActionListener);
+		JButton supprimer	= new JButton("Supprimer");
 		valider.addActionListener(
 				EventHandler.create(ActionListener.class, this, "validate"));
 		appliquer.addActionListener(
 				EventHandler.create(ActionListener.class, this, "apply"));
-		
-		JButton supprimer = new JButton("Supprimer");
+		quitter.addActionListener(quitActionListener);
 		supprimer.addActionListener(EventHandler.create(
 				ActionListener.class, this, "confirmDeletion"));
 		
@@ -393,17 +362,10 @@ public class SetupCompte {
 		// Panneau de couleur pour les diagrammes
 		JPanel couleurPanel = new JPanel(				// Panneau
 				new BorderLayout());
-		JButton colorButton = new JButton();			// Bouton couleur
 		couleurPanel.add(colorButton);					// Ajouter le bouton
 		
 		// Médiateur de données
-		dataMediator = new DataMediator(
-				fieldNom,
-				fieldNumero,
-				colorButton,
-				typeComboBox,
-				fieldOuverture,
-				fieldCloture);
+		dataMediator = new DataMediator();
 		
 		// Remplir la liste des comptes en sélectionnant "Nouveau..."
 		fillComptesList(null);
@@ -427,7 +389,7 @@ public class SetupCompte {
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelNom)
-						.addComponent(fieldNom))
+						.addComponent(nom))
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelType)
@@ -435,15 +397,15 @@ public class SetupCompte {
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelOuverture)
-						.addComponent(fieldOuverture))
+						.addComponent(ouverture))
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelCloture)
-						.addComponent(fieldCloture))
+						.addComponent(cloture))
 				.addGroup(layout.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelNumero)
-						.addComponent(fieldNumero)));
+						.addComponent(numero)));
 		layout.setHorizontalGroup(						// Insertion horizontale
 				layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(
@@ -459,7 +421,7 @@ public class SetupCompte {
 						GroupLayout.Alignment.LEADING)
 						.addComponent(hautDroite)
 						.addComponent(couleurPanel)
-						.addComponent(fieldNom,
+						.addComponent(nom,
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)
@@ -467,15 +429,15 @@ public class SetupCompte {
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)
-						.addComponent(fieldOuverture,
+						.addComponent(ouverture,
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)
-						.addComponent(fieldCloture,
+						.addComponent(cloture,
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)
-						.addComponent(fieldNumero,
+						.addComponent(numero,
 								GroupLayout.DEFAULT_SIZE,
 								150,
 								GroupLayout.PREFERRED_SIZE)));
