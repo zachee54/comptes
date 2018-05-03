@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.beans.EventHandler;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -83,89 +84,33 @@ import javax.swing.text.JTextComponent;
 public class SetupPermanent implements ActionListener, ListSelectionListener {
 	
 	/**
-	 * Le Logger de cette classe.
-	 */
-	private static final Logger LOGGER =
-			Logger.getLogger(SetupPermanent.class.getName());
-	
-	// Constantes de commandes de types de Permanent
-	public static final String FIXE = "fixe";
-	public static final String PROPORTIONNEL = "proportionnel";
-	public static final String SOLDER = "solder";
-	
-	// Constantes d'action
-	public static final String VALIDER = "valider";
-	public static final String APPLIQUER = "appliquer";
-	public static final String SUPPRIMER = "supprimer";
-	public static final String QUITTER = "quitter";
-	
-	/**
 	 * Un médiateur entre les données de l'interface et les données du modèle.
 	 */
 	private class DataMediator
 	implements ChangeListener, DocumentListener, ItemListener, TableModelListener {
 		
-		// Le contrôleur de données. Il contrôle l'objet Permanent à éditer.
-		PermanentController controller = null;
+		/**
+		 * Le contrôleur de données. Il contrôle le <code>Permanent<code> à
+		 * éditer.
+		 */
+		private PermanentController controller = null;
 		
-		// Composants graphiques de saisie des données
-		private TypeController typeController;			// Contrôleur de type
-		private JTextComponent nom, libelle, tiers;		// Composants de texte
-		private JCheckBox pointer;						// Pointage
-		private JComboBox<Compte> debit, credit;		// Comptes débit/crédit
-		private JComboBox<Permanent> dependance;		// Dépendance
-		private JComboBox<Compte> compteASolder;		// Compte à solder
-		private JSpinner taux;							// Taux
-		private PlannerTableModel jours, montants;		// Plannings
-		
-		public DataMediator(
-				TypeController typeController,
-				JTextComponent nom,
-				JTextComponent libelle,
-				JTextComponent tiers,
-				JCheckBox pointer,
-				JComboBox<Compte> debit,
-				JComboBox<Compte> credit,
-				PlannerTableModel jours,
-				PlannerTableModel montants,
-				JComboBox<Permanent> dependance,
-				JSpinner taux,
-				JComboBox<Compte> compteASolder) {
-			this.typeController = typeController;		// Contrôleur de type
-			
-			this.nom = nom;								// Zone de nom
-			nom.getDocument().addDocumentListener(this);// Écouter
-			
-			this.libelle = libelle;						// Zone du libellé
-			libelle.getDocument().addDocumentListener(	// Écouter
-					this);
-			
-			this.tiers = tiers;							// Zone nom du tiers
-			tiers.getDocument().addDocumentListener(	// Écouter
-					this);
-			
-			this.pointer = pointer;						// Case de pointage
-			pointer.addChangeListener(this);			// Écouter
-			
-			this.debit = debit;							// Débit et crédit
-			this.credit = credit;
-			debit.addItemListener(this);				// Écouter
+		/**
+		 * Construit un médiateur de données entre l'interface graphique et les
+		 * données du modèle.
+		 */
+		private DataMediator() {
+			nom.getDocument().addDocumentListener(this);
+			libelle.getDocument().addDocumentListener(this);
+			tiers.getDocument().addDocumentListener(this);
+			pointer.addChangeListener(this);
+			debit.addItemListener(this);
 			credit.addItemListener(this);
-			
-			this.jours = jours;							// Planning des jours
-			jours.addTableModelListener(this);			// Écouter
-			
-			this.montants = montants;					// Planning des montants
-			montants.addTableModelListener(this);		// Écouter
-			
-			this.dependance = dependance;				// Dépendance
-			dependance.addItemListener(this);			// Écouter
-			
-			this.taux = taux;							// Taux
+			jours.addTableModelListener(this);
+			montants.addTableModelListener(this);
+			dependance.addItemListener(this);
 			taux.addChangeListener(this);
-			
-			this.compteASolder = compteASolder;			// Compte à solder
-			compteASolder.addItemListener(this);		// Écouter
+			compteASolder.addItemListener(this);
 		}
 		
 		/**
@@ -180,7 +125,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		 * contrôleur sont retranscrites dans l'interface graphique.
 		 */
 		public void setController(PermanentController controller) {
-
+	
 			// Ignorer la valeur null
 			if (controller == null) {
 				return;
@@ -247,7 +192,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			taux.addChangeListener(this);
 			compteASolder.addItemListener(this);		
 		}
-
+	
 		/**
 		 * Reçoit les modifications de type initiées par l'utilisateur, et les
 		 * renvoie au contrôleur de Permanent.
@@ -281,7 +226,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		public void insertUpdate(DocumentEvent e) {
 			textChanged(e);
 		}
-
+	
 		/**
 		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
 		 * changement sur le nom.
@@ -290,13 +235,13 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		public void removeUpdate(DocumentEvent e) {
 			textChanged(e);
 		}
-
+	
 		/**
 		 * Interface <code>DocumentListener</code>. Aucune implémentation ici.
 		 */
 		@Override
 		public void changedUpdate(DocumentEvent e) {}
-
+	
 		/**
 		 * Interface <code>ItemListener</code>. Reçoit les notifications de
 		 * changements sur les comptes débité/crédité, sur la dépendance à une
@@ -314,7 +259,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				controller.setCompteASolder((Compte) e.getItem());
 			}
 		}
-
+	
 		/**
 		 * Interface <code>TableModelListener</code>. Reçoit les notifications
 		 * de changements sur le planning des jours, ou des montants fixes.
@@ -373,7 +318,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				controller.setMontants(mapMontants);
 			}
 		}
-
+	
 		/**
 		 * Interface <code>ChangeListener</code>. Reçoit les notifications de la
 		 * case à cocher pour le pointage automatique ou du spinner taux, et les
@@ -434,7 +379,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			changeVue(command);						// Extraire la commande
 			dataMediator.setType(command);			// Faire suivre au modèle
 		}
-
+	
 		/**
 		 * Action demandée programmatiquement.
 		 */
@@ -458,6 +403,33 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 	}// inner class TypeListener
 
+	/**
+	 * Le Logger de cette classe.
+	 */
+	private static final Logger LOGGER =
+			Logger.getLogger(SetupPermanent.class.getName());
+	
+	// Constantes de commandes de types de Permanent
+	public static final String FIXE = "fixe";
+	public static final String PROPORTIONNEL = "proportionnel";
+	public static final String SOLDER = "solder";
+	
+	// Constantes d'action
+	public static final String VALIDER = "valider";
+	public static final String APPLIQUER = "appliquer";
+	public static final String SUPPRIMER = "supprimer";
+	public static final String QUITTER = "quitter";
+	
+	// Composants graphiques de saisie des données
+	private TypeController typeController;			// Contrôleur de type
+	private JTextComponent nom, libelle, tiers;		// Composants de texte
+	private JCheckBox pointer;						// Pointage
+	private JComboBox<Compte> debit, credit;		// Comptes débit/crédit
+	private JComboBox<Permanent> dependance;		// Dépendance
+	private JComboBox<Compte> compteASolder;		// Compte à solder
+	private JSpinner taux;							// Taux
+	private PlannerTableModel jours, montants;		// Plannings
+	
 	/**
 	 * Le GUI associé.
 	 */
@@ -492,14 +464,6 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	 */
 	public SetupPermanent(JFrame owner, SimpleGUI gui) {
 		this.gui = gui;
-		
-		// Créer une liste avec les contrôleurs de Permanents
-		listPermanents = new JList<>(
-				new DefaultListModel<PermanentController>());
-		listPermanents.setSelectionMode(	// Mode de sélection
-				ListSelectionModel.SINGLE_SELECTION);
-		listPermanents
-		.addListSelectionListener(this);	// Écouter les changements
 		
 		// Sélection du type de Permanent (fixe, proportionnel ou dépendant)
 		JPanel hautDroite = new JPanel();			// Panel
@@ -597,21 +561,6 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			}
 		});// classe anonyme ItemListener
 		
-		// Créer le médiateur qui traduira les données
-		dataMediator = new DataMediator(
-				typeController,
-				nom,
-				libelle,
-				tiers,
-				pointer,
-				boxDebit,
-				boxCredit,
-				plannerJours,
-				plannerMontants,
-				dependance,
-				taux,
-				compteASolder);
-		
 		// Boutons de validation
 		JButton valider		= new JButton("Valider");	// Bouton Valider
 		JButton appliquer	= new JButton("Appliquer");	// Bouton Appliquer
@@ -627,6 +576,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		quitter		.addActionListener(this);
 		
 		// Charger la liste principale
+		dataMediator = new DataMediator();
+		listPermanents = createPermanentList(dataMediator);
 		fillPermanentList(null);
 		
 		// Disposer tout ensemble
@@ -792,6 +743,26 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		
 //		boxDebit.setSelectedItem(null);
 	}// constructeur
+	
+	/**
+	 * Crée une liste graphique des contrôleurs d'opérations permanentes.
+	 * 
+	 * @param dataMediator	Le médiateur de données auquel notifier les
+	 * 						changements de sélection.
+	 * 
+	 * @return				Une nouvelle liste graphique des contrôleurs
+	 * 						d'opérations permanentes.
+	 */
+	private static JList<PermanentController> createPermanentList(
+			DataMediator dataMediator) {
+		JList<PermanentController> list =
+				new JList<>(new DefaultListModel<PermanentController>());
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.addListSelectionListener(EventHandler.create(
+				ListSelectionListener.class, dataMediator, "setController",
+				"selectedValue"));
+		return list;
+	}
 	
 	/**
 	 * Renvoie une table de planning par mois.
