@@ -1,7 +1,6 @@
 package haas.olivier.comptes.gui.settings;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
 import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
@@ -115,7 +114,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		private JCheckBox pointer;						// Pointage
 		private JComboBox<Compte> debit, credit;		// Comptes débit/crédit
 		private JComboBox<Permanent> dependance;		// Dépendance
-		private JComboBox<CompteBancaire> compteASolder;// Compte à solder
+		private JComboBox<Compte> compteASolder;		// Compte à solder
 		private JSpinner taux;							// Taux
 		private PlannerTableModel jours, montants;		// Plannings
 		
@@ -131,7 +130,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				PlannerTableModel montants,
 				JComboBox<Permanent> dependance,
 				JSpinner taux,
-				JComboBox<CompteBancaire> compteASolder) {
+				JComboBox<Compte> compteASolder) {
 			this.typeController = typeController;		// Contrôleur de type
 			
 			this.nom = nom;								// Zone de nom
@@ -312,7 +311,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			} else if (e.getSource() == dependance) {
 				controller.setDependance((Permanent) e.getItem());
 			} else if (e.getSource() == compteASolder) {
-				controller.setCompteASolder((CompteBancaire) e.getItem());
+				controller.setCompteASolder((Compte) e.getItem());
 			}
 		}
 
@@ -584,11 +583,11 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		
 		// Paramètres des opérations soldant un compte
 		JLabel labelSolder = new JLabel("Compte à solder");
-		JComboBox<CompteBancaire> compteASolder =		// Box comptes à solder
+		JComboBox<Compte> compteASolder =				// Box comptes à solder
 				new JComboBox<>();
 		for (Compte c : arrayComptes) {					// Remplir la liste
-			if (c instanceof CompteBancaire) {// Seulement des comptes bancaires
-				compteASolder.addItem((CompteBancaire) c);
+			if (c instanceof Compte) {// Seulement des comptes bancaires
+				compteASolder.addItem(c);
 			}
 		}
 		compteASolder.addItemListener(new ItemListener() {
@@ -989,7 +988,7 @@ class PermanentController implements Comparable<PermanentController> {
 	private Map<Month,BigDecimal> montants = null;
 	private Permanent dependance = null;
 	private BigDecimal taux;
-	private CompteBancaire compteASolder = null;
+	private Compte compteASolder = null;
 	
 	/**
 	 * Construit un contrôleur contenant les données actuelles du
@@ -1053,7 +1052,7 @@ class PermanentController implements Comparable<PermanentController> {
 	public Map<Month,BigDecimal> getMontants()	{return montants;}
 	public Permanent getDependance()			{return dependance;}
 	public BigDecimal getTaux()					{return taux;}
-	public CompteBancaire getCompteASolder()	{return compteASolder;}
+	public Compte getCompteASolder()			{return compteASolder;}
 	
 	// Setters. Mémoriser l'existence d'une modif.
 	public void setType(String type) {
@@ -1111,7 +1110,7 @@ class PermanentController implements Comparable<PermanentController> {
 		modified = true;
 	}
 	
-	public void setCompteASolder(CompteBancaire compteASolder) {
+	public void setCompteASolder(Compte compteASolder) {
 		this.compteASolder = compteASolder;
 		modified = true;
 	}
@@ -1148,8 +1147,7 @@ class PermanentController implements Comparable<PermanentController> {
 					dependance, taux);
 		} else if (SetupPermanent.SOLDER.equals(type)) {
 			newPermanent = new PermanentSoldeur(		// Compte à solder
-					id, nom, (CompteBancaire) debit, credit, libelle, tiers,
-					pointer, jours);
+					id, nom, debit, credit, libelle, tiers, pointer, jours);
 		}
 
 		// Enregistrer dans le DAO
