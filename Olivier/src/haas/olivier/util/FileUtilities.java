@@ -5,13 +5,18 @@ package haas.olivier.util;
 
 import java.io.File;
 
-/** Une classe utilitaire traitant les fichiers.
+/**
+ * Une classe utilitaire traitant les fichiers.
  * 
  * @author Olivier HAAS
  */
 public class FileUtilities {
 
-	/** Renvoie l'extension du fichier.
+	private FileUtilities() {
+	}
+	
+	/**
+	 * Renvoie l'extension du fichier.
 	 * 
 	 * @param file	Le fichier dont il faut trouver l'extension.
 	 * 
@@ -26,10 +31,9 @@ public class FileUtilities {
 		String name = file.getName();
 		int i = name.lastIndexOf('.');				// Trouver le denier point
 		if (i > 0 && i < name.length()) {			// Si au milieu ou à la fin
-			return name.substring(
-					(point ? i : i+1));				// Renvoyer la suite
+			return name.substring(point ? i : i+1);	// Renvoyer la suite
 		} else {
 			return "";								// Sinon renvoyer vide
-		}// if point au milieu ou à la fin
-	}// getExtension
+		}
+	}
 }

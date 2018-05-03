@@ -5,7 +5,8 @@ package haas.olivier.util;
 
 import java.util.Iterator;
 
-/** Un itérateur en lecture seule, c'est-à-dire sans la méthode
+/**
+ * Un itérateur en lecture seule, c'est-à-dire sans la méthode
  * {@link java.util.Iterator#remove()}.
  * 
  * @author Olivier HAAS
@@ -14,9 +15,12 @@ import java.util.Iterator;
  */
 public abstract class ReadOnlyIterator<T> implements Iterator<T> {
 
-	/** @throws	UnsupportedOperationException */
+	/**
+	 * @throws	UnsupportedOperationException
+	 * 				Dans tous les cas.
+	 */
 	@Override
 	public final void remove() {
 		throw new UnsupportedOperationException();
-	}// remove
+	}
 }
