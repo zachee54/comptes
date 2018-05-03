@@ -1,4 +1,5 @@
-/** Des utilitaires divers.
+/**
+ * Des utilitaires divers.
  *
  * @author Olivier HAAS
  */
