@@ -67,7 +67,6 @@ import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -86,23 +85,34 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	/**
 	 * Un médiateur entre les données de l'interface et les données du modèle.
 	 */
-	private class DataMediator
-	implements ChangeListener, DocumentListener, ItemListener, TableModelListener {
+	public class DataMediator
+	implements ChangeListener, ItemListener, TableModelListener {
 		
 		/**
 		 * Le contrôleur de données. Il contrôle le <code>Permanent<code> à
 		 * éditer.
 		 */
-		private PermanentController controller = null;
+		private PermanentController controller;
+		
+		/**
+		 * Drapeau indiquant si l'interface est en cours de mise à jour du fait
+		 * du changement de contrôleur.<br>
+		 * Dans ce cas, la classe ne doit pas réagir aux événements générés par
+		 * les champs de saisie.
+		 */
+		private boolean updating = false;
 		
 		/**
 		 * Construit un médiateur de données entre l'interface graphique et les
 		 * données du modèle.
 		 */
 		private DataMediator() {
-			nom.getDocument().addDocumentListener(this);
-			libelle.getDocument().addDocumentListener(this);
-			tiers.getDocument().addDocumentListener(this);
+			nom.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, this, "nomChanged"));
+			libelle.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, this, "libelleChanged"));
+			tiers.getDocument().addDocumentListener(EventHandler.create(
+					DocumentListener.class, this, "tiersChanged"));
 			pointer.addChangeListener(this);
 			debit.addItemListener(this);
 			credit.addItemListener(this);
@@ -133,20 +143,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			
 			this.controller = controller;
 			
-			// Cesser d'écouter pour éviter un callback
-			nom.getDocument().removeDocumentListener(this);
-			libelle.getDocument().removeDocumentListener(this);
-			tiers.getDocument().removeDocumentListener(this);
-			pointer.removeChangeListener(this);
-			debit.removeItemListener(this);
-			credit.removeItemListener(this);
-			jours.removeTableModelListener(this);
-			montants.removeTableModelListener(this);
-			dependance.removeItemListener(this);
-			taux.removeChangeListener(this);
-			compteASolder.removeItemListener(this);
-			
 			// Transcrire les données du nouveau contrôleur
+			updating = true;
 			typeController.changeVue(controller.getType()); // Type
 			nom.setText(controller.getNom());				// Nom
 			libelle.setText(controller.getLibelle());		// Libellé
@@ -178,19 +176,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			}
 			dependance.setSelectedItem(					// Sélectionner le bon
 					controller.getDependance());
-			
-			// Réécouter les changements
-			nom.getDocument().addDocumentListener(this);
-			libelle.getDocument().addDocumentListener(this);
-			tiers.getDocument().addDocumentListener(this);
-			pointer.addChangeListener(this);
-			debit.addItemListener(this);
-			credit.addItemListener(this);
-			jours.addTableModelListener(this);
-			montants.addTableModelListener(this);
-			dependance.addItemListener(this);
-			taux.addChangeListener(this);
-			compteASolder.addItemListener(this);		
+			updating = false;
 		}
 	
 		/**
@@ -202,45 +188,31 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 		
 		/**
-		 * Reçoit les modifications des zones de texte dans l'interface et les
-		 * envoie vers le modèle.
-		 * 
-		 * @param e	Le <code>DocumentEvent</code> généré par le
-		 * 			<code>JTextComponent</code> contenant le texte.
+		 * Met à jour le nom de l'opération permanente dans le contrôleur
+		 * actuel.
 		 */
-		private void textChanged(DocumentEvent e) {
-			if (e.getDocument() == nom.getDocument()) {
-				controller.setNom(nom.getText());			// Nom
-			} else if (e.getDocument() == libelle.getDocument()) {
-				controller.setLibelle(libelle.getText());	// Libellé
-			} else if (e.getDocument() == tiers.getDocument()) {
-				controller.setTiers(tiers.getText());		// Tiers
-			}
+		public void nomChanged() {
+			if (!updating)
+				controller.setNom(nom.getText());
 		}
 		
 		/**
-		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
-		 * changement sur le nom.
+		 * Met à jour le libellé de l'opération permanente dans le contrôleur
+		 * actuel.
 		 */
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			textChanged(e);
+		public void libelleChanged() {
+			if (!updating)
+				controller.setLibelle(libelle.getText());
 		}
-	
+		
 		/**
-		 * Interface <code>DocumentListener</code>. Reçoit les notifications de
-		 * changement sur le nom.
+		 * Met à jour le nom du tiers dans l'opération permanente dans le
+		 * contrôleur actuel.
 		 */
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			textChanged(e);
+		public void tiersChanged() {
+			if (!updating)
+				controller.setTiers(tiers.getText());
 		}
-	
-		/**
-		 * Interface <code>DocumentListener</code>. Aucune implémentation ici.
-		 */
-		@Override
-		public void changedUpdate(DocumentEvent e) {}
 	
 		/**
 		 * Interface <code>ItemListener</code>. Reçoit les notifications de
