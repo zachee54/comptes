@@ -8,7 +8,8 @@ import java.util.concurrent.Executors;
 
 import javax.swing.SwingWorker;
 
-/** Un <code>SwingWorker</code> qui utilise un pool personnalisé.
+/**
+ * Un <code>SwingWorker</code> qui utilise un pool personnalisé.
  * <p>
  * Depuis le JDK 6u19 (au moins), la classe <code>SwingWorker</code> utilise un
  * pool de thread composé de... un seul thread. Par conséquent, les tâches
@@ -41,7 +42,9 @@ public abstract class PoolSwingWorker<T,V> extends SwingWorker<T, V> {
 	public static final ExecutorService EXECUTOR =
 			Executors.newCachedThreadPool();
 	
-	/** Exécute la tâche dans le pool personnalisé. */
+	/**
+	 * Exécute la tâche dans le pool personnalisé.
+	 */
 	public void executeInPool() {
 		EXECUTOR.execute(this);
 //		execute();

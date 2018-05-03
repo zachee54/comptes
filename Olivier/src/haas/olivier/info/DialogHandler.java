@@ -4,7 +4,7 @@
 package haas.olivier.info;
 
 import java.awt.BorderLayout;
-import java.util.logging.Formatter;
+import java.awt.Component;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -18,17 +18,21 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-/** Un <code>Handler</code> pour afficher des logs sous la forme de boîtes de
- * dialogues.
+/**
+ * Un <code>Handler</code> pour afficher des logs sous la forme de boîtes de
+ * dialogue.
  *
  * @author Olivier HAAS
  */
 public class DialogHandler extends Handler {
 	
-	/** Le cadre auquel doivent se rattacher les boîtes de dialogue. */
+	/**
+	 * Le cadre auquel doivent se rattacher les boîtes de dialogue.
+	 */
 	private final JFrame frame;
 	
-	/** Construit un récepteur de messages qui affiche les notifications à
+	/**
+	 * Construit un récepteur de messages qui affiche les notifications à
 	 * l'écran.
 	 * 
 	 * @param frame	Le cadre auquel doivent se rattacher les boîtes de dialogue.
@@ -37,102 +41,142 @@ public class DialogHandler extends Handler {
 		this.frame = frame;
 		setLevel(Level.INFO);
 		setFormatter(new DialogFormatter());
-	}// constructeur
+	}
 	
 	@Override
 	public void publish(final LogRecord record) {
 		
 		// Vérifier le niveau avant de traiter
-		Level level = record.getLevel();
-		if (level.intValue() < getLevel().intValue() || level == Level.OFF)
+		if (!checkLevel(record)) {
 			return;
+		}
 		
 		// Si on n'est pas dans l'EDT, changer de thread
-		if (!SwingUtilities.isEventDispatchThread()) {	// Pas dans EDT
-			SwingUtilities.invokeLater(new Runnable() {	// Transférer à EDT
-				@Override public void run() {
-					publish(record);					// Même méthode
-				}// run
-			});// classe anonyme Runnable
-			return;									// C'est tout pour ce thread
-		}// if not EDT
+		if (!SwingUtilities.isEventDispatchThread()) {
+			publishOnEventDispatchThread(record);
+			return;										// Fini pour ce thread
+		}
 		
-		// Chercher si une exception est associée à ce log
-		Throwable thrown = record.getThrown();			// Exception éventuelle
-		String message = getFormatter().format(record);	// Message formaté
+		// Afficher une boîte de dialogue "erreur" ou "normale" selon le cas
+		Throwable thrown = record.getThrown();
+		String message = getFormatter().format(record);
 		if (thrown != null) {
-			error(message, thrown);						// Dialogue "erreur"
+			error(message, thrown);
 		} else {
-			dialog(message, record.getLevel());			// Dialogue normal
-		}// if thrown
-	}// publish
+			dialog(message, record.getLevel());
+		}
+	}
 	
-	/** Affiche un message d'erreur à l'écran.
+	/**
+	 * Indique si le niveau du message de log justifie de le traiter.
+	 *
+	 * @param record	Le message de log à examiner.
+	 * @return			<code>true</code> si le niveau de <code>record</code>
+	 * 					fait qu'il doit être traité.
+	 */
+	private boolean checkLevel(LogRecord record) {
+		Level level = record.getLevel();
+		return (level != Level.OFF)
+				&& (level.intValue() >= getLevel().intValue());
+	}
+	
+	/**
+	 * Pulie le message de log sur l'EDT.
+	 *
+	 * @param record	Le message de log à publier.
+	 */
+	private void publishOnEventDispatchThread(final LogRecord record) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				publish(record);
+			}
+		});
+	}
+	
+	/**
+	 * Affiche un message d'erreur décrivant une exception.
 	 * 
 	 * @param message	Le message d'erreur à afficher.
 	 * @param e			L'exception à l'origine de l'erreur.
 	 */
-	private void error(final String message, final Throwable e) {
-		
-		// Si on n'est pas dans l'EDT, changer de thread
-		if (!SwingUtilities.isEventDispatchThread()) {	// Pas dans EDT
-			SwingUtilities.invokeLater(new Runnable() {	// Transférer à EDT
-				@Override public void run() {
-					error(message, e);					// Même méthode
-				}// run
-			});// classe anonyme Runnable
-			return;									// C'est tout pour ce thread
-		}// if not EDT
+	private void error(String message, Throwable e) {
 		
 		// Un panneau d'ensemble
 		JPanel errorPanel = new JPanel(new BorderLayout());
 		
-		// Une étiquette contenant le message principal
-		JLabel errorLabel = new JLabel();
-		errorLabel.setText(message);
+		// Une étiquette contenant le message principal au-dessus
+		JLabel errorLabel = new JLabel(message);
 		errorLabel.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
-		errorPanel.add(errorLabel,					// Message simple au-dessus
-				BorderLayout.NORTH);
+		errorPanel.add(errorLabel, BorderLayout.NORTH);
 		
 		// Une zone de texte contenant le message détaillé
 		if (e != null) {
-			JTextArea area = new JTextArea(3,40);
-			area.setText(							// Définir le texte
-					e.getClass().getSimpleName()	// Nom de l'exception
-					+ (e.getMessage() == null		// Message, s'il y en a un
-							? " "+e.getStackTrace()[0]	// Sinon n° de ligne
-							: ": "+ e.getMessage())
-					+ (e.getCause() == null			// Cause, s'il y en a une
-							? ""
-							: " (" + e.getCause().getMessage() + ")"));
-			area.setEditable(false);				// Édition interdite
-			area.setLineWrap(true);					// Passer à la ligne
-			area.setWrapStyleWord(true);			// Sans couper les mots
-			area.setFont(errorLabel.getFont());		// Même police que étiquette
-			errorPanel.add(new JScrollPane(area));	// Zone de texte au centre
-		}// if message détaillé non null
+			errorPanel.add(new JScrollPane(createExceptionDescriptionArea(e)));
+		}
 		
 		// Afficher la boîte de dialogue
-		JOptionPane.showMessageDialog(
-				/* Pas de frame si disposed
-				 * 
-				 * Si le frame parent est déjà fermé, et qu'il n'y a pas d'autre
-				 * fenêtre affichée, alors la fermeture du dialog n'entraînera
-				 * pas l'arrêt de la JVM alors qu'il le devrait.
-				 */
-				frame != null && frame.isVisible() ? frame : null,
-				errorPanel, "Erreur", JOptionPane.ERROR_MESSAGE);
-	}// error
+		JOptionPane.showMessageDialog(getParentFrame(), errorPanel, "Erreur",
+				JOptionPane.ERROR_MESSAGE);
+	}
 	
+	/**
+	 * Crée un composant décrivant l'exception et sa cause.
+	 *
+	 * @param e	L'exception à décrire.
+	 * @return	Une zone de texte contenant la description de l'exception et de
+	 * 			sa cause.
+	 */
+	private Component createExceptionDescriptionArea(Throwable e) {
+		JTextArea area = new JTextArea(3, 40);
+		String description = String.format(
+				"%s: %s (%s)",
+				e.getClass().getSimpleName(),		// Nom de l'exception
+				(e.getMessage() == null)			// Message, s'il y en a un
+						? e.getStackTrace()[0]		// Sinon n° de ligne
+						: e.getMessage(),
+				(e.getCause() == null)				// Cause, s'il y en a une
+						? ""
+						: e.getCause().getMessage());
+		area.setText(description);
+		area.setEditable(false);
+		area.setLineWrap(true);
+		area.setWrapStyleWord(true);
+		area.setFont(frame.getFont());				// Même police que frame
+		return area;
+	}
+	
+	/**
+	 * Renvoie le composant qui doit servir de parent à la boîte de dialogue.
+	 * <p>
+	 * Si {@link #frame} est déjà fermé et qu'il n'y a pas d'autre fenêtre
+	 * affichée, alors la fermeture du dialog n'entraînera pas l'arrêt de la
+	 * JVM alors qu'il le devrait.<br>
+	 * La méthode renvoie donc <code>null</code> si <code>frame</code> n'est pas
+	 * affiché.
+	 *
+	 * @return	<code>frame</code> s'il est affiché, sinon <code>null</code>.
+	 */
+	private JFrame getParentFrame() {
+		return ((frame != null) && frame.isVisible()) ? frame : null;
+	}
+	
+	/**
+	 * Affiche une boîte de dialogue.
+	 *
+	 * @param message	Le texte à afficher.
+	 * @param level		Le niveau de log, déterminant le type de boîte qui sera
+	 * 					affichée.
+	 */
 	private void dialog(String message, Level level) {
-		int niveau = level.intValue();					// Priorité du message
+		int niveau = level.intValue();
 		
 		// Titre et type de message par défaut
-		String title = null;							// Titre vide
-		int messageType = JOptionPane.PLAIN_MESSAGE;	// Message normal
+		String title = null;
+		int messageType = JOptionPane.PLAIN_MESSAGE;
 		
 		// Titre et type de message selon le niveau de log
-		if (niveau >= Level.SEVERE.intValue()) {		// Erreurs
+		if (niveau >= Level.SEVERE.intValue()) {
 			title = "Erreur";
 			messageType = JOptionPane.ERROR_MESSAGE;
 			
@@ -146,45 +190,17 @@ public class DialogHandler extends Handler {
 		}
 		
 		// Afficher le message
-		JOptionPane.showMessageDialog(
-				frame != null && frame.isVisible() ? frame : null,
-				message, title, messageType);
-	}// dialog
+		JOptionPane.showMessageDialog(getParentFrame(), message, title,
+				messageType);
+	}
 
 	@Override
 	public void flush() {
+		// Pas de données en attente
 	}
 
 	@Override
-	public void close() throws SecurityException {
+	public void close() {
+		// Aucune ressource à fermer 
 	}
-}// class DialogHandler
-
-/** Un formateur de message en vue de l'affichage dans une boîte de dialogue.
- * <p>
- * Cette implémentation ajoute des balises HTML et force une largeur de texte de
- * 500, pour permettre un affichage agréable à l'oeil.
- *
- * @author Olivier HAAS
- */
-class DialogFormatter extends Formatter {
-	
-	/** Formate le message spécifié au format HTML avec une largeur de 500. */ 
-	@Override
-	public String format(LogRecord record) {
-		
-		// Cas null
-		if (record == null)
-			return "";
-		
-		// Cas du message null
-		String message = record.getMessage();
-		if (message == null)
-			return "";
-		
-		// Cas général
-		return "<html><p width=\"500\">" +
-				(message.replace("\n", "<br>")) +
-				"</p></html>";
-	}// format
 }
