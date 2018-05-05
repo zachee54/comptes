@@ -113,7 +113,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 					DocumentListener.class, this, "libelleChanged"));
 			tiers.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, this, "tiersChanged"));
-			pointer.addChangeListener(this);
+			pointer.addItemListener(EventHandler.create(
+					ItemListener.class, this, "setPointer", "itemChange"));
 			debit.addItemListener(this);
 			credit.addItemListener(this);
 			jours.addTableModelListener(this);
@@ -213,6 +214,21 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			if (!updating)
 				controller.setTiers(tiers.getText());
 		}
+		
+		/**
+		 * Active ou désactive le pointage de l'opération permanente dans le
+		 * contrôleur actuel.
+		 * 
+		 * @param state	{@link java.awt.event.ItemEvent#SELECTED} ou
+		 * 				{@link java.awt.event.ItemEvent#DESELECTED}.
+		 */
+		public void setPointer(int state) {
+			if (state == ItemEvent.SELECTED) {
+				controller.setPointer(true);
+			} else if (state == ItemEvent.DESELECTED) {
+				controller.setPointer(false);
+			}
+		}
 	
 		/**
 		 * Interface <code>ItemListener</code>. Reçoit les notifications de
@@ -292,16 +308,13 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 	
 		/**
-		 * Interface <code>ChangeListener</code>. Reçoit les notifications de la
-		 * case à cocher pour le pointage automatique ou du spinner taux, et les
-		 * renvoie au contrôleur. */
+		 * Interface <code>ChangeListener</code>. Reçoit les notifications du
+		 * spinner taux, et les renvoie au contrôleur.
+		 */
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			if (e.getSource() == pointer) {					// Pointage
-				controller.setPointer(pointer.isSelected());
-			} else if (e.getSource() == taux) {
-				controller.setTaux(							// Taux parsé
-						new BigDecimal(taux.getValue().toString()));
+			if (e.getSource() == taux) {
+				controller.setTaux(new BigDecimal(taux.getValue().toString()));
 			}
 		}
 	}// inner class DataMediator
