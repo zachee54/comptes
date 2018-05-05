@@ -85,8 +85,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	/**
 	 * Un médiateur entre les données de l'interface et les données du modèle.
 	 */
-	public class DataMediator
-	implements ChangeListener, ItemListener, TableModelListener {
+	public class DataMediator implements ChangeListener, TableModelListener {
 		
 		/**
 		 * Le contrôleur de données. Il contrôle le <code>Permanent<code> à
@@ -115,13 +114,17 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 					DocumentListener.class, this, "tiersChanged"));
 			pointer.addItemListener(EventHandler.create(
 					ItemListener.class, this, "setPointer", "itemChange"));
-			debit.addItemListener(this);
-			credit.addItemListener(this);
+			debit.addItemListener(EventHandler.create(
+					ItemListener.class, controller, "setDebit", "item"));
+			credit.addItemListener(EventHandler.create(
+					ItemListener.class, controller, "setCredit", "item"));
 			jours.addTableModelListener(this);
 			montants.addTableModelListener(this);
-			dependance.addItemListener(this);
+			dependance.addItemListener(EventHandler.create(
+					ItemListener.class, controller, "setDependance", "item"));
 			taux.addChangeListener(this);
-			compteASolder.addItemListener(this);
+			compteASolder.addItemListener(EventHandler.create(
+					ItemListener.class, controller, "setCompteASolder","item"));
 		}
 		
 		/**
@@ -227,24 +230,6 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				controller.setPointer(true);
 			} else if (state == ItemEvent.DESELECTED) {
 				controller.setPointer(false);
-			}
-		}
-	
-		/**
-		 * Interface <code>ItemListener</code>. Reçoit les notifications de
-		 * changements sur les comptes débité/crédité, sur la dépendance à une
-		 * autre opération permanente et sur le compte à solder.
-		 */
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-			if (e.getSource() == debit) {
-				controller.setDebit((Compte) e.getItem());
-			} else if (e.getSource() == credit) {
-				controller.setCredit((Compte) e.getItem());
-			} else if (e.getSource() == dependance) {
-				controller.setDependance((Permanent) e.getItem());
-			} else if (e.getSource() == compteASolder) {
-				controller.setCompteASolder((Compte) e.getItem());
 			}
 		}
 	
