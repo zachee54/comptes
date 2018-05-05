@@ -85,7 +85,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	/**
 	 * Un médiateur entre les données de l'interface et les données du modèle.
 	 */
-	public class DataMediator implements ChangeListener, TableModelListener {
+	public class DataMediator implements TableModelListener {
 		
 		/**
 		 * Le contrôleur de données. Il contrôle le <code>Permanent<code> à
@@ -122,9 +122,10 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 			montants.addTableModelListener(this);
 			dependance.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setDependance", "item"));
-			taux.addChangeListener(this);
 			compteASolder.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setCompteASolder","item"));
+			taux.addChangeListener(EventHandler.create(
+					ChangeListener.class, this, "tauxChanged"));
 		}
 		
 		/**
@@ -293,14 +294,11 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 	
 		/**
-		 * Interface <code>ChangeListener</code>. Reçoit les notifications du
-		 * spinner taux, et les renvoie au contrôleur.
+		 * Actualise le taux de l'opération permanente dans le contrôleur
+		 * actuel, à partir du montant figurant dans le spinner.
 		 */
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			if (e.getSource() == taux) {
-				controller.setTaux(new BigDecimal(taux.getValue().toString()));
-			}
+		public void tauxChanged(ChangeEvent e) {
+			controller.setTaux(new BigDecimal(taux.getValue().toString()));
 		}
 	}// inner class DataMediator
 
