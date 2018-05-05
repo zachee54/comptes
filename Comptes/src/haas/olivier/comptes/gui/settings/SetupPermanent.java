@@ -70,7 +70,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
@@ -85,7 +84,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	/**
 	 * Un médiateur entre les données de l'interface et les données du modèle.
 	 */
-	public class DataMediator implements TableModelListener {
+	public class DataMediator {
 		
 		/**
 		 * Le contrôleur de données. Il contrôle le <code>Permanent<code> à
@@ -118,8 +117,10 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 					ItemListener.class, controller, "setDebit", "item"));
 			credit.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setCredit", "item"));
-			jours.addTableModelListener(this);
-			montants.addTableModelListener(this);
+			jours.addTableModelListener(EventHandler.create(
+					TableModelListener.class, this, "joursChanged"));
+			montants.addTableModelListener(EventHandler.create(
+					TableModelListener.class, this, "montantsChanged"));
 			dependance.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setDependance", "item"));
 			compteASolder.addItemListener(EventHandler.create(
@@ -235,62 +236,55 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 	
 		/**
-		 * Interface <code>TableModelListener</code>. Reçoit les notifications
-		 * de changements sur le planning des jours, ou des montants fixes.
+		 * Reçoit les notifications de changements sur le planning des jours.
+		 * <p<
+		 * Pour les tables de jours et de montants, la classe
+		 * PlannerTableModel utilise une Map<Month,Object> pour permettre
+		 * l'héritage entre les deux tables.
+		 * Il faut transférer les entrées de cette Map vers une
+		 * Map<Month,Integer> ou Map<Month,BigDecimal> avant de l'envoyer au
+		 * contrôleur de données.
 		 */
-		@Override
-		public void tableChanged(TableModelEvent e) {
-			
-			/*
-			 * Pour les tables de jours et de montants, la classe
-			 * PlannerTableModel utilise une Map<Month,Object> pour permettre
-			 * l'héritage entre les deux tables.
-			 * Il faut transférer les entrées de cette Map vers une
-			 * Map<Month,Integer> ou Map<Month,BigDecimal> avant de l'envoyer au
-			 * contrôleur de données.
-			 */
-			if (e.getSource() == jours) {			// Table des jours
+		public void tableChanged() {
 				
-				// Définir une nouvelle Map pour recevoir les données
-				HashMap<Month,Integer> mapJours =
-						new HashMap<Month,Integer>();
-				
-				// Pour chaque entrée de la Map de l'IHM
-				for (Entry<Month,Object> entry : jours.getMap().entrySet()) {
-					
-					// Vérifier la classe de la valeur
-					if (entry.getValue() instanceof Integer) {
-						
-						// Insérer dans la nouvelle Map
-						mapJours.put(
-								entry.getKey(), (Integer) entry.getValue());
-					}
+			// Définir une nouvelle Map pour recevoir les données
+			HashMap<Month,Integer> mapJours = new HashMap<>();
+
+			// Pour chaque entrée de la Map de l'IHM
+			for (Entry<Month,Object> entry : jours.getMap().entrySet()) {
+
+				// Vérifier la classe de la valeur
+				if (entry.getValue() instanceof Integer) {
+
+					// Insérer dans la nouvelle Map
+					mapJours.put(
+							entry.getKey(), (Integer) entry.getValue());
 				}
-				
-				// Envoyer la nouvelle Map au contrôleur
-				controller.setJours(mapJours);
-				
-			} else if (e.getSource() == montants) {	// Table des montants
-				
-				// Définir une nouvelle Map pour recevoir les données
-				HashMap<Month,BigDecimal> mapMontants =
-						new HashMap<Month,BigDecimal>();
-				
-				// Pour chaque entrée de la Map de l'IHM
-				for (Entry<Month,Object> entry : montants.getMap().entrySet()) {
-					
-					// Vérifier la classe de la valeur
-					if (entry.getValue() instanceof BigDecimal) {
-						
-						// Insérer dans la nouvelle Map
-						mapMontants.put(
-								entry.getKey(), (BigDecimal) entry.getValue());
-					}
-				}
-				
-				// Envoyer la nouvelle Map au contrôleur
-				controller.setMontants(mapMontants);
 			}
+
+			// Envoyer la nouvelle Map au contrôleur
+			controller.setJours(mapJours);
+		}	
+			
+		public void montantsChanged() {		
+
+			// Définir une nouvelle Map pour recevoir les données
+			HashMap<Month,BigDecimal> mapMontants = new HashMap<>();
+
+			// Pour chaque entrée de la Map de l'IHM
+			for (Entry<Month,Object> entry : montants.getMap().entrySet()) {
+
+				// Vérifier la classe de la valeur
+				if (entry.getValue() instanceof BigDecimal) {
+
+					// Insérer dans la nouvelle Map
+					mapMontants.put(
+							entry.getKey(), (BigDecimal) entry.getValue());
+				}
+			}
+
+			// Envoyer la nouvelle Map au contrôleur
+			controller.setMontants(mapMontants);
 		}
 	
 		/**
