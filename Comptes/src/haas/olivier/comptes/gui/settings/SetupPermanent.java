@@ -103,6 +103,9 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		/**
 		 * Construit un médiateur de données entre l'interface graphique et les
 		 * données du modèle.
+		 * <p>
+		 * L'objet écoute les modifications de tous les champs de saisie et les
+		 * répercute sur le contrôleur en cours.
 		 */
 		private DataMediator() {
 			nom.getDocument().addDocumentListener(EventHandler.create(
@@ -113,26 +116,33 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 					DocumentListener.class, this, "tiersChanged"));
 			pointer.addItemListener(EventHandler.create(
 					ItemListener.class, this, "setPointer", "itemChange"));
-			debit.addItemListener(EventHandler.create(
-					ItemListener.class, controller, "setDebit", "item"));
-			credit.addItemListener(EventHandler.create(
-					ItemListener.class, controller, "setCredit", "item"));
 			jours.addTableModelListener(EventHandler.create(
 					TableModelListener.class, this, "joursChanged"));
 			montants.addTableModelListener(EventHandler.create(
 					TableModelListener.class, this, "montantsChanged"));
+			taux.addChangeListener(EventHandler.create(
+					ChangeListener.class, this, "tauxChanged"));
+			
+			/*
+			 * Les ItemListener sont notifiés que lorsque la modification vient
+			 * de l'utilisateur, pas en cas de changement programmatique. On
+			 * peut donc renvoyer vers le contrôleur sans tester le drapeau
+			 * updating.
+			 */
+			debit.addItemListener(EventHandler.create(
+					ItemListener.class, controller, "setDebit", "item"));
+			credit.addItemListener(EventHandler.create(
+					ItemListener.class, controller, "setCredit", "item"));
 			dependance.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setDependance", "item"));
 			compteASolder.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setCompteASolder","item"));
-			taux.addChangeListener(EventHandler.create(
-					ChangeListener.class, this, "tauxChanged"));
 		}
 		
 		/**
 		 * Renvoie le contrôleur vers lequel pointe actuellement le médiateur.
 		 */
-		public PermanentController getController() {
+		PermanentController getController() {
 			return controller;
 		}
 		
@@ -143,52 +153,63 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		public void setController(PermanentController controller) {
 	
 			// Ignorer la valeur null
-			if (controller == null) {
+			if (controller == null)
 				return;
-			}
 			
 			this.controller = controller;
 			
 			// Transcrire les données du nouveau contrôleur
 			updating = true;
-			typeController.changeVue(controller.getType()); // Type
-			nom.setText(controller.getNom());				// Nom
-			libelle.setText(controller.getLibelle());		// Libellé
-			tiers.setText(controller.getTiers());			// Tiers
-			pointer.setSelected(controller.getPointer());	// Pointage
-			credit.setSelectedItem(controller.getCredit());	// Crédit
-			jours.setMap(controller.getJours());			// Planning jours
-			montants.setMap(controller.getMontants());		// Planning montants
+			typeController.changeVue(controller.getType());
+			nom.setText(controller.getNom());
+			libelle.setText(controller.getLibelle());
+			tiers.setText(controller.getTiers());
+			pointer.setSelected(controller.getPointer());
+			credit.setSelectedItem(controller.getCredit());
+			jours.setMap(controller.getJours());
+			montants.setMap(controller.getMontants());
 			
 			// Le compte à solder modifie aussi le compte débité
-			compteASolder.setSelectedItem(					// Compte à solder
-					controller.getCompteASolder());
+			compteASolder.setSelectedItem(controller.getCompteASolder());
 			// On modifie le compté débité seulement après
-			debit.setSelectedItem(controller.getDebit());	// Débit
+			debit.setSelectedItem(controller.getDebit());
 			
+			// Taux
 			BigDecimal decTaux = controller.getTaux();
-			if (decTaux != null) {
-				taux.setValue(controller.getTaux());		// Taux non null
-			}
+			if (decTaux != null)
+				taux.setValue(controller.getTaux());	// Taux non null
 			
-			/* Mettre à jour la combo box des opérations de dépendance. On
-			 * rajoute tous les Permanents, sauf celui qui est sélectionné. */
-			dependance.removeAllItems();				// Vider tout
-			for (PermanentController pc : controllers) {// Chaque contrôleur
-				if (pc != controller) {					// Sauf celui-ci
-					dependance.addItem(
-							pc.getPermanent());			// Ajouter le Permanent
-				}
-			}
-			dependance.setSelectedItem(					// Sélectionner le bon
-					controller.getDependance());
+			// Contenu de la combo box de dépendance
+			updateDependanceComboBox();
+			
 			updating = false;
+		}
+		
+		/**
+		 * Met à jour la combo box des opérations de dépendance.<br>
+		 * Elle supprime le contenu actuel et y insère tous les
+		 * <code>Permanent</code>s, sauf celui qui dépend du contrôleur
+		 * actuellement sélectionné.
+		 * <p>
+		 * À l'issue de la méthode, lé dépendance actuelle est sélectionnée,
+		 * s'il y en a une.
+		 */
+		private void updateDependanceComboBox() {
+			dependance.removeAllItems();
+			
+			controllers.stream()
+			.filter(c -> c != controller)
+			.map(PermanentController::getPermanent)
+			.forEach(p -> dependance.addItem(p)); 
+			
+			dependance.setSelectedItem(controller.getDependance());
 		}
 	
 		/**
 		 * Reçoit les modifications de type initiées par l'utilisateur, et les
 		 * renvoie au contrôleur de Permanent.
 		 */
+		// FIXME Cette méthode constitue probablement un détour inutile
 		public void setType(String type) {
 			controller.setType(type);
 		}
@@ -228,7 +249,9 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		 * 				{@link java.awt.event.ItemEvent#DESELECTED}.
 		 */
 		public void setPointer(int state) {
-			if (state == ItemEvent.SELECTED) {
+			if (updating) {
+				return;
+			} else if (state == ItemEvent.SELECTED) {
 				controller.setPointer(true);
 			} else if (state == ItemEvent.DESELECTED) {
 				controller.setPointer(false);
@@ -236,54 +259,52 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 	
 		/**
-		 * Reçoit les notifications de changements sur le planning des jours.
-		 * <p<
+		 * Reçoit les notifications de changements sur le planning des jours et
+		 * les renvoie au contrôleur.
+		 * <p>
 		 * Pour les tables de jours et de montants, la classe
-		 * PlannerTableModel utilise une Map<Month,Object> pour permettre
-		 * l'héritage entre les deux tables.
+		 * <code>PlannerTableModel</code> utilise une
+		 * <code>Map&lt;Month,Object&gt;</code> pour permettre l'héritage entre
+		 * les deux tables.<br>
 		 * Il faut transférer les entrées de cette Map vers une
-		 * Map<Month,Integer> ou Map<Month,BigDecimal> avant de l'envoyer au
+		 * <code>Map&lt;Month,Integer&gt;</code> ou
+		 * <code>Map&lt;Month,BigDecimal&gt;</code> avant de l'envoyer au
 		 * contrôleur de données.
 		 */
-		public void tableChanged() {
-				
-			// Définir une nouvelle Map pour recevoir les données
+		// FIXME L'héritage entre les deux tables de PlannerTableModel est ici un obstacle
+		public void joursChanged() {
 			HashMap<Month,Integer> mapJours = new HashMap<>();
-
-			// Pour chaque entrée de la Map de l'IHM
 			for (Entry<Month,Object> entry : jours.getMap().entrySet()) {
-
-				// Vérifier la classe de la valeur
-				if (entry.getValue() instanceof Integer) {
-
-					// Insérer dans la nouvelle Map
-					mapJours.put(
-							entry.getKey(), (Integer) entry.getValue());
+				Object value = entry.getValue();
+				if (value instanceof Integer) {
+					mapJours.put(entry.getKey(), (Integer) value
+							);
 				}
 			}
-
-			// Envoyer la nouvelle Map au contrôleur
 			controller.setJours(mapJours);
 		}	
 			
+		/**
+		 * Reçoit les notifications de changements sur le planning des montants
+		 * et les renvoie au contrôleur.
+		 * <p>
+		 * Pour les tables de jours et de montants, la classe
+		 * <code>PlannerTableModel</code> utilise une
+		 * <code>Map&lt;Month,Object&gt;</code> pour permettre l'héritage entre
+		 * les deux tables.<br>
+		 * Il faut transférer les entrées de cette Map vers une
+		 * <code>Map&lt;Month,Integer&gt;</code> ou
+		 * <code>Map&lt;Month,BigDecimal&gt;</code> avant de l'envoyer au
+		 * contrôleur de données.
+		 */
 		public void montantsChanged() {		
-
-			// Définir une nouvelle Map pour recevoir les données
 			HashMap<Month,BigDecimal> mapMontants = new HashMap<>();
-
-			// Pour chaque entrée de la Map de l'IHM
 			for (Entry<Month,Object> entry : montants.getMap().entrySet()) {
-
-				// Vérifier la classe de la valeur
-				if (entry.getValue() instanceof BigDecimal) {
-
-					// Insérer dans la nouvelle Map
-					mapMontants.put(
-							entry.getKey(), (BigDecimal) entry.getValue());
+				Object value = entry.getValue();
+				if (value instanceof BigDecimal) {
+					mapMontants.put(entry.getKey(), (BigDecimal) value);
 				}
 			}
-
-			// Envoyer la nouvelle Map au contrôleur
 			controller.setMontants(mapMontants);
 		}
 	
