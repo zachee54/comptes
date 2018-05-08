@@ -27,6 +27,7 @@ import java.beans.EventHandler;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -206,15 +208,6 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		}
 	
 		/**
-		 * Reçoit les modifications de type initiées par l'utilisateur, et les
-		 * renvoie au contrôleur de Permanent.
-		 */
-		// FIXME Cette méthode constitue probablement un détour inutile
-		public void setType(String type) {
-			controller.setType(type);
-		}
-		
-		/**
 		 * Met à jour le nom de l'opération permanente dans le contrôleur
 		 * actuel.
 		 */
@@ -319,10 +312,10 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 
 	/**
 	 * Un <code>ActionListener</code> qui gère les changements de vues et de
-	 * boutons en fonction du type de Permanent. Il peut être appelé par les
-	 * objets Swing générant des <code>ActionEvent</code>, ou directement par le
-	 * programme. L'objet crée son propre <code>JPanel</code> avec un
-	 * <code>CardLayout</code> standard.
+	 * boutons en fonction du type de <code>Permanent</code>. Il peut être
+	 * appelé par les objets Swing générant des <code>ActionEvent</code>, ou
+	 * directement par le programme. L'objet crée son propre <code>JPanel</code>
+	 * avec un <code>CardLayout</code> standard.
 	 * 
 	 * @author Olivier HAAS
 	 */
@@ -332,13 +325,21 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		 * <code>Map</code> associant les commandes aux boutons, pour permettre
 		 * la mise à jour du statut du bouton à l'invocation de la commande.
 		 */
-		public HashMap<String,AbstractButton> buttonMap =
-				new HashMap<String,AbstractButton>();
+		private final Map<String, AbstractButton> buttonMap = new HashMap<>();
 		
-		private CardLayout layout = new CardLayout();	// Le layout modifiable
-		public final JPanel panel = new JPanel(layout);	// Le panel à vues
+		/**
+		 * Le layout modifiable.
+		 */
+		private final CardLayout layout = new CardLayout();
 		
-		// Composants "débit" à désactiver pour le type "compte à solder"
+		/**
+		 * Le panel à vues.
+		 */
+		private final JPanel panel = new JPanel(layout);
+		
+		/**
+		 * Composants "débit" à désactiver pour le type "compte à solder".
+		 */
 		private JComponent[] debitComponents;
 		
 		/**
@@ -360,7 +361,9 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
 			changeVue(command);						// Extraire la commande
-			dataMediator.setType(command);			// Faire suivre au modèle
+			
+			// Faire suivre au contrôleur
+			dataMediator.getController().setType(command);
 		}
 	
 		/**
@@ -368,21 +371,19 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		 */
 		public void changeVue(String command) {
 			AbstractButton bouton;					// Bouton à mettre à jour
-			if (buttonMap.containsKey(command)) {	// Commande connue ?
-				bouton = buttonMap.get(command);	// Trouve le bon bouton
-			} else {
-				return;								// Inconnue: ne rien faire
-			}
-			if (!bouton.isSelected()) {
-				bouton.setSelected(true);			// Selectionne le bouton
-			}
+			if (!buttonMap.containsKey(command))
+				return;
+			bouton = buttonMap.get(command);
+			
+			if (!bouton.isSelected())
+				bouton.setSelected(true);
+			
 			layout.show(panel, command);			// Changer de vue
 			
 			// Activer ou désactiver les JComponents "débit" suivant le type
-			boolean actif = !SOLDER.equals(command);	// Inactif si SOLDER
-			for (JComponent comp : debitComponents) {	// Appliquer aux JComp
+			boolean actif = !SOLDER.equals(command);
+			for (JComponent comp : debitComponents)
 				comp.setEnabled(actif);
-			}
 		}
 	}// inner class TypeListener
 
@@ -404,29 +405,104 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	public static final String QUITTER = "quitter";
 	
 	// Composants graphiques de saisie des données
-	private TypeController typeController;			// Contrôleur de type
-	private JTextComponent nom, libelle, tiers;		// Composants de texte
-	private JCheckBox pointer;						// Pointage
-	private JComboBox<Compte> debit, credit;		// Comptes débit/crédit
-	private JComboBox<Permanent> dependance;		// Dépendance
-	private JComboBox<Compte> compteASolder;		// Compte à solder
-	private JSpinner taux;							// Taux
-	private PlannerTableModel jours, montants;		// Plannings
+	
+	/**
+	 * Contrôleur de type.
+	 */
+	private final TypeController typeController = new TypeController();
+	
+	/**
+	 * Le bouton de sélection du type d'opérations permanentes à montants fixes.
+	 */
+	private final JRadioButton radioFixe = new JRadioButton("Fixe");
+	
+	/**
+	 * Le bouton de sélection du type d'opérations permanentes proportionnelles
+	 * à une autre opération.
+	 */
+	private final JRadioButton radioProport = new JRadioButton("Proportionnel");
+	
+	/**
+	 * Le bouton de sélection du type d'opérations permanentes dont le rôle est
+	 * de solder un compte spécifique.
+	 */
+	private final JRadioButton radioSolder =
+			new JRadioButton("Solde d'un compte");
+	
+	/**
+	 * Champ de saisie du nom.
+	 */
+	private final JTextComponent nom = new JTextField();;
+	
+	/**
+	 * Champ de saisie du libellé.
+	 */
+	private final JTextComponent libelle = new JTextField();;
+	
+	/**
+	 * Champ de saisie du tiers.
+	 */
+	private final JTextComponent tiers = new JTextField();;
+	
+	/**
+	 * Case à cocher pour le pointage automatique de l'opération.
+	 */
+	private final JCheckBox pointer = new JCheckBox();
+	
+	/**
+	 * Liste déroulante pour choisir le compte débité.
+	 */
+	private final JComboBox<Compte> debit = new JComboBox<>();
+	
+	/**
+	 * Liste déroulante pour choisir le compte crédité.
+	 */
+	private final JComboBox<Compte> credit = new JComboBox<>();
+	
+	/**
+	 * Liste déroulante pour choisir l'opération dont dépend celle-ci.
+	 */
+	private final JComboBox<Permanent> dependance = new JComboBox<>();
+	
+	/**
+	 * Liste déroulante pour choisir le compte à solder.
+	 */
+	private final JComboBox<Compte> compteASolder = new JComboBox<>();
+	
+	/**
+	 * Champ de saisie du taux, pour une opération dépendante d'une autre.
+	 * <p>
+	 * Ce champ permet une saisie à la souris avec une précision d'une décimale.
+	 */
+	private final JSpinner taux =
+			new JSpinner(new SpinnerNumberModel(0.0, 0.0, null, 0.1));
+	
+	/**
+	 * Planning des jours du mois.
+	 */
+	private final PlannerTableModel jours =
+			new PlannerTableModel(Integer.class, "Jours");
+	
+	/**
+	 * Planning des montants.
+	 */
+	private final PlannerTableModel montants =
+			new PlannerTableModel(BigDecimal.class, "Montants");
 	
 	/**
 	 * Le GUI associé.
 	 */
-	private SimpleGUI gui;
+	private final SimpleGUI gui;
 	
 	/**
 	 * Boîte de dialogue principale.
 	 */
-	private JDialog dialog;
+	private final JDialog dialog;
 	
 	/**
 	 * Médiateur entre les données de l'IHM et du modèle.
 	 */
-	private DataMediator dataMediator;
+	private final DataMediator dataMediator;
 	
 	/**
 	 * La collection ordonnée de contrôleurs de <code>Permanent</code>s.
@@ -437,160 +513,97 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	 * Liste graphique des Permanents. Elle contient en fait des instances de
 	 * <code>PermanentController</code>, transparents pour l'utilisateur.
 	 */
-	private JList<PermanentController> listPermanents;
+	private final JList<PermanentController> listPermanents;
 	
 	/**
 	 * Construit une boîte de dialogue de gestion des <code>Permanent</code>s.
 	 * 
 	 * @param owner	La fenêtre parent.
 	 * @param gui	Le GUI associé (pour mise à jour des boutons).
+	 * 
+	 * @throws IOException
+	 * 				Si une erreur se produit pendant la récupération des
+	 * 				comptes.
 	 */
-	public SetupPermanent(JFrame owner, SimpleGUI gui) {
+	public SetupPermanent(JFrame owner, SimpleGUI gui) throws IOException {
 		this.gui = gui;
 		
-		// Sélection du type de Permanent (fixe, proportionnel ou dépendant)
-		JPanel hautDroite = new JPanel();			// Panel
-		ButtonGroup groupeType = new ButtonGroup();	// Groupe de boutons radio
-		JRadioButton radioFixe		= new JRadioButton("Fixe");	// Boutons radio
-		JRadioButton radioProport	= new JRadioButton("Proportionnel");
-		JRadioButton radioSolder	= new JRadioButton("Solde d'un compte");
-		radioFixe	.setActionCommand(FIXE);		// Commandes
-		radioProport.setActionCommand(PROPORTIONNEL);
-		radioSolder	.setActionCommand(SOLDER);
-		TypeController typeController =				// Contrôleur de type
-				new TypeController();
-		JRadioButton[] radios =						// Tous les boutons radio
-			{radioFixe, radioProport, radioSolder};
-		for (JRadioButton radio : radios) {			// Pour chaque bouton
-			radio.addActionListener(typeController);// Ajouter le Listener
-			typeController.buttonMap.put(			// Associer commande/bouton
-					radio.getActionCommand(), radio);
-			groupeType.add(radio);					// Ajouter au groupe
-			hautDroite.add(radio);					// Ajouter au panel
-		}
-		
-		// Nom du Permanent
-		JLabel labelNom = new JLabel("Nom");		// Étiquette
-		JTextField nom = new JTextField();			// Champ de saisie texte
-		
-		// Libellé de l'opération
-		JLabel labelLibelle = new JLabel("Libellé");// Étiquette
-		JTextField libelle = new JTextField();		// Champ de saisie texte
-		
-		// Nom du tiers
-		JLabel labelTiers = new JLabel("Tiers");	// Étiquette
-		JTextField tiers = new JTextField();		// Champs de saisie texte
-		
-		// Récupérer tous les comptes dans un tableau ordonné
-		ArrayList<Compte> comptes = new ArrayList<Compte>();
-		try {
-			comptes.addAll(DAOFactory.getFactory().getCompteDAO().getAll());
-		} catch (IOException e) {
-		}
-		Collections.sort(comptes);							// Trier
-		Compte[] arrayComptes = new Compte[comptes.size()];	// Mettre en tableau
-		comptes.toArray(arrayComptes);
-		
-		// Box de choix des comptes
-		JLabel labelDebit = new JLabel("Débit");				// Etiquettes
-		JLabel labelCredit = new JLabel("Crédit");
-		final JComboBox<Compte> boxDebit =						// ComboBoxes
-				new JComboBox<>(arrayComptes);
-		JComboBox<Compte> boxCredit = new JComboBox<>(arrayComptes);
-		boxDebit.setRenderer(									// Renderers
-				new ComptesComboBoxRenderer());
-		boxCredit.setRenderer(new ComptesComboBoxRenderer());
-		
-		// Case à cocher pour le pointage
-		JLabel labelPointage = new JLabel("Pointage");		// Étiquette
-		JCheckBox pointer = new JCheckBox();				// Case à cocher
-		
-		// La table des jours
-		PlannerTableModel plannerJours =
-				new PlannerTableModel(Integer.class, "Jours");
-		JTable tableJours = createPlannerTable(plannerJours);
-		
-		// Paramètres des opérations à montant fixe
-		PlannerTableModel plannerMontants =					// Modèle
-				new PlannerTableModel(BigDecimal.class, "Montants");
-		JTable tableMontants = createPlannerTable(plannerMontants);
-		tableMontants.setDefaultRenderer(				// Renderer BigDecimals
-				BigDecimal.class,new FinancialTable.MontantTableCellRenderer());
-		
-		// Paramètres des opérations à montant proportionnel à une autre
-		JLabel labelTaux = new JLabel("Taux");				// Etiquette taux				
-		JSpinner taux = new JSpinner(						// Saisie du taux
-				new SpinnerNumberModel(0.0, 0.0, null, 0.1));
-		taux.setEditor(										// Affichage du taux
-				new JSpinner.NumberEditor(taux, "0.00 '%'"));
-		JLabel labelPermanent =								// Label opération
-				new JLabel("Opération référente");
-		JComboBox<Permanent> dependance =					// Box dépendance
-				new JComboBox<>();
-		
-		// Paramètres des opérations soldant un compte
-		JLabel labelSolder = new JLabel("Compte à solder");
-		JComboBox<Compte> compteASolder =				// Box comptes à solder
-				new JComboBox<>();
-		for (Compte c : arrayComptes) {					// Remplir la liste
-			if (c instanceof Compte) {// Seulement des comptes bancaires
-				compteASolder.addItem(c);
-			}
-		}
-		compteASolder.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				boxDebit.setSelectedItem(e.getItem());	// Ajuster compte débité
-			}
-		});// classe anonyme ItemListener
-		
-		// Boutons de validation
-		JButton valider		= new JButton("Valider");	// Bouton Valider
-		JButton appliquer	= new JButton("Appliquer");	// Bouton Appliquer
-		JButton supprimer	= new JButton("Supprimer");	// Bouton Supprimer
-		JButton quitter		= new JButton("Quitter");	// Bouton Quitter
-		valider		.setActionCommand(VALIDER);			// Commandes
-		appliquer	.setActionCommand(APPLIQUER);
-		supprimer	.setActionCommand(SUPPRIMER);
-		quitter		.setActionCommand(QUITTER);
-		valider		.addActionListener(this);			// Écouter
-		appliquer	.addActionListener(this);
-		supprimer	.addActionListener(this);
-		quitter		.addActionListener(this);
-		
-		// Charger la liste principale
+		/*
+		 * Le médiateur de données ne peut pas être instancié dans sa
+		 * déclaration parce que son constructeur a besoin des variables
+		 * d'instance de SetupPermanent, instanciées également lors de leurs
+		 * déclarations.
+		 * Je ne veux pas devoir gérer des priorités entre variables d'instance.
+		 */
 		dataMediator = new DataMediator();
+		
+		// Configurer les composants de saisie
+		Compte[] comptes = getComptes();
+		initComptesComboBox(debit, comptes);
+		initComptesComboBox(credit, comptes);
+		initTypeButtons();
+		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
+		initComptesASolder(comptes);
 		listPermanents = createPermanentList(dataMediator);
 		fillPermanentList(null);
 		
 		// Disposer tout ensemble
+		JPanel main = createContent();
+		
+		// Lier la touche ESC à l'action de quitter
+		UniversalAction actionQuitter = new UniversalAction(this, QUITTER);
+		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), QUITTER);
+		main.getActionMap().put(QUITTER, actionQuitter);
+		
+		// Cadre principal
+		dialog = new JDialog(owner, "Gestion des opérations permanentes");
+		dialog.add(main);
+		
+		// Remplacer la fermeture par l'action personnalisée
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.addWindowListener(actionQuitter);
+		
+		dialog.setPreferredSize(new Dimension(900,600));
+		dialog.pack();
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);
+	}
+	
+	/**
+	 * Crée un panneau contenant tous les éléments graphiques.
+	 */
+	private JPanel createContent() {		
 		
 		// Liste des permanents dans un ScrollPane
 		JScrollPane scrollList = new JScrollPane(listPermanents);
 		scrollList.setPreferredSize(
 				new Dimension(150, scrollList.getPreferredSize().height));
 		
-		// Panneau de choix du type
-		hautDroite.setLayout(						// Agencement
-				new BoxLayout(hautDroite, BoxLayout.PAGE_AXIS));
-		TitledBorder titre =						// Bordure avec titre
-				BorderFactory.createTitledBorder("Type d'opération");
-		Font font = titre.getTitleFont();
-        if (font == null) {
-        	font = UIManager.getFont("TitledBorder.font");
-        }
-        if (font == null) {
-        	font = hautDroite.getFont();
-        }
-		font = font.deriveFont(Font.ITALIC);		// Police italique(pas gras)
-		titre.setTitleFont(font);
+		// Sélection du type de Permanent (fixe, dépendant ou soldeur)
+		JPanel typePanel = createTypePanel();
+		typePanel.add(radioFixe);
+		typePanel.add(radioProport);
+		typePanel.add(radioSolder);
 		
-		hautDroite.setBorder(titre);				// Appliquer la bordure
+		// Les tables de jours et de montants
+		JTable tableJours = createPlannerTable(jours);
+		JTable tableMontants = createPlannerTable(montants);
+		
+		// Étiquettes
+		JLabel labelNom = new JLabel("Nom");
+		JLabel labelLibelle = new JLabel("Libellé");
+		JLabel labelTiers = new JLabel("Tiers");
+		JLabel labelDebit = new JLabel("Débit");
+		JLabel labelCredit = new JLabel("Crédit");
+		JLabel labelPointage = new JLabel("Pointage");
+		JLabel labelTaux = new JLabel("Taux");				
+		JLabel labelPermanent = new JLabel("Opération référente");
+		JLabel labelSolder = new JLabel("Compte à solder");
 
 		// Panneau du nom, libellé, tiers, pointage, choix des comptes
-		JPanel panelComptes = new JPanel();			// Panneau
-		GroupLayout layoutComptes =					// Agencement
-				new GroupLayout(panelComptes);
+		JPanel panelComptes = new JPanel();
+		GroupLayout layoutComptes = new GroupLayout(panelComptes);
 		panelComptes.setLayout(layoutComptes);
 		layoutComptes.setAutoCreateGaps(true);
 		layoutComptes.setAutoCreateContainerGaps(true);
@@ -608,8 +621,8 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 						.addComponent(nom)
 						.addComponent(libelle)
 						.addComponent(tiers)
-						.addComponent(boxDebit)
-						.addComponent(boxCredit)
+						.addComponent(debit)
+						.addComponent(credit)
 						.addComponent(pointer)));
 		layoutComptes.setVerticalGroup(layoutComptes.createSequentialGroup()
 				.addGroup(layoutComptes.createParallelGroup(
@@ -627,11 +640,11 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 				.addGroup(layoutComptes.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelDebit)
-						.addComponent(boxDebit))
+						.addComponent(debit))
 				.addGroup(layoutComptes.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelCredit)
-						.addComponent(boxCredit))
+						.addComponent(credit))
 				.addGroup(layoutComptes.createParallelGroup(
 						GroupLayout.Alignment.BASELINE)
 						.addComponent(labelPointage)
@@ -639,7 +652,7 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 
 		// Panneau des opérations proportionnelles
 		JPanel propPanel = new JPanel();
-		GroupLayout layoutProp = new GroupLayout(propPanel);// Agencement
+		GroupLayout layoutProp = new GroupLayout(propPanel);
 		propPanel.setLayout(layoutProp);
 		layoutProp.setAutoCreateContainerGaps(true);
 		layoutProp.setAutoCreateGaps(true);
@@ -677,55 +690,80 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		JPanel transversalPanel = new JPanel(new GridLayout(1,2));
 		transversalPanel.add(								// Table des jours
 				new JScrollPane(tableJours), BorderLayout.WEST);
-		transversalPanel.add(cardPane);						//Panneau "carte"
+		transversalPanel.add(cardPane);						//Panneau à la carte
 
 		// Panneau des boutons de validation
-		JPanel validationPanel = new JPanel();				// Panneau
-		validationPanel.setLayout(							// Agencement
+		JPanel validationPanel = new JPanel();
+		validationPanel.setLayout(
 				new BoxLayout(validationPanel, BoxLayout.LINE_AXIS));
-		validationPanel.add(supprimer);						// Bouton Supprimer
+		
+		// Boutons de validation
+		JButton valider		= new JButton("Valider");		// Bouton Valider
+		JButton appliquer	= new JButton("Appliquer");		// Bouton Appliquer
+		JButton supprimer	= new JButton("Supprimer");		// Bouton Supprimer
+		JButton quitter		= new JButton("Quitter");		// Bouton Quitter
+		valider		.setActionCommand(VALIDER);				// Commandes
+		appliquer	.setActionCommand(APPLIQUER);
+		supprimer	.setActionCommand(SUPPRIMER);
+		quitter		.setActionCommand(QUITTER);
+		valider		.addActionListener(this);
+		appliquer	.addActionListener(this);
+		supprimer	.addActionListener(this);
+		quitter		.addActionListener(this);
+		validationPanel.add(supprimer);
 		validationPanel.add(Box.createHorizontalGlue());	// Pousser à droite
-		validationPanel.add(appliquer);						// Bouton Appliquer
-		validationPanel.add(valider);						// Bouton Valider
-		validationPanel.add(quitter);						// Bouton Quitter
+		validationPanel.add(appliquer);
+		validationPanel.add(valider);
+		validationPanel.add(quitter);
 		
 		// Panneau d'édition
 		JPanel editionPane = new JPanel();
-		editionPane.setLayout(						// Agencement vertical
-				new BoxLayout(editionPane, BoxLayout.PAGE_AXIS));
-		editionPane.add(hautDroite);				// Panel choix du type
-		editionPane.add(panelComptes);				// Panel choix du compte
+		editionPane.setLayout(new BoxLayout(editionPane, BoxLayout.PAGE_AXIS));
+		editionPane.add(typePanel);							// Choix du type
+		editionPane.add(panelComptes);						// Choix du compte
 		editionPane.add(transversalPanel);
 		editionPane.add(validationPanel);
 		
 		// Panneau général
 		JPanel main = new JPanel(new BorderLayout());
-		main.setBorder(								// Créer une marge
+		main.setBorder(										// Créer une marge
 				BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		main.add(scrollList, BorderLayout.WEST);	// Liste des Permanent
-		main.add(editionPane);						// Panneau d'édition
-		
-		// Lier la touche ESC à l'action de quitter
-		UniversalAction actionQuitter = new UniversalAction(this, QUITTER);
-		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
-		main.getActionMap().put("quitter", actionQuitter);
-		
-		// Cadre principal
-		dialog = new JDialog(owner, "Gestion des opérations permanentes");
-		dialog.add(main);
-		
-		// Remplacer la fermeture par l'action personnalisée
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.addWindowListener(actionQuitter);
-		
-		dialog.setPreferredSize(new Dimension(900,600));
-		dialog.pack();
-		dialog.setLocationRelativeTo(null);
-		dialog.setVisible(true);
-		
-//		boxDebit.setSelectedItem(null);
-	}// constructeur
+		main.add(scrollList, BorderLayout.WEST);			// Liste Permanents
+		main.add(editionPane);								// Panneau d'édition
+		return main;
+	}
+	
+	/**
+	 * Renvoie tous les comptes dans un tableau trié.
+	 * 
+	 * @return	Un tableau contenant tous les comptes triés par ordre naturel.
+	 * 
+	 * @throws IOException
+	 */
+	private static Compte[] getComptes() throws IOException {
+		Collection<Compte> comptes =
+				DAOFactory.getFactory().getCompteDAO().getAll();
+		Compte[] arrayComptes = comptes.toArray(new Compte[comptes.size()]);
+		Arrays.sort(arrayComptes);
+		return arrayComptes;
+	}
+	
+	/**
+	 * Configure une liste déroulante des comptes.
+	 * <p>
+	 * Les comptes sont insérés dans la liste déroulante, et l'affichage est
+	 * paramétré avec un Renderer approprié.<br>
+	 * Si la liste déroulante contient déjà quelque chose, son contenu est
+	 * supprimé.
+	 * 
+	 * @param combo		La liste déroulante des comptes.
+	 * @param comptes	Les comptes à insérer dans la liste déroulante.
+	 */
+	private static void initComptesComboBox(JComboBox<Compte> combo,
+			Compte[] comptes) {
+		combo.setModel(new DefaultComboBoxModel<>(comptes));
+		combo.setRenderer(new ComptesComboBoxRenderer());
+	}
 	
 	/**
 	 * Crée une liste graphique des contrôleurs d'opérations permanentes.
@@ -756,13 +794,87 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	 * 
 	 * @see	{@link PlannerTableModel}
 	 */
-	private JTable createPlannerTable(PlannerTableModel model) {
+	private static JTable createPlannerTable(PlannerTableModel model) {
 		JTable table = new JTable(model);
-//		table.setDefaultRenderer(						// Renderer des mois
-//				Month.class, new FinancialTable.MonthTableCellRenderer());
-		table.setDefaultEditor(							// Editor des mois
-				Month.class, new MonthCellEditor());
+		
+		// Éditeur spécifique pour les mois
+		table.setDefaultEditor(Month.class, new MonthCellEditor());
+		
+		table.setDefaultRenderer(BigDecimal.class,
+				new FinancialTable.MontantTableCellRenderer());
 		return table;
+	}
+	
+	/**
+	 * Crée un panneau contenant les boutons de choix du type d'opération.
+	 * 
+	 * @return	Un panneau.
+	 */
+	private static JPanel createTypePanel() {
+		JPanel typePanel = new JPanel();
+		typePanel.setLayout(new BoxLayout(typePanel, BoxLayout.PAGE_AXIS));
+		TitledBorder titre =
+				BorderFactory.createTitledBorder("Type d'opération");
+		
+		// Récupérer la police du titre (ou une autre) et la mettre en italique
+		Font font = titre.getTitleFont();
+		if (font == null) {
+			font = UIManager.getFont("TitledBorder.font");
+		}
+		if (font == null) {
+			font = typePanel.getFont();
+		}
+		font = font.deriveFont(Font.ITALIC);		// Police italique(pas gras)
+		titre.setTitleFont(font);
+	
+		typePanel.setBorder(titre);					// Appliquer la bordure
+		return typePanel;
+	}
+	
+	/**
+	 * Configure les boutons radios de choix du type d'opération.
+	 */
+	private void initTypeButtons() {
+		ButtonGroup groupeType = new ButtonGroup();
+		// FIXME Revoir la gestion des actions des boutons de type
+		// FIXME Si on met les boutons radio en variables d'instance, a-t-on vraiment besoin d'un contrôleur de type ? Il suffit de chercher le bouton sélectionné.
+		radioFixe.setActionCommand(FIXE);
+		radioProport.setActionCommand(PROPORTIONNEL);
+		radioSolder.setActionCommand(SOLDER);
+		JRadioButton[] radios = {radioFixe, radioProport, radioSolder};
+		for (JRadioButton radio : radios) {			// Pour chaque bouton
+			radio.addActionListener(typeController);// Ajouter le Listener
+			typeController.buttonMap.put(			// Associer commande/bouton
+					radio.getActionCommand(), radio);
+			groupeType.add(radio);					// Ajouter au groupe
+		}
+	}
+
+	/**
+	 * Configure la liste déroulante des comptes à solder.
+	 * <p>
+	 * Cette liste déroulante doit contenir tous les comptes bancaires.<br>
+	 * Lorsque l'utilisateur sélectionne un compte dans cette liste, le même
+	 * compte doit être sélectionné dans la liste déroulante {@link #debit}.
+	 * 
+	 * @param comptes	Tous les comptes. Les comptes bancaires seront lus dans
+	 * 					ce tableau et insérés dans la liste déroulante dans le
+	 * 					même ordre.
+	 * 
+	 * @see {@link #compteASolder}
+	 */
+	private void initComptesASolder(Compte[] comptes) {
+		
+		// Insérer les comptes bancaires
+		for (Compte compte : comptes) {
+			if (compte.getType().isBancaire()) {
+				compteASolder.addItem(compte);
+			}
+		}
+		
+		// Répercuter les changements de sélection vers la combo box debit
+		compteASolder.addItemListener(EventHandler.create(
+				ItemListener.class, debit, "setSelectedItem", "item"));
 	}
 	
 	/**
