@@ -70,7 +70,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
@@ -81,7 +80,7 @@ import javax.swing.text.JTextComponent;
  * 
  * @author Olivier HAAS.
  */
-public class SetupPermanent implements ActionListener, ListSelectionListener {
+public class SetupPermanent {
 	
 	/**
 	 * Un médiateur entre les données de l'interface et les données du modèle.
@@ -398,12 +397,6 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	public static final String PROPORTIONNEL = "proportionnel";
 	public static final String SOLDER = "solder";
 	
-	// Constantes d'action
-	public static final String VALIDER = "valider";
-	public static final String APPLIQUER = "appliquer";
-	public static final String SUPPRIMER = "supprimer";
-	public static final String QUITTER = "quitter";
-	
 	// Composants graphiques de saisie des données
 	
 	/**
@@ -545,16 +538,17 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
 		initComptesASolder(comptes);
 		listPermanents = createPermanentList(dataMediator);
-		fillPermanentList(null);
+		updatePermanentList(null);
 		
 		// Disposer tout ensemble
 		JPanel main = createContent();
 		
 		// Lier la touche ESC à l'action de quitter
-		UniversalAction actionQuitter = new UniversalAction(this, QUITTER);
+		UniversalAction actionQuitter = new UniversalAction(EventHandler.create(
+				ActionListener.class, this, "confirmAndQuit"));
 		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), QUITTER);
-		main.getActionMap().put(QUITTER, actionQuitter);
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
+		main.getActionMap().put("quitter", actionQuitter);
 		
 		// Cadre principal
 		dialog = new JDialog(owner, "Gestion des opérations permanentes");
@@ -568,169 +562,6 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 		dialog.pack();
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
-	}
-	
-	/**
-	 * Crée un panneau contenant tous les éléments graphiques.
-	 */
-	private JPanel createContent() {		
-		
-		// Liste des permanents dans un ScrollPane
-		JScrollPane scrollList = new JScrollPane(listPermanents);
-		scrollList.setPreferredSize(
-				new Dimension(150, scrollList.getPreferredSize().height));
-		
-		// Sélection du type de Permanent (fixe, dépendant ou soldeur)
-		JPanel typePanel = createTypePanel();
-		typePanel.add(radioFixe);
-		typePanel.add(radioProport);
-		typePanel.add(radioSolder);
-		
-		// Les tables de jours et de montants
-		JTable tableJours = createPlannerTable(jours);
-		JTable tableMontants = createPlannerTable(montants);
-		
-		// Étiquettes
-		JLabel labelNom = new JLabel("Nom");
-		JLabel labelLibelle = new JLabel("Libellé");
-		JLabel labelTiers = new JLabel("Tiers");
-		JLabel labelDebit = new JLabel("Débit");
-		JLabel labelCredit = new JLabel("Crédit");
-		JLabel labelPointage = new JLabel("Pointage");
-		JLabel labelTaux = new JLabel("Taux");				
-		JLabel labelPermanent = new JLabel("Opération référente");
-		JLabel labelSolder = new JLabel("Compte à solder");
-
-		// Panneau du nom, libellé, tiers, pointage, choix des comptes
-		JPanel panelComptes = new JPanel();
-		GroupLayout layoutComptes = new GroupLayout(panelComptes);
-		panelComptes.setLayout(layoutComptes);
-		layoutComptes.setAutoCreateGaps(true);
-		layoutComptes.setAutoCreateContainerGaps(true);
-		layoutComptes.setHorizontalGroup(layoutComptes.createSequentialGroup()
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.TRAILING, false)
-						.addComponent(labelNom)
-						.addComponent(labelLibelle)
-						.addComponent(labelTiers)
-						.addComponent(labelDebit)
-						.addComponent(labelCredit))
-						.addComponent(labelPointage)
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.LEADING, false)
-						.addComponent(nom)
-						.addComponent(libelle)
-						.addComponent(tiers)
-						.addComponent(debit)
-						.addComponent(credit)
-						.addComponent(pointer)));
-		layoutComptes.setVerticalGroup(layoutComptes.createSequentialGroup()
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelNom)
-						.addComponent(nom))
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelLibelle)
-						.addComponent(libelle))
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelTiers)
-						.addComponent(tiers))
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelDebit)
-						.addComponent(debit))
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelCredit)
-						.addComponent(credit))
-				.addGroup(layoutComptes.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelPointage)
-						.addComponent(pointer)));
-
-		// Panneau des opérations proportionnelles
-		JPanel propPanel = new JPanel();
-		GroupLayout layoutProp = new GroupLayout(propPanel);
-		propPanel.setLayout(layoutProp);
-		layoutProp.setAutoCreateContainerGaps(true);
-		layoutProp.setAutoCreateGaps(true);
-		layoutProp.setHorizontalGroup(layoutProp.createSequentialGroup()
-				.addGroup(layoutProp.createParallelGroup(
-						GroupLayout.Alignment.TRAILING, false)
-						.addComponent(labelTaux)
-						.addComponent(labelPermanent))
-				.addGroup(layoutProp.createParallelGroup(
-						GroupLayout.Alignment.LEADING, false)
-						.addComponent(taux)
-						.addComponent(dependance)));
-		layoutProp.setVerticalGroup(layoutProp.createSequentialGroup()
-				.addGroup(layoutProp.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelTaux)
-						.addComponent(taux))
-				.addGroup(layoutProp.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelPermanent)
-						.addComponent(dependance)));
-		
-		// Panneau des opérations soldant un compte
-		JPanel solderPanel = new JPanel();
-		solderPanel.add(labelSolder);
-		solderPanel.add(compteASolder);
-
-		// Les paramètres variables suivant le type d'instance
-		JPanel cardPane = typeController.panel;				// Panel à vues
-		cardPane.add(new JScrollPane(tableMontants), FIXE);	// Fixes
-		cardPane.add(propPanel, PROPORTIONNEL);				// Proportionnels
-		cardPane.add(solderPanel, SOLDER);					// A solder
-		
-		// Un panneau transversal en deux cases pour les détails
-		JPanel transversalPanel = new JPanel(new GridLayout(1,2));
-		transversalPanel.add(								// Table des jours
-				new JScrollPane(tableJours), BorderLayout.WEST);
-		transversalPanel.add(cardPane);						//Panneau à la carte
-
-		// Panneau des boutons de validation
-		JPanel validationPanel = new JPanel();
-		validationPanel.setLayout(
-				new BoxLayout(validationPanel, BoxLayout.LINE_AXIS));
-		
-		// Boutons de validation
-		JButton valider		= new JButton("Valider");		// Bouton Valider
-		JButton appliquer	= new JButton("Appliquer");		// Bouton Appliquer
-		JButton supprimer	= new JButton("Supprimer");		// Bouton Supprimer
-		JButton quitter		= new JButton("Quitter");		// Bouton Quitter
-		valider		.setActionCommand(VALIDER);				// Commandes
-		appliquer	.setActionCommand(APPLIQUER);
-		supprimer	.setActionCommand(SUPPRIMER);
-		quitter		.setActionCommand(QUITTER);
-		valider		.addActionListener(this);
-		appliquer	.addActionListener(this);
-		supprimer	.addActionListener(this);
-		quitter		.addActionListener(this);
-		validationPanel.add(supprimer);
-		validationPanel.add(Box.createHorizontalGlue());	// Pousser à droite
-		validationPanel.add(appliquer);
-		validationPanel.add(valider);
-		validationPanel.add(quitter);
-		
-		// Panneau d'édition
-		JPanel editionPane = new JPanel();
-		editionPane.setLayout(new BoxLayout(editionPane, BoxLayout.PAGE_AXIS));
-		editionPane.add(typePanel);							// Choix du type
-		editionPane.add(panelComptes);						// Choix du compte
-		editionPane.add(transversalPanel);
-		editionPane.add(validationPanel);
-		
-		// Panneau général
-		JPanel main = new JPanel(new BorderLayout());
-		main.setBorder(										// Créer une marge
-				BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		main.add(scrollList, BorderLayout.WEST);			// Liste Permanents
-		main.add(editionPane);								// Panneau d'édition
-		return main;
 	}
 	
 	/**
@@ -832,6 +663,187 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	}
 	
 	/**
+	 * Renvoie une collection de tous les <code>Permanent</code>, à laquelle est
+	 * ajouté un élément <code>null</code> pour permettre la saisie d'une
+	 * nouvelle opération.
+	 * 
+	 * @return	Une nouvelle collection des <code>Permanent</code>s et d'un
+	 * 			élément <code>null</code>.
+	 * 
+	 * @throws IOException
+	 */
+	private static Collection<Permanent> getAllPermanentsAndNull()
+			throws IOException {
+		Collection<Permanent> permanents = new ArrayList<>();
+		permanents.add(null);
+		permanents.addAll(DAOFactory.getFactory().getPermanentDAO().getAll());
+		return permanents;
+	}
+
+	/**
+	 * Crée un panneau contenant tous les éléments graphiques.
+	 */
+	private JPanel createContent() {		
+		
+		// Liste des permanents dans un ScrollPane
+		JScrollPane scrollList = new JScrollPane(listPermanents);
+		scrollList.setPreferredSize(
+				new Dimension(150, scrollList.getPreferredSize().height));
+		
+		// Sélection du type de Permanent (fixe, dépendant ou soldeur)
+		JPanel typePanel = createTypePanel();
+		typePanel.add(radioFixe);
+		typePanel.add(radioProport);
+		typePanel.add(radioSolder);
+		
+		// Les tables de jours et de montants
+		JTable tableJours = createPlannerTable(jours);
+		JTable tableMontants = createPlannerTable(montants);
+		
+		// Étiquettes
+		JLabel labelNom = new JLabel("Nom");
+		JLabel labelLibelle = new JLabel("Libellé");
+		JLabel labelTiers = new JLabel("Tiers");
+		JLabel labelDebit = new JLabel("Débit");
+		JLabel labelCredit = new JLabel("Crédit");
+		JLabel labelPointage = new JLabel("Pointage");
+		JLabel labelTaux = new JLabel("Taux");				
+		JLabel labelPermanent = new JLabel("Opération référente");
+		JLabel labelSolder = new JLabel("Compte à solder");
+	
+		// Panneau du nom, libellé, tiers, pointage, choix des comptes
+		JPanel panelComptes = new JPanel();
+		GroupLayout layoutComptes = new GroupLayout(panelComptes);
+		panelComptes.setLayout(layoutComptes);
+		layoutComptes.setAutoCreateGaps(true);
+		layoutComptes.setAutoCreateContainerGaps(true);
+		layoutComptes.setHorizontalGroup(layoutComptes.createSequentialGroup()
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.TRAILING, false)
+						.addComponent(labelNom)
+						.addComponent(labelLibelle)
+						.addComponent(labelTiers)
+						.addComponent(labelDebit)
+						.addComponent(labelCredit))
+						.addComponent(labelPointage)
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.LEADING, false)
+						.addComponent(nom)
+						.addComponent(libelle)
+						.addComponent(tiers)
+						.addComponent(debit)
+						.addComponent(credit)
+						.addComponent(pointer)));
+		layoutComptes.setVerticalGroup(layoutComptes.createSequentialGroup()
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelNom)
+						.addComponent(nom))
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelLibelle)
+						.addComponent(libelle))
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelTiers)
+						.addComponent(tiers))
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelDebit)
+						.addComponent(debit))
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelCredit)
+						.addComponent(credit))
+				.addGroup(layoutComptes.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelPointage)
+						.addComponent(pointer)));
+	
+		// Panneau des opérations proportionnelles
+		JPanel propPanel = new JPanel();
+		GroupLayout layoutProp = new GroupLayout(propPanel);
+		propPanel.setLayout(layoutProp);
+		layoutProp.setAutoCreateContainerGaps(true);
+		layoutProp.setAutoCreateGaps(true);
+		layoutProp.setHorizontalGroup(layoutProp.createSequentialGroup()
+				.addGroup(layoutProp.createParallelGroup(
+						GroupLayout.Alignment.TRAILING, false)
+						.addComponent(labelTaux)
+						.addComponent(labelPermanent))
+				.addGroup(layoutProp.createParallelGroup(
+						GroupLayout.Alignment.LEADING, false)
+						.addComponent(taux)
+						.addComponent(dependance)));
+		layoutProp.setVerticalGroup(layoutProp.createSequentialGroup()
+				.addGroup(layoutProp.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelTaux)
+						.addComponent(taux))
+				.addGroup(layoutProp.createParallelGroup(
+						GroupLayout.Alignment.BASELINE)
+						.addComponent(labelPermanent)
+						.addComponent(dependance)));
+		
+		// Panneau des opérations soldant un compte
+		JPanel solderPanel = new JPanel();
+		solderPanel.add(labelSolder);
+		solderPanel.add(compteASolder);
+	
+		// Les paramètres variables suivant le type d'instance
+		JPanel cardPane = typeController.panel;				// Panel à vues
+		cardPane.add(new JScrollPane(tableMontants), FIXE);	// Fixes
+		cardPane.add(propPanel, PROPORTIONNEL);				// Proportionnels
+		cardPane.add(solderPanel, SOLDER);					// A solder
+		
+		// Un panneau transversal en deux cases pour les détails
+		JPanel transversalPanel = new JPanel(new GridLayout(1,2));
+		transversalPanel.add(								// Table des jours
+				new JScrollPane(tableJours), BorderLayout.WEST);
+		transversalPanel.add(cardPane);						//Panneau à la carte
+	
+		// Panneau des boutons de validation
+		JPanel validationPanel = new JPanel();
+		validationPanel.setLayout(
+				new BoxLayout(validationPanel, BoxLayout.LINE_AXIS));
+		
+		// Boutons de validation
+		JButton valider		= new JButton("Valider");		// Bouton Valider
+		JButton appliquer	= new JButton("Appliquer");		// Bouton Appliquer
+		JButton supprimer	= new JButton("Supprimer");		// Bouton Supprimer
+		JButton quitter		= new JButton("Quitter");		// Bouton Quitter
+		valider.addActionListener(EventHandler.create(
+				ActionListener.class, this, "applyAndQuit"));
+		appliquer.addActionListener(EventHandler.create(
+				ActionListener.class, this, "applyAllAndGetSelection"));
+		supprimer.addActionListener(EventHandler.create(
+				ActionListener.class, this, "confirmAndDelete"));
+		quitter.addActionListener(EventHandler.create(
+				ActionListener.class, this, "confirmAndQuit"));
+		validationPanel.add(supprimer);
+		validationPanel.add(Box.createHorizontalGlue());	// Pousser à droite
+		validationPanel.add(appliquer);
+		validationPanel.add(valider);
+		validationPanel.add(quitter);
+		
+		// Panneau d'édition
+		JPanel editionPane = new JPanel();
+		editionPane.setLayout(new BoxLayout(editionPane, BoxLayout.PAGE_AXIS));
+		editionPane.add(typePanel);							// Choix du type
+		editionPane.add(panelComptes);						// Choix du compte
+		editionPane.add(transversalPanel);
+		editionPane.add(validationPanel);
+		
+		// Panneau général
+		JPanel main = new JPanel(new BorderLayout());
+		main.setBorder(										// Créer une marge
+				BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		main.add(scrollList, BorderLayout.WEST);			// Liste Permanents
+		main.add(editionPane);								// Panneau d'édition
+		return main;
+	}
+
+	/**
 	 * Configure les boutons radios de choix du type d'opération.
 	 */
 	private void initTypeButtons() {
@@ -884,153 +896,157 @@ public class SetupPermanent implements ActionListener, ListSelectionListener {
 	 * @param selection	Le <code>Permanent</code> à sélectionner après la mise à
 	 * 					jour. Si <code>null</code>, sélectionne l'item
 	 * 					"Nouveau..."
+	 * 
+	 * @throws IOException
 	 */
-	private void fillPermanentList(Permanent selection) {
-		
-		// La liste des permanents
-		Collection<Permanent> permanents = new ArrayList<Permanent>();
-		
-		// Ajouter un null au début pour autoriser une nouvelle saisie.
-		permanents.add(null);
-		
-		// Obtenir tous les Permanents
-		try {
-			for (Permanent p :
-				DAOFactory.getFactory().getPermanentDAO().getAll()) {
-				
-				permanents.add(p);
-			}
-			
-		} catch (IOException e) {
-		}
+	private void updatePermanentList(Permanent selection) throws IOException {
 		
 		// Liste des contrôleurs de Permanents
 		controllers = new ArrayList<>();
-		
-		// Remplir la liste de contrôleurs
 		PermanentController selected = null;
-		for (Permanent p : permanents) {
-			PermanentController controller =			// Nouveau contrôleur
-					new PermanentController(p);
-			controllers.add(controller);				// Ajouter
-			if (p == selection) {
-				selected = controller;					// Repérer la sélection
+		for (Permanent p : getAllPermanentsAndNull()) {
+			PermanentController controller = new PermanentController(p);
+			controllers.add(controller);
+			if (p == selection) {			// p ET selection peuvent être null
+				selected = controller;		// Y compris le contrôleur Nouveau..
 			}
 		}
 		
 		// Trier
 		Collections.sort(controllers);
 		
-		// Le modèle
-		DefaultListModel<PermanentController> listModel =
-				new DefaultListModel<>();
-		for (PermanentController pc : controllers) {	// Remplir le modèle
-			listModel.addElement(pc);
-		}
-		listPermanents.setModel(listModel);				// Affecter le modèle
-		
-		// Sélectionner le bon item
-		if (selection == null) {						// Pas de sélection
-			listPermanents.setSelectedIndex(
-					0);									//Sélectionne le premier
-		} else {
-			listPermanents.setSelectedValue(			// Ou l'item spécifié
-					selected, true);
-		}
+		// Remplir la liste avec ces contrôleurs
+		fillPermanentListFromControllers(selected);
 	}
 	
 	/**
-	 * Actualise l'interface graphique avec les paramètres du
-	 * <code>Permanent</code> nouvellement sélectionné.
+	 * Remplace le contenu de la liste graphique par les contrôleurs actuels.
+	 * 
+	 * @param selected	Le contrôleur
 	 */
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		
-		// Faire afficher les données de la nouvelle sélection
-		dataMediator.setController(
-				(PermanentController) listPermanents.getSelectedValue());
+	private void fillPermanentListFromControllers(
+			PermanentController selected) {
+		DefaultListModel<PermanentController> listModel =
+				new DefaultListModel<>();
+		for (PermanentController pc : controllers)
+			listModel.addElement(pc);
+		listPermanents.setModel(listModel);
+		listPermanents.setSelectedValue(selected, true);
 	}
-
+	
 	/**
-	 * Reçoit les actions des boutons de validation.
+	 * Applique toutes les modifications et quitte la boîte de dialogue.
+	 * 
+	 * @throws IOException
 	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
-		
-		// Mémoriser la sélection actuelle
-		PermanentController selected =
-				dataMediator.getController();			//Contrôleur sélectionné
-		Permanent selection = selected.getPermanent();	// Permanent lié
-		
-		// Appliquer les changements si nécessaire
-		if (VALIDER.equals(command) || APPLIQUER.equals(command)) {
-			Permanent p;								// Curseur de Permanent
-			
-			// Pour chaque contrôleur
-			for (PermanentController pc : controllers) {
-				try {
-					// Appliquer les modifs
-					p = pc.applyChanges();
-					
-				} catch (IOException e1) {
-					LOGGER.log(
-							Level.SEVERE,
-							"Impossible de sauvegarder l'opération\n" + pc, e1);
-					
-					// Arrêter ici sans recharger les données
-					return;
-				}
+	public void applyAllAndQuit() throws IOException {
+		applyAllAndGetSelection();
+		quit();
+	}
+	
+	/**
+	 * Applique toutes les modifications et recharge les données.
+	 * 
+	 * @throws IOException
+	 */
+	public void applyAllAndReload() throws IOException {
+		updatePermanentList(applyAllAndGetSelection());
+	}
+	
+	/**
+	 * Applique toutes les modifications.
+	 * 
+	 * @throws IOException
+	 */
+	private Permanent applyAllAndGetSelection() throws IOException {
+		PermanentController selected = dataMediator.getController();
+		Permanent selection = null;
+		for (PermanentController pc : controllers) {
+			try {
+				// Appliquer les modifications
+				Permanent p = pc.applyChanges();
 				
 				// Actualiser la sélection si besoin
 				if (pc == selected) {
 					selection = p;
 				}
+				
+			} catch (IOException e) {
+				throw new IOException(
+						String.format(
+								"Impossible de sauvegarder l'opération%n%s",
+								pc),
+						e);
 			}
 		}
+		return selection;
+	}
+	
+	/**
+	 * Demande conformation à l'utilisateur puis supprime le contrôleur
+	 * actuellement sélectionné.
+	 */
+	public void confirmAndDelete() {
+		PermanentController selected = dataMediator.getController();
 		
-		// Supprimer si nécessaire
-		if (SUPPRIMER.equals(command)
-				&& JOptionPane.showConfirmDialog(		// Demander confirmation
-						dialog,
-						"Voulez-vous vraiment supprimer l'opération permanente "
-						+ selected + " ?",
-						"Supprimer une opération permanente",
-						JOptionPane.YES_NO_OPTION)
-					== JOptionPane.YES_NO_OPTION) {		// Réponse OUI
+		int confirm = JOptionPane.showConfirmDialog(
+				dialog,
+				String.format(
+						"Voulez-vous vraiment supprimer l'opération permanente %s ?",
+						selected),
+				"Supprimer une opération permanente",
+				JOptionPane.YES_NO_OPTION);
+		
+		if (confirm == JOptionPane.YES_OPTION) {
 			try {
-				selected.deletePermanent();				// Effacer
+				selected.deletePermanent();
 			} catch (IOException e1) {
 				LOGGER.log(Level.SEVERE,
 						"Impossible de supprimer " + selected, e1);
 			}
 		}
-		
-		// Quitter ou recharger les données
-		if (QUITTER.equals(command) || VALIDER.equals(command)) {
-			
-			// Vérifier s'il y a des modifications non enregistrées
-			boolean modified = false;					// Marqueur de modifs
-			for (PermanentController pc : controllers) {
-				modified = modified || pc.isModified();	// Contrôleur modifié ?
-			}
-			
-			if (!modified								// Pas modifié
-					|| JOptionPane.showConfirmDialog(	// Ou confirmé
-							dialog,
-							"Il y a des changements non enregistrés.\n" +
-							"Voulez-vous les abandonner ?",
-							"Abandonner les changements",
-							JOptionPane.YES_NO_OPTION)
-							== JOptionPane.YES_OPTION) {
-				dialog.dispose();					// Fermer le dialogue
-				gui.dataModified();					// Prévenir du changement
-			}
-		} else {
-			fillPermanentList(selection);			// Recharger les données
-		}
 	}
-}// class SetupPermanent
+	
+	/**
+	 * Demande confirmation à l'utilisateur s'il y a des changements non
+	 * sauvegardés, puis quitte laboîte de dialogue.
+	 */
+	public void confirmAndQuit() {
+		if (!isModified()) {
+			int confirm = JOptionPane.showConfirmDialog(
+				dialog,
+				"Il y a des changements non enregistrés.\nVoulez-vous les abandonner ?",
+				"Abandonner les changements",
+				JOptionPane.YES_NO_OPTION);
+			
+			if (confirm != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+		quit();
+	}
+	
+	/**
+	 * Quitte la boîte de dialogue sans demander confirmation.
+	 */
+	private void quit() {
+		dialog.dispose();
+		gui.dataModified();
+	}
+	
+	/**
+	 * Indique si l'un des contrôleurs a été modifié depuis la dernière
+	 * sauvegarde.
+	 */
+	private boolean isModified() {
+		for (PermanentController controller : controllers) {
+			if (controller.isModified()) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
 
 /**
  * Un contrôleur de <code>Permanent</code>. Permet de pré-visualiser les

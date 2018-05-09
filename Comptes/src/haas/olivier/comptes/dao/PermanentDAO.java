@@ -1,6 +1,8 @@
 package haas.olivier.comptes.dao;
 
 import java.io.IOException;
+import java.util.Collection;
+
 import haas.olivier.comptes.Permanent;
 
 /** L'interface d'accès aux données des opérations permanentes.
@@ -10,7 +12,7 @@ import haas.olivier.comptes.Permanent;
 public interface PermanentDAO {
 
 	/** Renvoie toutes les écritures permanentes. */
-	public Iterable<Permanent> getAll() throws IOException;
+	public Collection<Permanent> getAll() throws IOException;
 	
 	/** Renvoie une opération permanente.
 	 * 

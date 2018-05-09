@@ -1,6 +1,7 @@
 package haas.olivier.comptes.dao.cache;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -74,7 +75,7 @@ public class CachePermanentDAO implements PermanentDAO {
 	 * doublon.
 	 */
 	@Override
-	public Iterable<Permanent> getAll() throws IOException {
+	public Collection<Permanent> getAll() throws IOException {
 		LinkedHashSet<Permanent> permanentSet = new LinkedHashSet<>();
 		for (Permanent p : permanents.values())
 			addWithDependances(p, permanentSet);
