@@ -1,13 +1,9 @@
 package haas.olivier.comptes.gui.settings;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.PermanentFixe;
-import haas.olivier.comptes.PermanentProport;
-import haas.olivier.comptes.PermanentSoldeur;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.dao.DAOFactory;
-import haas.olivier.comptes.dao.PermanentDAO;
 import haas.olivier.comptes.gui.SimpleGUI;
 import haas.olivier.comptes.gui.table.ComptesComboBoxRenderer;
 import haas.olivier.comptes.gui.table.FinancialTable;
@@ -354,7 +350,8 @@ public class SetupPermanent {
 		}
 		
 		/**
-		 * Action envoyée par un objet Swing sur action de l'utilisateur.
+		 * Modifie la vue pour adapter la fenêtre au type sélectionné, et
+		 * mémorise ce type dans le <code>dataMediator</code>.
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -366,7 +363,7 @@ public class SetupPermanent {
 		}
 	
 		/**
-		 * Action demandée programmatiquement.
+		 * Modifie la vue pour adapter la fenêtre au type sélectionné.
 		 */
 		public void changeVue(String command) {
 			AbstractButton bouton;					// Bouton à mettre à jour
@@ -445,12 +442,12 @@ public class SetupPermanent {
 	/**
 	 * Liste déroulante pour choisir le compte débité.
 	 */
-	private final JComboBox<Compte> debit = new JComboBox<>();
+	private final JComboBox<Compte> debit;
 	
 	/**
 	 * Liste déroulante pour choisir le compte crédité.
 	 */
-	private final JComboBox<Compte> credit = new JComboBox<>();
+	private final JComboBox<Compte> credit;
 	
 	/**
 	 * Liste déroulante pour choisir l'opération dont dépend celle-ci.
@@ -532,8 +529,8 @@ public class SetupPermanent {
 		
 		// Configurer les composants de saisie
 		Compte[] comptes = getComptes();
-		initComptesComboBox(debit, comptes);
-		initComptesComboBox(credit, comptes);
+		debit = createComptesComboBox(comptes);
+		credit = createComptesComboBox(comptes);
 		initTypeButtons();
 		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
 		initComptesASolder(comptes);
@@ -580,20 +577,20 @@ public class SetupPermanent {
 	}
 	
 	/**
-	 * Configure une liste déroulante des comptes.
+	 * Crée une liste déroulante des comptes.
 	 * <p>
 	 * Les comptes sont insérés dans la liste déroulante, et l'affichage est
 	 * paramétré avec un Renderer approprié.<br>
 	 * Si la liste déroulante contient déjà quelque chose, son contenu est
 	 * supprimé.
 	 * 
-	 * @param combo		La liste déroulante des comptes.
 	 * @param comptes	Les comptes à insérer dans la liste déroulante.
 	 */
-	private static void initComptesComboBox(JComboBox<Compte> combo,
-			Compte[] comptes) {
-		combo.setModel(new DefaultComboBoxModel<>(comptes));
+	private static JComboBox<Compte> createComptesComboBox(Compte[] comptes) {
+		JComboBox<Compte> combo =
+				new JComboBox<>(new DefaultComboBoxModel<>(comptes));
 		combo.setRenderer(new ComptesComboBoxRenderer());
+		return combo;
 	}
 	
 	/**
@@ -607,8 +604,7 @@ public class SetupPermanent {
 	 */
 	private static JList<PermanentController> createPermanentList(
 			DataMediator dataMediator) {
-		JList<PermanentController> list =
-				new JList<>(new DefaultListModel<PermanentController>());
+		JList<PermanentController> list = new JList<>();
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(EventHandler.create(
 				ListSelectionListener.class, dataMediator, "setController",
@@ -890,8 +886,7 @@ public class SetupPermanent {
 	}
 	
 	/**
-	 * Remplit la liste graphique avec des contrôleurs de tous les
-	 * <code>Permanent</code>s.
+	 * Crée de nouveaux contrôleurs et les affiche dans la liste graphique.
 	 * 
 	 * @param selection	Le <code>Permanent</code> à sélectionner après la mise à
 	 * 					jour. Si <code>null</code>, sélectionne l'item
@@ -1047,249 +1042,6 @@ public class SetupPermanent {
 		return false;
 	}
 }
-
-/**
- * Un contrôleur de <code>Permanent</code>. Permet de pré-visualiser les
- * modifications à apporter à un <code>Permanent</code>.
- * <p>
- * Cette classe est externe à <code>SetupPermanent</code> pour éviter que
- * celle-ci n'accède aux propriétés privés du <code>PermanentController</code>,
- * au lieu de passer par les setters.
- */
-class PermanentController implements Comparable<PermanentController> {
-	private Permanent permanent = null;			// Permanent à modifier
-	private boolean modified = false;			// Marqueur de modifications
-	
-	// Propriétés à éditer
-	private String type = null;
-	private String nom = null;
-	private Compte debit = null, credit = null;
-	private String libelle = null, tiers = null;
-	private boolean pointer = false;
-	private Map<Month,Integer> jours = null;
-	private Map<Month,BigDecimal> montants = null;
-	private Permanent dependance = null;
-	private BigDecimal taux;
-	private Compte compteASolder = null;
-	
-	/**
-	 * Construit un contrôleur contenant les données actuelles du
-	 * <code>Permanent</code> spécifié.
-	 * 
-	 * @param p	Le <code>Permanent</code> à utiliser. Utiliser <code>null</code>
-	 * 			pour la définition d'un nouveau <code>Permanent</code.
-	 */
-	public PermanentController(Permanent p) {
-		permanent = p;								// Mémoriser le Permanent
-		refresh();									// Récupérer ses propriétés
-	}
-	
-	/**
-	 * Rafraîchit les données à partir des propriétés du <code>Permanent</code>
-	 * actuel.
-	 */
-	private void refresh() {
-		if (permanent != null) {			// Permanent pré-existant (non null)
-			nom				= permanent.nom;		// Mémoriser ses propriétés
-			debit			= permanent.debit;
-			credit			= permanent.credit;
-			libelle			= permanent.libelle;
-			tiers			= permanent.tiers;
-			pointer			= permanent.pointer;
-			jours			= permanent.jours;
-
-			// Déterminer le type et appliquer les propriétés particulières
-			if (permanent instanceof PermanentFixe) {
-				type = SetupPermanent.FIXE;
-				montants = ((PermanentFixe) permanent).montants;
-
-			} else if (permanent instanceof PermanentProport) {
-				type = SetupPermanent.PROPORTIONNEL;
-				dependance = ((PermanentProport) permanent).dependance;
-				taux = ((PermanentProport) permanent).taux;
-				
-			} else if (permanent instanceof PermanentSoldeur) {				
-				type = SetupPermanent.SOLDER;
-			}
-			
-		} else {									// Pas de Permanent
-			type = SetupPermanent.FIXE;				// Type FIXE par défaut
-			taux = new BigDecimal("2");				// Taux par défaut
-		}
-	}
-	
-	public Permanent getPermanent() {
-		return permanent;
-	}
-	
-	// Getters
-	public String getType()						{return type;}
-	public String getNom()						{return nom;}
-	public Compte getDebit()					{return debit;}
-	public Compte getCredit()					{return credit;}
-	public String getLibelle()					{return libelle;}
-	public String getTiers()					{return tiers;}
-	public boolean getPointer()					{return pointer;}
-	public Map<Month,Integer> getJours()		{return jours;}
-	public Map<Month,BigDecimal> getMontants()	{return montants;}
-	public Permanent getDependance()			{return dependance;}
-	public BigDecimal getTaux()					{return taux;}
-	public Compte getCompteASolder()			{return compteASolder;}
-	
-	// Setters. Mémoriser l'existence d'une modif.
-	public void setType(String type) {
-		this.type = type;
-		modified = true;
-	}
-	
-	public void setNom(String nom) {
-		this.nom = nom;
-		modified = true;
-	}
-	
-	public void setDebit(Compte debit) {
-		this.debit = debit;
-		modified = true;
-	}
-	
-	public void setCredit(Compte credit) {
-		this.credit = credit;
-		modified = true;
-	}
-	
-	public void setLibelle(String libelle) {
-		this.libelle = libelle;
-		modified = true;
-	}
-	
-	public void setTiers(String tiers) {
-		this.tiers = tiers;
-		modified = true;
-	}
-	
-	public void setPointer(boolean pointer) {
-		this.pointer = pointer;
-		modified = true;
-	}
-	
-	public void setJours(Map<Month,Integer> jours) {
-		this.jours = jours;
-		modified = true;
-	}
-	
-	public void setMontants(Map<Month,BigDecimal> montants) {
-		this.montants = montants;
-		modified = true;
-	}
-	
-	public void setDependance(Permanent dependance) {
-		this.dependance = dependance;
-		modified = true;
-	}
-	
-	public void setTaux(BigDecimal taux) {
-		this.taux = taux;
-		modified = true;
-	}
-	
-	public void setCompteASolder(Compte compteASolder) {
-		this.compteASolder = compteASolder;
-		modified = true;
-	}
-	
-	public boolean isModified() {
-		return modified;
-	}
-	
-	/**
-	 * Applique les modifications au Permanent et envoie la nouvelle version au
-	 * DAO.
-	 * 
-	 * @return	Le nouveau <code>Permanent</code> enregistré dans le DAO. S'il
-	 * 			n'y a pas de modifications, c'est la même instance
-	 * 			qu'auparavant.
-	 * 
-	 * @throws IOException
-	 */
-	public Permanent applyChanges() throws IOException {
-		if (!modified)									// Si rien n'a changé
-			return permanent;							// Ne rien faire
-
-		// Instancier un nouveau Permanent en remplacement de l'actuel
-		Permanent newPermanent = null;					// Déclarer le nouveau
-		Integer id = (permanent == null)				// Id à utiliser
-				? null : permanent.id;
-		if (SetupPermanent.FIXE.equals(type)) {
-			newPermanent = new PermanentFixe(			// Montants fixes
-					id, nom, debit, credit, libelle, tiers, pointer, jours,
-					montants);
-		} else if (SetupPermanent.PROPORTIONNEL.equals(type)) {
-			newPermanent = new PermanentProport(		// Proportionnel
-					id, nom, debit, credit, libelle, tiers, pointer, jours,
-					dependance, taux);
-		} else if (SetupPermanent.SOLDER.equals(type)) {
-			newPermanent = new PermanentSoldeur(		// Compte à solder
-					id, nom, debit, credit, libelle, tiers, pointer, jours);
-		}
-
-		// Enregistrer dans le DAO
-		PermanentDAO dao = DAOFactory.getFactory().getPermanentDAO();
-		if (permanent == null) {						// Pas d'ancien objet
-			permanent = dao.add(newPermanent);			// Insérer et mémoriser
-		} else {										// Objet existant
-			dao.update(newPermanent);					// Remplacer
-			permanent = dao.get(id);					// Mémoriser le nouveau
-		}
-
-		// Rafraîchir les données
-		refresh();
-		
-		// Réinitialiser le marqueur ("non modifié")
-		modified = false;
-		
-		return permanent;
-	}
-	
-	/**
-	 * Supprime le <code>Permanent</code>. 
-	 * 
-	 * @throws IOException
-	 */
-	public void deletePermanent() throws IOException {
-		DAOFactory.getFactory().getPermanentDAO().remove(permanent.id);
-	}
-	
-	/**
-	 * Applique la relation d'ordre des Permanents au contrôleurs de
-	 * <code>Permanent</code>s. Si on contrôleur est vide ("Nouveau..."), il
-	 * passe avant.
-	 */
-	@Override
-	public int compareTo(PermanentController controller) {
-		Permanent permanent2 = controller.getPermanent();
-		if (permanent != null && permanent2 != null) {
-			return permanent.compareTo(permanent2);	// Cas général
-		} else if (permanent == null && permanent2 != null) {
-			return -1;								// Le null en premier
-		} else if (permanent != null && permanent2 == null) {
-			return 1;								// Le non-null en deuxième
-		} else {
-			return 0;								// Deux null: égalité !
-		}
-	}
-	
-	/**
-	 * Affiche le nom du Permanent vers lequel pointe l'objet.
-	 */
-	@Override
-	public String toString() {
-		if (permanent == null) {					// Pas de Permanent
-			return "Nouveau...";					// Texte pour un nouveau
-		} else {
-			return permanent.toString();			// Sinon, nom du Permanent
-		}
-	}
-}// package-private class PermanentController
 
 /**
  * Un <code>TableModel</code> pour la table des jours.
