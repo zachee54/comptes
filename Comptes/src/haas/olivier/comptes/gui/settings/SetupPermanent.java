@@ -841,8 +841,6 @@ public class SetupPermanent {
 	 */
 	private void initTypeButtons() {
 		ButtonGroup groupeType = new ButtonGroup();
-		// FIXME Revoir la gestion des actions des boutons de type
-		// FIXME Si on met les boutons radio en variables d'instance, a-t-on vraiment besoin d'un contrôleur de type ? Il suffit de chercher le bouton sélectionné.
 		radioFixe.setActionCommand(FIXE);
 		radioProport.setActionCommand(PROPORTIONNEL);
 		radioSolder.setActionCommand(SOLDER);
