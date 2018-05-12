@@ -88,13 +88,6 @@ class PermanentController implements Comparable<PermanentController> {
 	private BigDecimal taux;
 	
 	/**
-	 * Compte à solder par l'opération permanente (pour les opérations dont
-	 * c'est l'objet).
-	 */
-	// FIXME Pas besoin di on ne distingue plus CompteBudget/CompteBancaire
-	private Compte compteASolder = null;
-	
-	/**
 	 * Construit un contrôleur contenant les données actuelles du
 	 * <code>Permanent</code> spécifié.
 	 * 
@@ -247,16 +240,6 @@ class PermanentController implements Comparable<PermanentController> {
 	}
 	
 	/**
-	 * Renvoie le compte à solder par l'opération permanente.
-	 * 
-	 * @return	Le compte à solder par l'opération permanente, ou
-	 * 			<code>null</code>.
-	 */
-	public Compte getCompteASolder() {
-		return compteASolder;
-	}
-	
-	/**
 	 * Modifie le type de l'opération permanente.
 	 * 
 	 * @param type	Une des chaînes {@link SetupPermanent#FIXE},
@@ -371,17 +354,6 @@ class PermanentController implements Comparable<PermanentController> {
 	}
 	
 	/**
-	 * Modifie le compte à solder par l'opération permanente.
-	 * 
-	 * @param compteASolder	Le nouveau compte à solder par l'opération
-	 * 						permanente.
-	 */
-	public void setCompteASolder(Compte compteASolder) {
-		this.compteASolder = compteASolder;
-		modified = true;
-	}
-	
-	/**
 	 * Indique si les données ont été modifiées.
 	 * 
 	 * @return	code>true</code> si les données ont été modifiées.
@@ -419,8 +391,7 @@ class PermanentController implements Comparable<PermanentController> {
 					dependance, taux);
 		} else if (SetupPermanent.SOLDER.equals(type)) {
 			newPermanent = new PermanentSoldeur(
-					id, nom, compteASolder, credit, libelle, tiers, pointer,
-					jours);
+					id, nom, debit, credit, libelle, tiers, pointer, jours);
 		}
 
 		// Enregistrer dans le DAO
