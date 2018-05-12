@@ -361,8 +361,14 @@ ActionListener, PropertiesController {
 		outils.add(new AbstractAction("Opérations permanentes...") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Lancer la gestion des Permanents
-				new SetupPermanent(frame, SimpleGUI.this);
+				try {
+					new SetupPermanent(frame, SimpleGUI.this);
+				} catch (IOException e1) {
+					LOGGER.log(
+							Level.SEVERE,
+							"Impossible d'afficher la fenêtre de paramétrage des opérations permanentes",
+							e1);
+				}
 			}
 		});// classe anonyme AbstractAction
 		
