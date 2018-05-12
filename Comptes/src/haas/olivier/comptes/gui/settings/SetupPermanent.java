@@ -10,7 +10,6 @@ import haas.olivier.comptes.gui.table.FinancialTable;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -40,7 +39,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
@@ -1061,47 +1059,3 @@ public class SetupPermanent {
 		return false;
 	}
 }
-
-/**
- * Un <code>TableCellEditor</code> pour la classe <code>Month</code>.
- */
-@SuppressWarnings("serial")
-class MonthCellEditor extends DefaultCellEditor {
-	
-	/**
-	 * Construit un éditeur avec <code>JComboBox</code>.
-	 */
-	public MonthCellEditor() {
-		super(new JComboBox<Month>());
-	}
-
-	/**
-	 * Renvoie une <code>JComboBox</code> pré-remplie avec les 12 mois avant et
-	 * après le mois de référence. Si le mois de référence est
-	 * <code>null</code>, par rapport à la date du jour.
-	 */
-	@Override
-	public Component getTableCellEditorComponent(JTable table, Object value,
-			boolean isSelected, int row, int column) {
-		
-		// ComboBox générée par la classe mère
-		@SuppressWarnings("unchecked")
-		JComboBox<Month> comboBox =
-				(JComboBox<Month>) super.getTableCellEditorComponent(
-						table, value, isSelected, row, column);
-		
-		comboBox.removeAllItems();				// Supprimer tous les items
-		Month reference = (value instanceof Month) ?
-				(Month) value : new Month();	// Mois de référence (ou actuel)
-		
-		// Re-remplir, de -12 mois à +12 mois
-		for (int i=-12; i<=12; i++) {
-			comboBox.addItem(reference.getTranslated(i));
-		}
-		
-		// Sélectionner le mois de référence par défaut
-		comboBox.setSelectedItem(reference);
-		
-		return comboBox;
-	}
-}// class MonthCellEditor
