@@ -12,7 +12,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 
-/** Un <code>TableCellEditor</code> de base pour les dates.
+/**
+ * Un <code>TableCellEditor</code> de base pour les dates.
  * <p>
  * Cette classe utilise un <code>DefaultCellEditor(JTextField)</code> en
  * modifiant seulement l'apparence de la bordure, pour éviter des problèmes
@@ -24,10 +25,13 @@ import javax.swing.JTextField;
 @SuppressWarnings("serial")
 class SimpleDateEditor extends DefaultCellEditor {
 	
-	/** Le format de date. */
+	/**
+	 * Le format de date.
+	 */
 	private DateFormat formatter;
 	
-	/** Le constructeur lance un <code>DefaultCellEditor</code> avec un
+	/**
+	 * Le constructeur lance un <code>DefaultCellEditor</code> avec un
 	 * <code>JTextField</code>.
 	 */
 	public SimpleDateEditor(DateFormat formatter, Color color) {
@@ -36,7 +40,7 @@ class SimpleDateEditor extends DefaultCellEditor {
 		
 		// Modifier la bordure. C'est la commande essentielle de la classe !
 		editorComponent.setBorder(BorderFactory.createLineBorder(color));
-	}// constructeur
+	}
 	
 	@Override
 	public Date getCellEditorValue() {
@@ -45,7 +49,7 @@ class SimpleDateEditor extends DefaultCellEditor {
 		} catch (ParseException e) {
 			return null;
 		}
-	}// getCellEditorValue
+	}
 	
 	@Override
 	public Component getTableCellEditorComponent(
@@ -62,5 +66,5 @@ class SimpleDateEditor extends DefaultCellEditor {
 			field.setText(formatter.format((Date) value));
 		}
 		return field;
-	}// getTableCellEditorComponent
-}// class SimpleDateEditor
+	}
+}

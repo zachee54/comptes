@@ -33,41 +33,56 @@ import haas.olivier.comptes.gui.actions.MonthObservable;
 public class EcrituresTableModel extends FinancialTableModel
 implements DataObserver {
 
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(EcrituresTableModel.class.getName());
 	
-	/** Modèle définissant la disposition normale des colonnes. */
+	/**
+	 * Modèle définissant la disposition normale des colonnes.
+	 */
 	private static final ColumnType[] normalDisposition =
 		{ColumnType.DATE, ColumnType.POINTAGE, ColumnType.TIERS,
 		ColumnType.LIBELLE, ColumnType.CHEQUE, ColumnType.MONTANT,
 		ColumnType.CONTREPARTIE};
 	
-	/** Modèle définissant la disposition des colonnes pour la vue du compte
-	 * abstrait d'épargne. */
+	/**
+	 * Modèle définissant la disposition des colonnes pour la vue du compte
+	 * abstrait d'épargne.
+	 */
 	private static final ColumnType[] epargneDisposition =
 		{ColumnType.DATE, ColumnType.TIERS, ColumnType.LIBELLE,
 		ColumnType.MONTANT, ColumnType.CONTREPARTIE, ColumnType.COMPTE};
 	
-	/** Nombre minimum de lignes à afficher (sous réserve d'écritures dispo). */
+	/**
+	 * Nombre minimum de lignes à afficher (sous réserve d'écritures dispo).
+	 */
 	private static final int LIGNES_MINI = 50; 
 
-	/** Drapeau indiquant si les écritures doivent être triées par pointage.
+	/**
+	 * Drapeau indiquant si les écritures doivent être triées par pointage.
 	 * <p>
 	 * Si <code>false</code>, alors elles sont triées par ordre naturel.
 	 */
 	public static boolean triPointage = false;
 
-	/** Modifie la disposition des colonnes. */
+	/**
+	 * Modifie la disposition des colonnes.
+	 */
 	public void setDisposition(ColumnType[] disposition) {
 		this.disposition = disposition;
 		this.fireTableStructureChanged();			// Remettre à jour la vue
-	}// setDisposition
+	}
 	
-	/** Les modèles des écritures comptables à afficher. */
+	/**
+	 * Les modèles des écritures comptables à afficher.
+	 */
 	protected final ArrayList<EcritureRowModel> rowModels = new ArrayList<>();
 
-	/** Observable de changements de données. */
+	/**
+	 * Observable de changements de données.
+	 */
 	private DataObservable dataObservable;
 	
 	/**
@@ -88,9 +103,10 @@ implements DataObserver {
 		
 		// Disposition par défaut
 		disposition = normalDisposition;
-	}// constructeur
+	}
 
-	/** Renvoie un modèle de ligne d'écriture adapté à la vue.
+	/**
+	 * Renvoie un modèle de ligne d'écriture adapté à la vue.
 	 * <p>
 	 * Cette méthode peut être réécrite par une classe dérivée pour modifier le
 	 * comportement d'affichage des <code>Ecriture</code>s dans un autre
@@ -100,9 +116,10 @@ implements DataObserver {
 	 */
 	protected EcritureRowModel getEcritureRowModel(Ecriture e) {
 		return  new EcritureRowModel(e, compte);
-	}// getEcritureRowModel
+	}
 	
-	/** Met à jour le modèle.
+	/**
+	 * Met à jour le modèle.
 	 * <p>
 	 * Les écritures utilisées sont celles du mois cible, complétées si besoin
 	 * des écritures immédiatement antérieures pour atteindre le minimum
@@ -132,7 +149,7 @@ implements DataObserver {
 			if (disposition != normalDisposition) {
 				setDisposition(normalDisposition);
 			}
-		}// if compte abstrait d'épargne
+		}
 
 		Month month = MonthObservable.getMonth();	// Le mois sélectionné
 		Month today = new Month();					// Le mois actuel
@@ -175,29 +192,30 @@ implements DataObserver {
 					
 					// Ajouter cette écriture
 					rowModels.add(getEcritureRowModel(e));
-				}// if écriture à retenir
-			}// for source
+				}
+			}
 
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE, "Impossible de lire les données", e);
-		}// try
+		}
 
 		// Mettre à jour l'affichage
 		fireTableDataChanged();
 		LOGGER.config("Prêt");
-	}// update
+	}
 
 	@Override
 	public int getRowCount() {
 		return rowModels.size();
-	}// getRowCount
+	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
 		return rowModels.get(row).get(disposition[col]);
-	}// getValueAt
+	}
 	
-	/** Modifie une valeur de la table.
+	/**
+	 * Modifie une valeur de la table.
 	 * <p>
 	 * Si la modification concerne une écriture existante, l'écriture est mise à
 	 * jour dans le DAO.<br>
@@ -221,7 +239,8 @@ implements DataObserver {
 			// Tenter d'instancier une écriture et de l'ajouter au modèle
 			EcritureController.insert(rowModel.createEcriture());
 			
-			/* Prévenir du changement de données.
+			/*
+			 * Prévenir du changement de données.
 			 * Il se peut toutefois que la mise à jour soit impossible, si on
 			 * n'a pas pu déterminer une date à partir de laquelle mettre à
 			 * jour.
@@ -233,8 +252,8 @@ implements DataObserver {
 			
 		} catch (InconsistentArgumentsException | IOException e1) {
 			LOGGER.log(Level.SEVERE, e1.getMessage(), e1);
-		}// try
-	}// setValueAt
+		}
+	}
 
 	/**
 	 * Renvoie l'écriture correspondant à la ligne en question.
@@ -247,9 +266,10 @@ implements DataObserver {
 	 */
 	public Ecriture getEcritureAt(int row) {
 		return rowModels.get(row).getEcriture();
-	}// getEcritureAt
+	}
 
-	/** Renvoie le montant à afficher dans la ligne donnée.
+	/**
+	 * Renvoie le montant à afficher dans la ligne donnée.
 	 * <p>
 	 * Il s'agit de l'impact de cette écriture sur le solde du compte.<br>
 	 * Suivant que le compte figure au crédit ou au débit, qu'il s'agit d'un
@@ -262,9 +282,10 @@ implements DataObserver {
 	public BigDecimal getMontantAt(int row) {
 		Ecriture e = getEcritureAt(row);			// Ecriture de cette ligne
 		return e == null ? BigDecimal.ZERO : compte.getImpactOf(e);
-	}// getMontantAt
+	}
 	
-	/** Rend la table entièrement éditable, sauf pour la liste des écritures
+	/**
+	 * Rend la table entièrement éditable, sauf pour la liste des écritures
 	 * d'épargne.
 	 * 
 	 * @return	true sauf si le compte visualisé est le compte abstrait
@@ -272,20 +293,21 @@ implements DataObserver {
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		return (compte == null || compte.getType() != TypeCompte.SUIVI_EPARGNE);
-	}// isCellEditable
+	}
 
 	@Override
 	public void dataModified() {
 		update();			// Mettre à jour quand les données sont modifiées
-	}// dataModified
+	}
 	
 	DataObservable getDataObservable() {
 		return dataObservable;
-	}// getDataObservable
+	}
 }// class EcrituresTableModel
 
-/** Un modèle gérant les données d'une écriture, pour permettre leur affichage
- * et leur modification dans une ligne de la table.
+/**
+ * Un modèle gérant les données d'une écriture, pour permettre leur affichage et
+ * leur modification dans une ligne de la table.
  * <p>
  * Cette classe fait simplement le lien entre les types de colonnes et les
  * données d'un brouillon d'écriture.
@@ -296,10 +318,13 @@ implements DataObserver {
  */
 class EcritureRowModel {
 
-	/** Un objet contenant les données de l'écriture à représenter. */
+	/**
+	 * Un objet contenant les données de l'écriture à représenter.
+	 */
 	private final EcritureDraft draft;
 	
-	/** Un drapeau indiquant si l'écriture est lue "à l'envers".<br>
+	/**
+	 * Un drapeau indiquant si l'écriture est lue "à l'envers".<br>
 	 * Suivant que le compte depuis lequel est lue l'écriture est le compte
 	 * débité ou du compte crédité, le montant apparaîtra dans un sans ou dans
 	 * l'autre, et le compte à afficher en tant que contrepartie sera le compte
@@ -307,7 +332,8 @@ class EcritureRowModel {
 	 */
 	private final boolean inverse;
 	
-	/** Drapeau indiquant si le compte visualisé est un compte budgétaire.<br>
+	/**
+	 * Drapeau indiquant si le compte visualisé est un compte budgétaire.<br>
 	 * Si <code>true</code>, alors le montant doit être inversé car les comptes
 	 * budgétaires enregistrent les montants à l'envers.<br>
 	 * Si par ailleurs l'écriture n'est pas "à l'endroit", alors cela fait une
@@ -316,7 +342,8 @@ class EcritureRowModel {
 	 */
 	private final boolean visuBudget;
 	
-	/** Construit un modèle de ligne d'écriture.
+	/**
+	 * Construit un modèle de ligne d'écriture.
 	 * <p>
 	 * Si l'<code>Ecriture</code> est <code>null</code>, les données sont
 	 * initialisées avec au crédit le compte spécifié.
@@ -338,18 +365,20 @@ class EcritureRowModel {
 		// Arrivé ici, les comptes sont bien définis dans draft
 		inverse = (visu == draft.debit);				// Sens de lecture
 		visuBudget = visu instanceof CompteBudget;		// Compte budgétaire ?
-	}// constructeur
+	}
 	
-	/** Renvoie la date de l'écriture en cours de saisie.
+	/**
+	 * Renvoie la date de l'écriture en cours de saisie.
 	 * 
 	 * @return	La date de l'écriture, ou <code>null</code> si la date n'est pas
 	 * 			saisie.
 	 */
 	Date getDate() {
 		return draft.date;
-	}// getDate
+	}
 	
-	/** Renvoie la donnée du type spécifié.
+	/**
+	 * Renvoie la donnée du type spécifié.
 	 * 
 	 * @param type	Le type de la donnée voulue.
 	 * 
@@ -370,10 +399,11 @@ class EcritureRowModel {
 		case CONTREPARTIE:	return inverse ? draft.credit : draft.debit;
 		case COMPTE:		return inverse ? draft.debit : draft.credit;
 		default:			return null;
-		}// switch type
-	}// get
+		}
+	}
 	
-	/** Modifie une donnée dans le modèle de ligne d'écriture.
+	/**
+	 * Modifie une donnée dans le modèle de ligne d'écriture.
 	 * 
 	 * @param value	La nouvelle valeur.
 	 * @param type	Le type de la valeur modifiée.
@@ -410,10 +440,11 @@ class EcritureRowModel {
 			break;
 			
 		default:
-		}// switch
-	}// set	compte1			= (Compte) value;		break;
+		}
+	}
 	
-	/** Renvoie le montant à afficher.
+	/**
+	 * Renvoie le montant à afficher.
 	 * 
 	 * @return	Le montant si l'écriture est à l'endroit et que le compte
 	 * 			visualisé est un compte bancaire, ou son opposé si l'écriture
@@ -430,13 +461,15 @@ class EcritureRowModel {
 		if (montant == null)
 			return null;
 		
-		/* Cas général : écriture à l'endroit et compte bancaire, ou l'inverse.
+		/*
+		 * Cas général : écriture à l'endroit et compte bancaire, ou l'inverse.
 		 * Sinon on prend l'opposé du montant.
 		 */
 		return (inverse == visuBudget) ? montant : montant.negate();
-	}// getMontant
+	}
 	
-	/** Tente d'instancier une écriture à partir des données saisies. 
+	/**
+	 * Tente d'instancier une écriture à partir des données saisies. 
 	 * 
 	 * @throws EcritureMissingArgumentException
 	 * 			Si les données sont insuffisantes pour instancier une écriture.
@@ -448,14 +481,17 @@ class EcritureRowModel {
 	Ecriture createEcriture() throws EcritureMissingArgumentException,
 	InconsistentArgumentsException {
 		return draft.createEcriture();
-	}// createEcriture
+	}
 	
-	/** Renvoie l'Ecriture contrôlée. */
+	/**
+	 * Renvoie l'Ecriture contrôlée.
+	 */
 	Ecriture getEcriture() {
 		return draft.e;
-	}// getEcriture
+	}
 
-	/** Définit si le montant à afficher correspond à l'impact sur le compte
+	/**
+	 * Définit si le montant à afficher correspond à l'impact sur le compte
 	 * crédité.<br>
 	 * Sinon, le montant sera affiché à l'envers.
 	 * 
@@ -464,7 +500,9 @@ class EcritureRowModel {
 	 */
 	protected boolean estAlEndroit(Ecriture e, Compte visu) {
 		if (visu.getType() == TypeCompte.SUIVI_EPARGNE) {
-			/* Dans le cas du compte abstrait d'épargne, l'écriture est à
+			
+			/*
+			 * Dans le cas du compte abstrait d'épargne, l'écriture est à
 			 * l'endroit si le compte crédité est le compte d'épargne.
 			 */
 			return e.credit.isEpargne();
@@ -472,6 +510,6 @@ class EcritureRowModel {
 		} else {
 			// Cas général : dire si le compte visualisé est au crédit
 			return e.credit == visu;
-		}// if
-	}// estAlEndroit
+		}
+	}
 }// class EcrituresController

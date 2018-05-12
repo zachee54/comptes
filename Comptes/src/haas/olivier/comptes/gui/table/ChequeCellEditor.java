@@ -21,7 +21,8 @@ import javax.swing.BorderFactory;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 
-/** Un éditeur de numéros de chèques avec une aide à la saisie.
+/**
+ * Un éditeur de numéros de chèques avec une aide à la saisie.
  * <p>
  * L'éditeur recueille les derniers numéros de chèques et propose le numéro
  * suivant au moment de la saisie.
@@ -32,10 +33,13 @@ class ChequeCellEditor extends CompletionEditor<Integer>
 implements DataObserver {
 	private static final long serialVersionUID = -4956665626962829163L;
 	
-	/** Le mois le plus ancien pour rechercher les numéros de chèques. */
+	/**
+	 * Le mois le plus ancien pour rechercher les numéros de chèques.
+	 */
 	private static Month limit = new Month().getTranslated(-6);
 	
-	/** Un vérificateur de validité de la valeur actuelle de l'éditeur.
+	/**
+	 * Un vérificateur de validité de la valeur actuelle de l'éditeur.
 	 * <p>
 	 * Il s'agit en fait d'un <code>InputVerifier</code> utilisé habituellement
 	 * pour les <code>JTextField</code>, mais qui est étendu ici à l'ensemble de
@@ -55,7 +59,7 @@ implements DataObserver {
 					|| (fieldValue instanceof String
 							&& ((String) fieldValue).isEmpty())) {
 				return true;
-			}// if valeur acceptable par principe
+			}
 			
 			// Cas général : essayer de parser et voir si ça marche
 			try {
@@ -64,12 +68,14 @@ implements DataObserver {
 				
 			} catch (NumberFormatException e) {
 				return false;
-			}// try
-		}// verify
+			}
+		}
 		
 	};// classe anonyme InputVerifier
 	
-	/** Construit un éditeur de numéros de chèques avec aide à la saisie. */
+	/**
+	 * Construit un éditeur de numéros de chèques avec aide à la saisie.
+	 */
 	ChequeCellEditor(DataObservable obs) {
 		super(new DefaultCompletionModel<Integer>(),// Modèle avec saisie
 				true);
@@ -80,9 +86,10 @@ implements DataObserver {
 		
 		// Remplir la liste des numéros de chèques à proposer
 		dataModified();
-	}// constructeur
+	}
 	
-	/** Renvoie la valeur de l'éditeur en le convertissant en
+	/**
+	 * Renvoie la valeur de l'éditeur en le convertissant en
 	 * <code>Integer</code> si besoin.
 	 * 
 	 * @return	Un <code>Integer</code> correspondant à la valeur de l'éditeur,
@@ -102,11 +109,12 @@ implements DataObserver {
 				
 			} catch (NumberFormatException e) {
 				return null;					// Erreur parsage: renvoyer null
-			}// try
-		}// if value Integer
-	}// getValue
+			}
+		}
+	}
 	
-	/** Vérifie la validité de la valeur actuelle avant d'arrêter l'édition.<br>
+	/**
+	 * Vérifie la validité de la valeur actuelle avant d'arrêter l'édition.<br>
 	 * Si la valeur est invalide (ce qui n'arrive en principe que par la saisie
 	 * d'un texte ne correspondant pas à la représentation d'un
 	 * <code>Integer</code>), l'édition n'est pas arrêtée et le champ de saisie
@@ -127,18 +135,20 @@ implements DataObserver {
 			// Invalide : entourer en rouge et refuser de valider l'édition
 			getField().setBorder(BorderFactory.createLineBorder(Color.red));
 			return false;
-		}// if verifier
-	}// stopCellEditing
+		}
+	}
 
-	/** Enlève la bordure rouge éventuelle avant d'annuler l'édition. */
+	/**
+	 * Enlève la bordure rouge éventuelle avant d'annuler l'édition.
+	 */
 	@Override
 	public void cancelCellEditing() {
 		getField().setBorder(null);
 		super.cancelCellEditing();
-	}// cancelCellEditing
+	}
 	
-	/** Réactualise la liste des numéros de chèques à proposer en
-	 * autocomplétion.
+	/**
+	 * Réactualise la liste des numéros de chèques à proposer en autocomplétion.
 	 */
 	@Override
 	public void dataModified() {
@@ -153,7 +163,7 @@ implements DataObserver {
 			for (Ecriture e : ecritures) {
 				if (e.cheque != null)
 					nums.add(e.cheque);
-			}// for ecritures
+			}
 			
 			// Déterminer les prochains numéros de chèques possibles
 			List<Integer> values =					// Valeurs à suggérer
@@ -166,9 +176,9 @@ implements DataObserver {
 				if (prec == null					// Premier numéro
 						|| num + 1 != prec) {		// Ou pas contigu
 					values.add(num+1);				// Mémoriser le num d'après
-				}// if
+				}
 				prec = num;							// Passer au suivant
-			}// while nums
+			}
 			
 			// Définir ces numéros comme valeurs d'autocomplétion
 			Collections.sort(values);				// Trier
@@ -176,6 +186,7 @@ implements DataObserver {
 			
 		} catch (IOException e) {
 			e.printStackTrace();
-		}// try
-	}// dataModified
-}// class ChequeCellEditor
+			// TODO Exceptino à gérer
+		}
+	}
+}

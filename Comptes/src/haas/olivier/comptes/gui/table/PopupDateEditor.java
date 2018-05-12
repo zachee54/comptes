@@ -42,7 +42,8 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
-/** Un calendrier pop-up pour éditer une cellule dans un JTable.
+/**
+ * Un calendrier pop-up pour éditer une cellule dans un JTable.
  * <i>Pattern Decorator</i>.
  * <p>
  * Le pop-up utilise un <code>TableCellEditor</code> délégué, à qui il délègue
@@ -110,58 +111,76 @@ MouseMotionListener, MouseWheelListener {
 	private DateButton[] jours;			// Les boutons pour chaque jour affiché
 	private Component mouseOver = null;	// Composant survolé
 	
-	/** Une étiquette améliorée qui gère les clics, les dates (optionnellement)
+	/**
+	 * Une étiquette améliorée qui gère les clics, les dates (optionnellement)
 	 * et son apparence en fonction de la date associée.
 	 * Elle sert pour la plupart des éléments cliquables du calendrier tels que
 	 * jours du calendrier, bouton de validation et d'annulation.
 	 * L'avantage de cette classe est qu'elle permet de modifier et rétablir
 	 * facilement un style de couleurs, qui permet ainsi de gérer le survol par
-	 * la souris. */
+	 * la souris.
+	 */
 	class DateButton extends JLabel implements MouseListener {
 		
-		/** La date, s'il y en a une (par défaut: null). */
+		/**
+		 * La date, s'il y en a une (par défaut: <code>null</code>).
+		 */
 		private Date date = null;
 		
-		/** Construit une étiquette cliquable sans texte spécifique.
+		/**
+		 * Construit une étiquette cliquable sans texte spécifique.
 		 * Cet objet a vocation à servir pour les jours du mois. Elle gère
 		 * elle-même les réponses aux clics.
-		 * @param motion	La classe qui gère le survol par la souris. */
+		 * 
+		 * @param motion	La classe qui gère le survol par la souris.
+		 */
 		public DateButton(MouseMotionListener motion) {
 			this(motion, "");
 			addMouseListener(this);					// Ecouter le clic
-		}// constructeur
+		}
 		
-		/** Construit une étiquette cliquable avec le texte spécifié.
+		/**
+		 * Construit une étiquette cliquable avec le texte spécifié.
+		 * <p>
 		 * Ce constructeur ne prévoit pas de gestion des clics, ce qui
 		 * correspond notamment aux boutons "effacer" et "annuler", dont les
-		 * MouseListeners sont définis par la classe englobante.
-		 * @param motion	La classe qui gère le survol par la souris */
+		 * <code>MouseListener</code>s sont définis par la classe englobante.
+		 * 
+		 * @param motion	La classe qui gère le survol par la souris.
+		 */
 		public DateButton(MouseMotionListener motion, String text) {
 			super(text);							// Etiquette avec texte
 			setHorizontalAlignment(SwingConstants.CENTER);	// Centrer
 			setBackground(FOND);					// Couleur de fond
 			setOpaque(true);						// Dessiner le fond (opaque)
 			addMouseMotionListener(motion);			// Ecouter les mouvements	
-		}// constructeur
+		}
 
 		public Date getDate() {
 			return date;
 		}
 		
-		/** Mémorise la date spécifiée et adapte le texte et l'apparence du
+		/**
+		 * Mémorise la date spécifiée et adapte le texte et l'apparence du
 		 * bouton en fonction de cette date.
-		 * @param date	La nouvelle date */
+		 * 
+		 * @param date	La nouvelle date.
+		 */
 		public void setDate(Date date) {
 			this.date = date;
 			setText(dayOfMonth.format(date));	// Ecrire la date sur le bouton
 			updateStyle();
 		}
 		
-		/** Modifie l'apparence du bouton en fonction de la date associée.
+		/**
+		 * Modifie l'apparence du bouton en fonction de la date associée.
+		 * <p>
 		 * L'apparence diffère si la date correspond à la date actuellement
 		 * stockée par l'éditeur, ou si elle ne fait pas partie du mois affiché
 		 * (fin du mois précédent ou début du mois suivant).
-		 * S'il n'y a pas de date, il s'agit de l'apparence standard. */
+		 * <p>
+		 * S'il n'y a pas de date, il s'agit de l'apparence standard.
+		 */
 		public void updateStyle() {
 			if (date != null && 
 					(date.equals(editorDate)		// Sélection ?
@@ -176,9 +195,9 @@ MouseMotionListener, MouseWheelListener {
 					setForeground(STANDARD);	// Police couleur du mois
 				} else {
 					setForeground(INACTIF);		// Police couleur autres mois
-				}// if mois
-			}// if sélection
-		}// updateStyle
+				}
+			}
+		}
 		
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -197,8 +216,11 @@ MouseMotionListener, MouseWheelListener {
 		public void mouseExited(MouseEvent e) {}
 	}// inner class DateButton
 	
-	/** Une instance utilisant l'éditeur délégué spécifié.
-	 * @param editor	L'éditeur délégué qui apparaîtra dans la cellule. */
+	/**
+	 * Une instance utilisant l'éditeur délégué spécifié.
+	 * 
+	 * @param editor	L'éditeur délégué qui apparaîtra dans la cellule.
+	 */
 	public PopupDateEditor(TableCellEditor editor) {
 		delegate = editor;
 	}
@@ -295,18 +317,22 @@ MouseMotionListener, MouseWheelListener {
 		DateButton effacer = new DateButton(this, "Effacer");// Bouton effacer
 		DateButton annuler = new DateButton(this, "Annuler");// Bouton annuler
 		effacer.addMouseListener(new MouseAdapter() {
+			
 			@Override
 			public void mouseClicked(MouseEvent e) {// Bouton "effacer" cliqué
 				editorDate = null;					// Effacer la date
 				userClicked = true;					// L'utilisateur a cliqué !
 				stopCellEditing();					// Terminer l'édition
-			}// mouseClicked
+			}
+			
 		});// classe anonyme effacer
 		annuler.addMouseListener(new MouseAdapter() {
+			
 			@Override
 			public void mouseClicked(MouseEvent e) {// Bouton "annuler" cliqué
 				cancelCellEditing();				// Annuler l'édition
-			}// mouseClicked
+			}
+			
 		});// classe anonyme annuler
 		bas.add(effacer);							// Ajouter au panel du bas
 		bas.add(annuler);
@@ -325,10 +351,12 @@ MouseMotionListener, MouseWheelListener {
 				"cancel");
 		popupCal.getActionMap()									// ActionMap
 		.put("cancel", new AbstractAction() {					// Annulation
+			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				cancelCellEditing();	// Annuler l'édition
-			}// actionPerformed
+			}
+			
 		});// anonymous AbstractAction
 		
 		// Dimension du calendrier
@@ -353,9 +381,11 @@ MouseMotionListener, MouseWheelListener {
 		// Renvoyer le composant de l'éditeur délégué
 		return delegate.getTableCellEditorComponent(
 				table, value, isSelected, row, column);
-	}// getTableCellEditorComponent
+	}
 	
-	/** Remplit le calendrier en fonction de la date et du mois spécifiés.
+	/**
+	 * Remplit le calendrier en fonction de la date et du mois spécifiés.
+	 * 
 	 * @param mois	Le mois à afficher.
 	 * @param date	La date à sélectionner. Si elle ne fait pas partie du mois,
 	 * 				Alors qu'aucune date n'apparaît comme sélectionnée.
@@ -377,15 +407,17 @@ MouseMotionListener, MouseWheelListener {
 			Date cursorDate = cal.getTime();			// Le curseur de dates
 			jours[i].setDate(cursorDate);
 			cal.add(Calendar.DAY_OF_MONTH, 1);			// Voir le lendemain...
-		}// for jours
-	}// updateCalendar
+		}
+	}
 	
-	@Override
-	/** Renvoie la valeur de l'éditeur.
+	/**
+	 * Renvoie la valeur de l'éditeur.
+	 * 
 	 * @return	La valeur sur laquelle l'utilisateur a cliqué. Si l'utilisateur
 	 * 			n'a pas cliqué sur le calendrier, renvoie la date de l'éditeur
 	 * 			délégué, ou null si ce n'est pas une date.
 	 */
+	@Override
 	public Object getCellEditorValue() {
 		if (userClicked) {
 			return editorDate;
@@ -393,13 +425,15 @@ MouseMotionListener, MouseWheelListener {
 			Object value = delegate.getCellEditorValue();
 			return (value instanceof Date) ? value : null;
 		}
-	}// getCellEditorValue
+	}
 	
-	@Override
-	/** Cette méthode change le mois affiché par le calendrier popup en fonction
+	/**
+	 * Cette méthode change le mois affiché par le calendrier popup en fonction
 	 * de la commande passée.
-	 * @param e	Un ActionEvent contenant une commande de navigation
+	 * 
+	 * @param e	Un <code>ActionEvent</code> contenant une commande de navigation
 	 * 			PREVIOUS_YEAR, NEXT_YEAR, PREVIOUS_MONTH,NEXT_MONTH. */
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		// Partir du mois actuellement affiché
@@ -421,44 +455,55 @@ MouseMotionListener, MouseWheelListener {
 		}
 		monthDisplayed = new Month(cal.getTime());	// Redéfinir le mois affiché
 		updateCalendar();							// Mettre à jour
-	}// actionPerformed
+	}
 
+	/**
+	 * Renvoie vers l'éditeur délégué.
+	 */
 	@Override
-	/** Renvoie vers l'éditeur délégué. */
 	public boolean isCellEditable(EventObject anEvent) {
 		return delegate.isCellEditable(anEvent);
 	}
 
+	/**
+	 * Renvoie vers l'éditeur délégué.
+	 */
 	@Override
-	/** Renvoie vers l'éditeur délégué. */
 	public boolean shouldSelectCell(EventObject anEvent) {
 		return delegate.shouldSelectCell(anEvent);
 	}
 
+	/**
+	 * Stoppe l'éditeur sous-jacent et prévient les Listeners.
+	 * 
+	 * @return	la valeur retournée par l'éditeur délégué.
+	 */
 	@Override
-	/** Stoppe l'éditeur sous-jacent et prévient les Listeners.
-	 * @return	la valeur retournée par l'éditeur délégué. */
 	public boolean stopCellEditing() {
 		fireEditingStopped();
 		delegate.removeCellEditorListener(this);	// Cesser d'écouter avant
 		return delegate.stopCellEditing();			// Arrêter le délégué après
 	}
 
+	/**
+	 * Cessz d'écouter l'éditeur délégué, l'arrête et prévient les Listeners.
+	 */
 	@Override
-	/** Cess d'écouter l'éditeur délégué, l'arrête et prévient les Listeners. */
 	public void cancelCellEditing() {
 		fireEditingCanceled();
 		delegate.removeCellEditorListener(this);	// Cesser d'écouter avant
 		delegate.cancelCellEditing();				// Annuler le délégué après
 	}
 
-	@Override
-	/** Interface CellEditorListener: méthode invoquée par l'éditeur délégué.
+	/**
+	 * Interface CellEditorListener: méthode invoquée par l'éditeur délégué.<br>
 	 * Retient la valeur de l'éditeur délégué si elle est valide, cesse
-	 * de l'écouter et avertit les Listeners.
+	 * de l'écouter et avertit les Listeners.<br>
 	 * Par contre, si l'éditeur délégué contient un booléen qui vient d'être
-	 * activé (true), la méthode ne fait rien: il convient de laisser
-	 * l'utilisateur choisir une date sur le calendrier. */
+	 * activé (<code>true</code>), la méthode ne fait rien: il convient de
+	 * laisser l'utilisateur choisir une date sur le calendrier.
+	 */
+	@Override
 	public void editingStopped(ChangeEvent e) {
 		Object delegateValue = delegate.getCellEditorValue();
 		if (delegateValue instanceof Boolean					// Un booléen
@@ -469,25 +514,31 @@ MouseMotionListener, MouseWheelListener {
 		fireEditingStopped();
 	}
 
-	@Override
-	/** Interface CellEditorListener: méthode invoquée par l'éditeur délégué.
+	/**
+	 * Interface CellEditorListener: méthode invoquée par l'éditeur délégué.
 	 * Dans le cas général, cesse d'écouter l'éditeur délégué et prévient les
-	 * Listeners. */
+	 * Listeners.
+	 */
+	@Override
 	public void editingCanceled(ChangeEvent e) {
 		delegate.removeCellEditorListener(this);
 		fireEditingCanceled();
 	}
 	
+	/**
+	 * Juste pour intercepter des annulations émanant de la table, et pas
+	 * seulement d'un des éditeurs. Cela permet de masquer le pop-up.
+	 */
 	@Override
-	/** Juste pour intercepter des annulations émanant de la table, et pas
-	 * seulement d'un des éditeurs. Cela permet de masquer le pop-up. */
 	public void removeCellEditorListener(CellEditorListener l) {
 		popup.hide();
 		super.removeCellEditorListener(l);
 	}
 	
+	/**
+	 * Change de mois en fonction du sens de rotation de la molette.
+	 */
 	@Override
-	/** Change de mois en fonction du sens de rotation de la molette. */
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if (e.getWheelRotation() < 0) {
 			actionPerformed(new ActionEvent(		// Mois précédent
@@ -496,11 +547,13 @@ MouseMotionListener, MouseWheelListener {
 			actionPerformed(new ActionEvent(		// Mois suivant
 					this, ActionEvent.ACTION_PERFORMED, NEXT_MONTH));
 		}
-	}// mouseWheelMoved
+	}
 
+	/**
+	 * Modifie l'aspect du composant source lorsqu'il est (ou n'est plus)
+	 * survolé.
+	 */
 	@Override
-	/** Modifie l'aspect du composant source lorsqu'il est (ou n'est plus)
-	 * survolé. */
 	public void mouseMoved(MouseEvent e) {
 		Component source = e.getComponent();
 		if (!source.equals(mouseOver)) {		// Nouveau composant survolé
@@ -511,8 +564,8 @@ MouseMotionListener, MouseWheelListener {
 			}
 			mouseOver = source;					// Mémoriser le composant
 		}
-	}// mouseMoved
+	}
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {}
-}// class PopupDateEditor
+}
