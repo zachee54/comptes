@@ -19,8 +19,8 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.gui.actions.DataObservable;
 import haas.olivier.comptes.gui.actions.MonthObservable;
 
-/** Un modèle de table gérant les résultats d'une recherche parmi les
- * écritures.
+/**
+ * Un modèle de table gérant les résultats d'une recherche parmi les écritures.
  * <p>
  * Le modèle implémente le modèle singleton afin que les résultats soient
  * synchronisés dans tous les onglets.
@@ -32,10 +32,13 @@ import haas.olivier.comptes.gui.actions.MonthObservable;
 public class SearchTableModel extends EcrituresTableModel
 implements DocumentListener {
 
-	/** L'instance unique. */
+	/**
+	 * L'instance unique.
+	 */
 	private static SearchTableModel instance = null;
 	
-	/** Renvoie le modèle unique.
+	/**
+	 * Renvoie le modèle unique.
 	 * <p>
 	 * Le modèle écoute les changements des observables et du document
 	 * spécifiés.
@@ -52,9 +55,10 @@ implements DocumentListener {
 			monthObservable.addObserver(instance);
 		}
 		return instance;
-	}// getInstance
+	}
 	
-	/** Le modèle utilisé pour la saisie du texte à rechercher.
+	/**
+	 * Le modèle utilisé pour la saisie du texte à rechercher.
 	 * <p>
 	 * L'avantage de l'implémenter ici est de forcer un texte unique pour
 	 * plusieurs champs de saisie, répartis dans différentes vues de
@@ -62,15 +66,21 @@ implements DocumentListener {
 	 */
 	private static PlainDocument document = new PlainDocument();
 	
-	/** Renvoie le modèle unique de champ de saisie. */
+	/**
+	 * Renvoie le modèle unique de champ de saisie.
+	 */
 	public static Document getDocument() {
 		return document;
-	}// getDocument
+	}
 	
-	/** Texte recherché. */
+	/**
+	 * Texte recherché.
+	 */
 	private static String text = null;
 	
-	/** Construit un modèle de table gérant les résultats de recherche. */
+	/**
+	 * Construit un modèle de table gérant les résultats de recherche.
+	 */
 	private SearchTableModel(MonthObservable monthObservable,
 			DataObservable dataObservable) {
 		// Se mettre à jour en fonction du mois et des données uniquement
@@ -84,9 +94,10 @@ implements DocumentListener {
 		
 		// Écouter les changements dans la saisie utilisateur
 		document.addDocumentListener(this);
-	}// constructeur
+	}
 
-	/** Met à jour la table en recherchant le texte voulu.
+	/**
+	 * Met à jour la table en recherchant le texte voulu.
 	 * 
 	 * @param e	L'événement sur le document contenant le texte à rechecher.
 	 */
@@ -98,9 +109,11 @@ implements DocumentListener {
 			e1.printStackTrace();
 		}
 		update();										// Mettre à jour
-	}// search
+	}
 
-	/** Recherche les écritures contenant le texte précédemment défini. */
+	/**
+	 * Recherche les écritures contenant le texte précédemment défini.
+	 */
 	@Override
 	public void update() {
 		rowModels.clear();							// Effacer l'existant
@@ -131,31 +144,37 @@ implements DocumentListener {
 			}// for all
 			
 		} catch (IOException e) {					// Erreur: ne rien renvoyer
-		}// try
+			// TODO Exception à traiter
+		}
 		fireTableDataChanged();
 	}// update
 
-	/** Met à jour les données dans tous les cas, alors que la classe mère ne se
+	/**
+	 * Met à jour les données dans tous les cas, alors que la classe mère ne se
 	 * met à jour que si un compte est sélectionné.
 	 */
 	@Override
 	public void monthChanged(Month month) {
 		update();
-	}// monthChanged
+	}
 
-	/** Renvoie un modèle de lignes d'Ecriture adapté à la vue "recherche". */
+	/**
+	 * Renvoie un modèle de lignes d'Ecriture adapté à la vue "recherche".
+	 */
 	@Override
 	protected SearchRowModel getEcritureRowModel(Ecriture e) {
 		return new SearchRowModel(e);
-	}// getEcritureController
+	}
 	
-	/** Retourne le montant affiché sur cette ligne. */
+	/**
+	 * Retourne le montant affiché sur cette ligne.
+	 */
 	@Override
 	public BigDecimal getMontantAt(int row) {
 		BigDecimal montant =
 				(BigDecimal) rowModels.get(row).get(ColumnType.MONTANT);
 		return montant == null ? BigDecimal.ZERO : montant;
-	}// getMontantAt
+	}
 	
 	// Interface DocumentListener
 	
@@ -174,23 +193,26 @@ implements DocumentListener {
 	}
 }// public class RechercheTableModel
 
-/** Un contrôleur d'écritures pour afficher les écritures dans le bon sens dans
-  * la vue "Recheche". 
-  * 
-  * @author Olivier Haas
-  */
+/**
+ * Un contrôleur d'écritures pour afficher les écritures dans le bon sens dans
+ * la vue "Recheche". 
+ * 
+ * @author Olivier Haas
+ */
 class SearchRowModel extends EcritureRowModel {
 
-	/** Construit un contrôleur d'écritures pour afficher les écritures dans le
+	/**
+	 * Construit un contrôleur d'écritures pour afficher les écritures dans le
 	 * bon sens dans la vue "Recherche".
 	 * 
 	 * @param e	L'écriture à contrôler.
 	 */
 	SearchRowModel(Ecriture e) {
 		super(e, null);
-	}// constructeur
+	}
 	
-	/** Cette méthode permet de présenter préférentiellement les comptes
+	/**
+	 * Cette méthode permet de présenter préférentiellement les comptes
 	 * bancaires au crédit, ce qui permet de lire les écritures dans un sens
 	 * plus naturel.
 	 * <p>
@@ -213,6 +235,6 @@ class SearchRowModel extends EcritureRowModel {
 			// Le type le plus significatif (plus petit) au crédit
 			return e.credit.getType().level < e.debit.getType().level;
 		}
-	}// estAlEndroit
+	}
 	
 }// class SearchController

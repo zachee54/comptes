@@ -18,7 +18,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 
 
-/** Un Renderer pour les JComboBox qui affichent des comptes.
+/**
+ * Un Renderer pour les JComboBox qui affichent des comptes.
  * <p>
  * Les comptes sont listés dans l'ordre naturel. Cette classe ajoute des
  * séparateurs entre les comptes de types différents, et le code couleur de
@@ -28,22 +29,31 @@ import javax.swing.ListModel;
  */
 public class ComptesComboBoxRenderer implements ListCellRenderer<Compte> {
 	
-	/** Le format monétaire à utiliser. */
+	/**
+	 * Le format monétaire à utiliser.
+	 */
 	private static final DecimalFormat DF = new DecimalFormat(
 			"#,##0.00 \u00A4;- #", new DecimalFormatSymbols(Locale.FRANCE));
 	
-	/** Le Renderer délégué. */
+	/**
+	 * Le Renderer délégué.
+	 */
 	private ListCellRenderer<Object> delegate = new DefaultListCellRenderer();
 	
-	/** Un panel englobant le Renderer. */
+	/**
+	 * Un panel englobant le Renderer.
+	 */
 	private JPanel panel = new JPanel(new BorderLayout());
 	
-	/** Un séparateur de menus, utilisé pour séparer les comptes de types
+	/**
+	 * Un séparateur de menus, utilisé pour séparer les comptes de types
 	 * différents.
 	 */
 	private JSeparator sep = new JSeparator();
 	
-	/** Le mois actuel. */
+	/**
+	 * Le mois actuel.
+	 */
 	private Month month = new Month();
 	
 	@Override
@@ -62,7 +72,7 @@ public class ComptesComboBoxRenderer implements ListCellRenderer<Compte> {
 					+ value + "<br/>"						// Nom
 					+ DF.format(value.getHistorique(month))	// Montant
 					+ "</html>");
-		}// if value non null
+		}
 		
 		// index==-1 signifie l'item sélectionné
 		if (index < 0) {
@@ -94,5 +104,5 @@ public class ComptesComboBoxRenderer implements ListCellRenderer<Compte> {
 			panel.remove(sep);							// Pas de séparateur
 		}
 		return panel;
-	}// getListCellRendererComponent
+	}
 }

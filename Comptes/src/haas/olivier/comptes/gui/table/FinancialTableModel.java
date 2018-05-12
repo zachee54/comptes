@@ -12,8 +12,8 @@ import java.util.Date;
 
 import javax.swing.table.AbstractTableModel;
 
-/** Un <code>TableModel</code> adapté pour la présentation de tables
- * financières.
+/**
+ * Un <code>TableModel</code> adapté pour la présentation de tables financières.
  * <p>
  * Il contient soit des écritures, soit des montants de suivi.
  * 
@@ -23,10 +23,14 @@ import javax.swing.table.AbstractTableModel;
 abstract class FinancialTableModel extends AbstractTableModel implements
 		MonthObserver, CompteObserver {
 
-	/** La disposition des colonnes, sous forme de tableau de constantes. */
+	/**
+	 * La disposition des colonnes, sous forme de tableau de constantes.
+	 */
 	ColumnType[] disposition;
 	
-	/** Le compte à utiliser. */
+	/**
+	 * Le compte à utiliser.
+	 */
 	Compte compte;
 
 	/**
@@ -51,9 +55,11 @@ abstract class FinancialTableModel extends AbstractTableModel implements
 			// Mémoriser le compte (pas d'accès statique dans CompteObservable)
 			compte = compteObservable.getCompte();
 		}
-	}// constructeur
+	}
 
-	/** Met à jour les données. */
+	/**
+	 * Met à jour les données.
+	 */
 	// TODO utiliser plutôt fireTableDataChanged ?
 	abstract void update();
 
@@ -63,12 +69,12 @@ abstract class FinancialTableModel extends AbstractTableModel implements
 	 */
 	ColumnType[] getDisposition() {
 		return disposition;
-	}// getDisposition
+	}
 
 	@Override
 	public int getColumnCount() {
 		return (disposition == null) ? 0 : disposition.length;
-	}// getColumnCount
+	}
 
 	@Override
 	public String getColumnName(int columnIndex) {
@@ -105,8 +111,8 @@ abstract class FinancialTableModel extends AbstractTableModel implements
 			return "Moyenne";
 		default:
 			return "";
-		}// switch
-	}// getColumnName
+		}
+	}
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
@@ -135,9 +141,10 @@ abstract class FinancialTableModel extends AbstractTableModel implements
 		default:
 			return String.class;
 		}
-	}// getColumnClass
+	}
 	
-	/** Renvoie le montant à afficher dans la ligne donnée.<br>
+	/**
+	 * Renvoie le montant à afficher dans la ligne donnée.<br>
 	 * Il s'agit du montant qui déterminera la couleur de la ligne.
 	 */
 	abstract BigDecimal getMontantAt(int row);
@@ -149,7 +156,7 @@ abstract class FinancialTableModel extends AbstractTableModel implements
 	public void compteChanged(Compte compte) {
 		this.compte = compte;	// Changer le compte
 		update();				// Mettre à jour
-	}// compteChanged
+	}
 	
 	
 	// Interface MonthObserver
@@ -159,10 +166,10 @@ abstract class FinancialTableModel extends AbstractTableModel implements
 		// Mettre à jour quand le mois est modifié
 		if (compte != null)	// Sauf s'il n'y a pas de compte !
 			update();
-	}// monthChanged
+	}
 
 	@Override
 	public void dateChanged(Date date) {
 		// Les modèles ne réagissent pas aux changements de date.
-	}// dateChanged
-}// class
+	}
+}

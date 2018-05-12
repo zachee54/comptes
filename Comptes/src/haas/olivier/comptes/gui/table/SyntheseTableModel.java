@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Un <code>TableModel</code> donnant une vision synthétique des comptes d'un
+/**
+ * Un <code>TableModel</code> donnant une vision synthétique des comptes d'un
  * même type à une date donnée.
  * 
  * @author Olivier HAAS
@@ -25,26 +26,37 @@ import java.util.List;
 public class SyntheseTableModel extends FinancialTableModel
 implements SoldesObserver {
 
-	/** Disposition des colonnes pour des comptes bancaires. */
+	/**
+	 * Disposition des colonnes pour des comptes bancaires.
+	 */
 	private static ColumnType[] dispositionBancaire =
 		{ColumnType.COMPTE, ColumnType.HISTORIQUE, ColumnType.AVUE};
 	
-	/** Disposition des colonnes pour des comptes budgétaires. */
+	/**
+	 * Disposition des colonnes pour des comptes budgétaires.
+	 */
 	private static ColumnType[] dispositionBudget =
 		{ColumnType.COMPTE, ColumnType.HISTORIQUE, ColumnType.MOYENNE};
 	
-	/** Le filtre de comptes à utiliser pour savoir lesquels afficher. */
+	/**
+	 * Le filtre de comptes à utiliser pour savoir lesquels afficher.
+	 */
 	private FilterCompte filter;
 	
-	/** Liste des comptes. */
+	/**
+	 * Liste des comptes.
+	 */
 	private List<Compte> comptes = new ArrayList<Compte>();
 	
-	/** Totaux par type de solde. */
+	/**
+	 * Totaux par type de solde.
+	 */
 	private BigDecimal totalHistorique = BigDecimal.ZERO,
 			totalSoldeAVue = BigDecimal.ZERO,
 			totalMoyenne = BigDecimal.ZERO;
 	
-	/** Construit un modèle de table de synthèse des comptes.
+	/**
+	 * Construit un modèle de table de synthèse des comptes.
 	 * 
 	 * @param monthObservable	L'observable de mois.
 	 * @param compteObservable	L'observable de compte.
@@ -64,9 +76,10 @@ implements SoldesObserver {
 		
 		// Définir la disposition de départ
 		defineDisposition();
-	}// constructeur
+	}
 	
-	/** Redéfinit la disposition.
+	/**
+	 * Redéfinit la disposition.
 	 * <p>
 	 * Cette méthode est utile à l'initialisation du modèle, ou quand la
 	 * disposition est modifiée.
@@ -76,12 +89,12 @@ implements SoldesObserver {
 		// On distingue selon qu'il s'agit d'un compte bancaire ou budgétaire.
 		disposition = filter.acceptsBancaires()
 				? dispositionBancaire : dispositionBudget;
-	}// defineDisposition
+	}
 
 	@Override
 	public int getRowCount() {
 		return comptes.size() + 1;			// Les comptes + la ligne de total
-	}// getRowCount
+	}
 
 	@Override
 	public void update() {
@@ -115,9 +128,9 @@ implements SoldesObserver {
 					if (c instanceof CompteBudget) {	// Si compte budgétaire
 						totalMoyenne = totalMoyenne.add(// Moyenne
 								((CompteBudget) c).getMoyenne(month));
-					}// if compte budgétaire
-				}// if type de compte
-			}// for comptes
+					}
+				}
+			}
 			
 			// Trier la liste de comptes
 			Collections.sort(comptes);
@@ -126,8 +139,9 @@ implements SoldesObserver {
 			fireTableDataChanged();
 
 		} catch (IOException e) {
-		}// try
-	}// update
+			// TODO Exception à traiter
+		}
+	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
@@ -147,7 +161,7 @@ implements SoldesObserver {
 				// Pas de break : si compte bancaire, pas de moyenne (null)
 			default:
 				return null;
-			}// switch
+			}
 			
 		} else {											// Ligne de total
 			switch (disposition[col]) {						// Selon la colonne
@@ -156,11 +170,13 @@ implements SoldesObserver {
 			case AVUE:		return totalSoldeAVue;			// Total à vue
 			case MOYENNE:	return totalMoyenne;			// Total moyenne
 			default:		return null;
-			}// switch
-		}// if row
-	}// getValueAt
+			}
+		}
+	}
 	
-	/** Renvoie par convention le solde à vue du compte pour le mois en cours.*/
+	/**
+	 * Renvoie par convention le solde à vue du compte pour le mois en cours.
+	 */
 	@Override
 	public BigDecimal getMontantAt(int row) {
 		if (row < comptes.size()) {	// La ligne est dans la liste des commptes
@@ -169,17 +185,17 @@ implements SoldesObserver {
 		} else {					// Ligne de total
 			return totalSoldeAVue;	// Renvoyer le total des soldes à vue
 		}
-	}// getMontantAt
+	}
 	
-	/** Renvoie l'index de la ligne contenant le compte actuellement
-	 * sélectionné.
+	/**
+	 * Renvoie l'index de la ligne contenant le compte actuellement sélectionné.
 	 */
 	public int getActualCompteRow() {
 		return comptes.indexOf(compte);	// C'est l'index du compte dans la liste
-	}// getActualCompteRow
+	}
 
 	@Override
 	public void soldesChanged() {
 		update();					// Mettre à jour quand les soldes changent
-	}// soldesChanged
+	}
 }
