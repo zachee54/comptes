@@ -158,6 +158,12 @@ public class SetupPermanent {
 			BigDecimal decTaux = controller.getTaux();
 			if (decTaux != null)
 				taux.setValue(controller.getTaux());	// Taux non null
+			/*
+			 * Les ItemListener sont notifiés que lorsque la modification vient
+			 * de l'utilisateur, pas en cas de changement programmatique. On
+			 * peut donc renvoyer vers le contrôleur sans tester le drapeau
+			 * updating.
+			 */
 			
 			// Contenu de la combo box de dépendance
 			updateDependanceComboBox();
@@ -359,23 +365,6 @@ public class SetupPermanent {
 		private final JPanel panel = new JPanel(layout);
 		
 		/**
-		 * Composants "débit" à désactiver pour le type "compte à solder".
-		 */
-		private JComponent[] debitComponents;
-		
-		/**
-		 * Crée un contrôleur de type qui active ou désactive les composants
-		 * spécifiés selon le type. 
-		 * 
-		 * @param debit	Les <code>JComponent</code>s à désactiver pour le type
-		 * 				"compte à solder". Il s'agit en principe des composants
-		 * 				du choix du compte débité.
-		 */
-		public TypeController(JComponent... debitComponents) {
-			this.debitComponents = debitComponents;
-		}
-		
-		/**
 		 * Modifie la vue pour adapter la fenêtre au type sélectionné, et
 		 * mémorise ce type dans le <code>dataMediator</code>.
 		 */
@@ -399,11 +388,6 @@ public class SetupPermanent {
 				bouton.setSelected(true);
 			
 			layout.show(panel, command);			// Changer de vue
-			
-			// Activer ou désactiver les JComponents "débit" suivant le type
-			boolean actif = !SOLDER.equals(command);
-			for (JComponent comp : debitComponents)
-				comp.setEnabled(actif);
 		}
 	}// inner class TypeListener
 
@@ -423,7 +407,7 @@ public class SetupPermanent {
 	/**
 	 * Contrôleur de type.
 	 */
-	private final TypeController typeController;
+	private final TypeController typeController = new TypeController();
 	
 	/**
 	 * Le bouton de sélection du type d'opérations permanentes à montants fixes.
@@ -555,12 +539,6 @@ public class SetupPermanent {
 		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
 		listPermanents = createPermanentList(dataMediator);
 		updatePermanentList(null);
-		
-		/*
-		 * Le contrôleur de type désactive la liste déroulante débit si le type
-		 * est "soldeur".
-		 */
-		typeController = new TypeController(debit);
 		
 		// Disposer tout ensemble
 		JPanel main = createContent();
