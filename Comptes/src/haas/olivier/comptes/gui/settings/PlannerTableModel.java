@@ -153,7 +153,11 @@ class PlannerTableModel extends AbstractTableModel {
 	}
 	
 	/**
-	 * Renvoie la <code>Map</code> actuelle.
+	 * Renvoie les valeurs actuelles pour chaque mois.
+	 * 
+	 * @return	Une <code>Map</code> des valeurs actuelles pour chaque mois. Le
+	 * 			contrat garantit que toutes les valeurs sont du type de la
+	 * 			classe fournie au constructeur.
 	 */
 	public Map<Month,Object> getMap() {
 		return map;
