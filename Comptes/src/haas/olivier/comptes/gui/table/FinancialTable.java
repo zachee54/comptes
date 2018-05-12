@@ -52,7 +52,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
-/** Une JTable personnalisée pour afficher des informations monétaires.
+/**
+ * Une JTable personnalisée pour afficher des informations monétaires.
  * <p>
  * La table utilise des formats d'affichage, des éditeurs et des largeurs de
  * colonnes personnalisés pour les dates et mois, montants, comptes et numéros
@@ -73,13 +74,16 @@ import javax.swing.table.TableModel;
 public class FinancialTable extends JTable implements TableCellRenderer,
 		Action {
 	
-	/** Un Renderer pour les BigDecimal.<br>
+	/**
+	 * Un Renderer pour les BigDecimal.<br>
 	 * Juste pour un format d'affichage plus naturel.
 	 */
 	public static class MontantTableCellRenderer
 	extends DefaultTableCellRenderer {
 		
-		/** Le formateur de <code>BigDecimal</code>. */
+		/**
+		 * Le formateur de <code>BigDecimal</code>.
+		 */
 		private static final DecimalFormat BIGDECIMAL_FORMATTER =
 				new DecimalFormat(
 						"#,##0.00;- #",
@@ -89,9 +93,11 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			// Ajouter des espaces après pour décoller les nombres de la marge
 			BIGDECIMAL_FORMATTER.setPositiveSuffix("  ");
 			BIGDECIMAL_FORMATTER.setNegativeSuffix("  ");
-		}// static
+		}
 		
-		/** Écrit le <code>BigDecimal</code> selon le format prédéfini. */
+		/**
+		 * Écrit le <code>BigDecimal</code> selon le format prédéfini.
+		 */
 		@Override
 		public void setValue(Object value) {
 
@@ -107,17 +113,21 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 				
 				// Ne rien écrire
 				setText("");
-			}// if BigDecimal non nul
+			}
 
 			// Alignement à droite
 			setHorizontalAlignment(SwingConstants.RIGHT);
-		}// setValue
+		}
 	}// public static nested class MontantCellRenderer
 	
-	/** Format des chèques: entiers à 7 chiffres. */
+	/**
+	 * Format des chèques: entiers à 7 chiffres.
+	 */
 	private static final String CHEQUE_FORMAT = "%07d";
 
-	/** Format des dates: jj/mm/aaaa. */
+	/**
+	 * Format des dates: jj/mm/aaaa.
+	 */
 	private static final DateFormat DATE_FORMATTER =
 			new SimpleDateFormat("dd/MM/yyyy");
 
@@ -136,7 +146,9 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 	private static final int WIDTH_MONTANT = 85;
 	private static final int WIDTH_STRING = 150;
 
-	/** Liste déroulante pour le choix des comptes dans la table. */
+	/**
+	 * Liste déroulante pour le choix des comptes dans la table.
+	 */
 	private static JComboBox<Compte> boxComptes = new JComboBox<Compte>();
 	static {
 		// Personnaliser l'affichage par une séparation des types de comptes
@@ -148,14 +160,15 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 		/* Remplir la comboBox. Appel statique pour ne pas remplir la comboBox à
 		 * chaque instanciation. */
 		updateComptesEditor();
-	}// bloc static
+	}
 	
 	// Réduire le délai d'apparition des infobulles
 	static {
 		ToolTipManager.sharedInstance().setInitialDelay(250);
-	}// bloc static
+	}
 	
-	/** Remplit la liste déroulante de choix des comptes, utilisée par le
+	/**
+	 * Remplit la liste déroulante de choix des comptes, utilisée par le
 	 * <code>TableCellEditor</code> spécifique aux objets <code>Compte</code>.
 	 * <p>
 	 * La méthode est publique pour pouvoir forcer la mise à jour depuis un
@@ -181,8 +194,9 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			
 		} catch (IOException e1) {	
 			e1.printStackTrace();
-		}// try
-	}// updateComptesEditor
+			// TODO Exception à gérer
+		}
+	}
 
 	/**
 	 * Construit une <code>JTable</code> avec quelques modifications de
@@ -215,10 +229,11 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 		inputMapAncestor.put(KeyStroke.getKeyStroke(	// Shift + tab
 				KeyEvent.VK_TAB, KeyEvent.SHIFT_DOWN_MASK), "editNext");
 		getActionMap().put("editNext", this);
-	}// constructeur
+	}
 	
-	/** Définit des Renderers personnalisés pour les <code>BigDecimal</code>,
-	 * les <code>Date</code> et les <code>Month</code>.
+	/**
+	 * Définit des Renderers personnalisés pour les <code>BigDecimal</code>, les
+	 * <code>Date</code> et les <code>Month</code>.
 	 */
 	@Override
 	protected void createDefaultRenderers() {
@@ -230,16 +245,19 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 		
 		// Remplacer le Renderer par défaut pour la classe Date
 		setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
+			
 			@Override
 			public void setValue(Object value) {
 				setText(value instanceof Date
 						? DATE_FORMATTER.format((Date) value)// Date
 								: ""); 					// Pas de date = pas de texte
-			}// setValue
+			}
+			
 		});// classe anonyme
-	}// createDefaultsRenderer
+	}
 	
-	/** Définit un éditeur personnalisé utilisant un popup pour les
+	/**
+	 * Définit un éditeur personnalisé utilisant un popup pour les
 	 * <code>Date</code>.
 	 */
 	@Override
@@ -251,9 +269,10 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 				Date.class,
 				new PopupDateEditor(
 						new SimpleDateEditor(DATE_FORMATTER, GRILLE)));
-	}// createDefaultEditors
+	}
 	
-	/** Configure la table en ajustant la taille des colonnes, les Renderers et
+	/**
+	 * Configure la table en ajustant la taille des colonnes, les Renderers et
 	 * les Editors par colonne.
 	 */
 	protected void configure() {
@@ -264,9 +283,9 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 					((FinancialTableModel) dataModel).getDisposition();
 			for (int i = 0; i < disposition.length; i++) {
 				configure(columnModel.getColumn(i), disposition[i]);
-			}// for colonnes
-		}// if FinancialTableModel
-	}// configure
+			}
+		}
+	}
 
 	protected void configure(TableColumn column, ColumnType type) {
 		switch(type) {
@@ -293,8 +312,9 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 					} else {
 						// Pas de n° de chèque: ne rien écrire
 						setText("");
-					}// if Integer
-				}// setValue
+					}
+				}
+				
 			});// classe anonyme DefaultTableCellRenderer
 			
 
@@ -302,13 +322,14 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			if (dataModel instanceof EcrituresTableModel) {
 				column.setCellEditor(new ChequeCellEditor(
 						((EcrituresTableModel) dataModel).getDataObservable()));
-			}// if EcrituresTableModel
+			}
 			break;
 
 		case POINTAGE:								// Pointages
 			column.setMaxWidth(WIDTH_POINTAGE);		// Largeur maximale
 			
-			/* Une case à cocher pour l'édition
+			/*
+			 * Une case à cocher pour l'édition
 			 * On a besoin de la définir nous-mêmes car la classe JTable ne
 			 * définit l'éditeur par défaut des Boolean qu'après l'affectation
 			 * du modèle, alors qu'ici on est appelé depuis setModel.
@@ -344,6 +365,7 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			// Modèle de base
 			CompletionModel<Entry<String,Integer>> model1 =
 					new DefaultCompletionModel<Entry<String,Integer>>() {
+				
 				@Override
 				public void load() {
 					// Charger l'index des commentaires
@@ -353,8 +375,9 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 								.constructCommentIndex().entrySet());
 					} catch (IOException e) {
 						e.printStackTrace();
-					}// try
-				}// load
+						// TODO Exception à gérer
+					}
+				}
 			};//classe anonyme DefaultCompletionModel
 
 			// Modèle indexé
@@ -366,12 +389,14 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 					new CacheCompletionModel<String>(
 
 							new CacheCompletionModel.ContextProvider() {
+								
 								@Override
 								public Object getContext() {
 									// Le contexte = le DAO écritures
 									return DAOFactory.getFactory()
 											.getEcritureDAO();
-								}// getContext
+								}
+								
 							},// classe anonyme ContextProvider
 
 							model2);
@@ -389,10 +414,11 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			break;
 
 		default:	// Sans objet, sauf pour le compilateur
-		}// switch ColumnType
-	}// configure colonne
+		}
+	}
 
-	/** Modifie le modèle.
+	/**
+	 * Modifie le modèle.
 	 * <p>
 	 * Cette méthode vérifie que le nonuveau modèle est une instance
 	 * <code>FinancialTableModel</code>.
@@ -408,9 +434,10 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			throw new IllegalArgumentException("Seuls les FinancialTableModel" +
 					" sont autorisés avec une FinancialTable");
 		}
-	}// setModel
+	}
 
-	/** Renvoie cet objet.
+	/**
+	 * Renvoie cet objet.
 	 * <p>
 	 * Cette méthode permet d'intercepter les Renderer au moment où ils sont
 	 * appelés. L'implémentation de l'interface TableCellRenderer permet de
@@ -424,7 +451,8 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 		return this;
 	}
 
-	/** Récupère le Component généré par le TableCellRenderer de la classe
+	/**
+	 * Récupère le Component généré par le TableCellRenderer de la classe
 	 * JTable, puis le colorise en fonction des données du modèle.
 	 * <p>
 	 * Cette méthode ne peut pas être externalisée dans un
@@ -455,12 +483,12 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 
 		// Récupérer le montant de l'écriture affichée sur cette ligne
 		BigDecimal montant;
-		if (value instanceof BigDecimal) { // La cellule contient un montant
+		if (value instanceof BigDecimal) {	// La cellule contient un montant
 
 			// Utiliser le signe du nombre contenu dans la cellule
 			montant = (BigDecimal) value;
 
-		} else { // La cellule contient autre chose
+		} else {							// La cellule contient autre chose
 
 			// Utiliser le signe du montant principal de cette ligne
 			montant = ((FinancialTableModel) model).getMontantAt(row);
@@ -468,27 +496,28 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 
 		// Déterminer la couleur à utiliser
 		Color couleur;
-		if (montant.signum() > 0) { // Couleur pour montant positif
+		if (montant.signum() > 0) {			// Couleur pour montant positif
 			couleur = RECETTE;
-		} else if (montant.signum() < 0) { // Couleur pour montant négatif
+		} else if (montant.signum() < 0) {	// Couleur pour montant négatif
 			couleur = DEPENSE;
 		} else { // Montant nul: couleur neutre
 			couleur = NEUTRE;
 		}
 
 		// Coloriser
-		if (isSelected) { // Sélectionné
-			component.setBackground(couleur); // Arrière-plan
-			component.setForeground(FOND); // Couleur du fond
-		} else { // Non sélectionné
-			component.setBackground(FOND); // Arrière-plan
-			component.setForeground(couleur); // Couleur de police
+		if (isSelected) {						// Sélectionné
+			component.setBackground(couleur);	// Arrière-plan
+			component.setForeground(FOND);		// Couleur du fond
+		} else {								// Non sélectionné
+			component.setBackground(FOND);		// Arrière-plan
+			component.setForeground(couleur);	// Couleur de police
 		}
 
 		return component;
-	}// getTableCellRendererComponent
+	}
 
-	/** Détermine le tooltip à afficher au survol de la souris sur la table.
+	/**
+	 * Détermine le tooltip à afficher au survol de la souris sur la table.
 	 * <p>
 	 * Seule la colonne contenant les cases à cocher de pointage donne lieu à un
 	 * tooltip, qui contient alors la date de pointage.
@@ -525,7 +554,7 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			toolTip = (ecriture == null || ecriture.pointage == null)
 					? "" : DATE_FORMATTER.format(ecriture.pointage);
 
-		} else { // Autre colonne
+		} else {										// Autre colonne
 
 			// Récupérer le Component de la cellule
 			Component comp = getCellRenderer(rowIndex, colIndex)
@@ -550,14 +579,15 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 				FontMetrics fm = getFontMetrics(getFont());
 				String cellText = ((JLabel) comp).getText();
 				if (fm.stringWidth(cellText) > availableWidth) {
-					toolTip = cellText; // Trop long: afficher le toolTip
-				}// if texte trop long
-			}// if JLabel
-		}// if colonne
+					toolTip = cellText;		// Trop long: afficher le toolTip
+				}
+			}
+		}
 		return toolTip;
-	}// getToolTipText
+	}
 
-	/** Met à jour la table.
+	/**
+	 * Met à jour la table.
 	 * <p>
 	 * En plus de l'appel à la méthode de la classe mère, cette méthode permet
 	 * de remettre à jour la configuration des colonnes (taille, Renderer, etc)
@@ -585,12 +615,14 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 			// Sélectionner cette ligne
 			try {
 				setRowSelectionInterval(row, row);
-			} catch (IllegalArgumentException e1) { // Modèle pas opérationnel
-			} // Tant pis
-		}// if synthese
-	}// tableChanged
+			} catch (IllegalArgumentException e1) {	// Modèle pas opérationnel
+			}										// Tant pis
+		}
+	}
 
-	/** Déplace l'éditeur vers la droite ou vers la gauche. */
+	/**
+	 * Déplace l'éditeur vers la droite ou vers la gauche.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (!isEditing()) {
@@ -616,16 +648,20 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 
 		// Lancer l'édition de la cellule adjacente (s'il y en a une)
 		editCellAt(selected == null ? row : selected, col);
-	}// actionPerformed
+	}
 
-	/** Interface <code>Action</code>. Aucune implémentation. */
+	/**
+	 * Interface <code>Action</code>. Aucune implémentation.
+	 */
 	@Override
 	public Object getValue(String arg0) {
 		return null;
 	}
 
-	/** Interface <code>Action</code>. Aucune implémentation. */
+	/**
+	 * Interface <code>Action</code>. Aucune implémentation.
+	 */
 	@Override
 	public void putValue(String arg0, Object arg1) {
 	}
-}// class FinancialTable
+}
