@@ -419,7 +419,8 @@ class PermanentController implements Comparable<PermanentController> {
 					dependance, taux);
 		} else if (SetupPermanent.SOLDER.equals(type)) {
 			newPermanent = new PermanentSoldeur(
-					id, nom, debit, credit, libelle, tiers, pointer, jours);
+					id, nom, compteASolder, credit, libelle, tiers, pointer,
+					jours);
 		}
 
 		// Enregistrer dans le DAO
