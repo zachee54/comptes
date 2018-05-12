@@ -128,8 +128,6 @@ public class SetupPermanent {
 					ItemListener.class, controller, "setCredit", "item"));
 			dependance.addItemListener(EventHandler.create(
 					ItemListener.class, controller, "setDependance", "item"));
-			compteASolder.addItemListener(EventHandler.create(
-					ItemListener.class, controller, "setCompteASolder","item"));
 		}
 		
 		/**
@@ -158,14 +156,10 @@ public class SetupPermanent {
 			libelle.setText(controller.getLibelle());
 			tiers.setText(controller.getTiers());
 			pointer.setSelected(controller.getPointer());
+			debit.setSelectedItem(controller.getDebit());
 			credit.setSelectedItem(controller.getCredit());
 			jours.setMap(controller.getJours());
 			montants.setMap(controller.getMontants());
-			
-			// Le compte à solder modifie aussi le compte débité
-			compteASolder.setSelectedItem(controller.getCompteASolder());
-			// On modifie le compté débité seulement après
-			debit.setSelectedItem(controller.getDebit());
 			
 			// Taux
 			BigDecimal decTaux = controller.getTaux();
@@ -450,11 +444,6 @@ public class SetupPermanent {
 	private final JComboBox<Permanent> dependance = new JComboBox<>();
 	
 	/**
-	 * Liste déroulante pour choisir le compte à solder.
-	 */
-	private final JComboBox<Compte> compteASolder = new JComboBox<>();
-	
-	/**
 	 * Champ de saisie du taux, pour une opération dépendante d'une autre.
 	 * <p>
 	 * Ce champ permet une saisie à la souris avec une précision d'une décimale.
@@ -529,7 +518,6 @@ public class SetupPermanent {
 		credit = createComptesComboBox(comptes);
 		initTypeButtons();
 		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
-		initComptesASolder(comptes);
 		listPermanents = createPermanentList(dataMediator);
 		updatePermanentList(null);
 		
@@ -707,7 +695,6 @@ public class SetupPermanent {
 		JLabel labelPointage = new JLabel("Pointage");
 		JLabel labelTaux = new JLabel("Taux");				
 		JLabel labelPermanent = new JLabel("Opération référente");
-		JLabel labelSolder = new JLabel("Compte à solder");
 	
 		// Panneau du nom, libellé, tiers, pointage, choix des comptes
 		JPanel panelComptes = new JPanel();
@@ -783,16 +770,11 @@ public class SetupPermanent {
 						.addComponent(labelPermanent)
 						.addComponent(dependance)));
 		
-		// Panneau des opérations soldant un compte
-		JPanel solderPanel = new JPanel();
-		solderPanel.add(labelSolder);
-		solderPanel.add(compteASolder);
-	
 		// Les paramètres variables suivant le type d'instance
 		JPanel cardPane = typeController.panel;				// Panel à vues
 		cardPane.add(new JScrollPane(tableMontants), FIXE);	// Fixes
 		cardPane.add(propPanel, PROPORTIONNEL);				// Proportionnels
-		cardPane.add(solderPanel, SOLDER);					// A solder
+		cardPane.add(new JPanel(), SOLDER);					// A solder
 		
 		// Un panneau transversal en deux cases pour les détails
 		JPanel transversalPanel = new JPanel(new GridLayout(1,2));
@@ -858,33 +840,6 @@ public class SetupPermanent {
 					radio.getActionCommand(), radio);
 			groupeType.add(radio);					// Ajouter au groupe
 		}
-	}
-
-	/**
-	 * Configure la liste déroulante des comptes à solder.
-	 * <p>
-	 * Cette liste déroulante doit contenir tous les comptes bancaires.<br>
-	 * Lorsque l'utilisateur sélectionne un compte dans cette liste, le même
-	 * compte doit être sélectionné dans la liste déroulante {@link #debit}.
-	 * 
-	 * @param comptes	Tous les comptes. Les comptes bancaires seront lus dans
-	 * 					ce tableau et insérés dans la liste déroulante dans le
-	 * 					même ordre.
-	 * 
-	 * @see {@link #compteASolder}
-	 */
-	private void initComptesASolder(Compte[] comptes) {
-		
-		// Insérer les comptes bancaires
-		for (Compte compte : comptes) {
-			if (compte.getType().isBancaire()) {
-				compteASolder.addItem(compte);
-			}
-		}
-		
-		// Répercuter les changements de sélection vers la combo box debit
-		compteASolder.addItemListener(EventHandler.create(
-				ItemListener.class, debit, "setSelectedItem", "item"));
 	}
 	
 	/**
