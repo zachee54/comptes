@@ -11,9 +11,8 @@ import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
+import haas.olivier.comptes.TypeCompte;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.gui.actions.DataObservable;
@@ -223,17 +222,14 @@ class SearchRowModel extends EcritureRowModel {
 	 */
 	@Override
 	protected boolean estAlEndroit(Ecriture e, Compte visu) {
-		if (e.debit instanceof CompteBancaire
-				&& e.credit instanceof CompteBudget) {
-			return false;	// Changer pour avoir le compte bancaire au crédit 
-			
-		} else if (e.debit instanceof CompteBudget
-				&& e.credit instanceof CompteBancaire) {
-			return true;	// Laisser le compte bancaire au crédit
-			
+		TypeCompte typeDebit = e.debit.getType();
+		TypeCompte typeCredit = e.credit.getType();
+		if (typeDebit.isBancaire() && typeCredit.isBudgetaire()) {
+			return false; 
+		} else if (typeDebit.isBudgetaire() && typeCredit.isBancaire()) {
+			return true;
 		} else {
-			// Le type le plus significatif (plus petit) au crédit
-			return e.credit.getType().level < e.debit.getType().level;
+			return typeCredit.compareTo(typeDebit) < 0;
 		}
 	}
 	

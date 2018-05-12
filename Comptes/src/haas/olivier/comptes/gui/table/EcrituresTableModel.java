@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.EcritureMissingArgumentException;
 import haas.olivier.comptes.InconsistentArgumentsException;
@@ -364,7 +363,7 @@ class EcritureRowModel {
 		
 		// Arrivé ici, les comptes sont bien définis dans draft
 		inverse = (visu == draft.debit);				// Sens de lecture
-		visuBudget = visu instanceof CompteBudget;		// Compte budgétaire ?
+		visuBudget = visu.getType().isBudgetaire();		// Compte budgétaire ?
 	}
 	
 	/**
