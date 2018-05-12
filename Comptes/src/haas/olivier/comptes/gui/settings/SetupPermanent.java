@@ -27,12 +27,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.TreeMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -68,7 +69,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -259,17 +259,11 @@ public class SetupPermanent {
 		 * <code>Map&lt;Month,BigDecimal&gt;</code> avant de l'envoyer au
 		 * contrôleur de données.
 		 */
-		// FIXME L'héritage entre les deux tables de PlannerTableModel est ici un obstacle
 		public void joursChanged() {
-			HashMap<Month,Integer> mapJours = new HashMap<>();
-			for (Entry<Month,Object> entry : jours.getMap().entrySet()) {
-				Object value = entry.getValue();
-				if (value instanceof Integer) {
-					mapJours.put(entry.getKey(), (Integer) value
-							);
-				}
-			}
-			controller.setJours(mapJours);
+			controller.setJours(
+					jours.getMap().entrySet().stream()
+					.filter(filterValueClass(Integer.class))
+					.collect(castValueAndCollect()));
 		}	
 			
 		/**
@@ -286,14 +280,35 @@ public class SetupPermanent {
 		 * contrôleur de données.
 		 */
 		public void montantsChanged() {		
-			HashMap<Month,BigDecimal> mapMontants = new HashMap<>();
-			for (Entry<Month,Object> entry : montants.getMap().entrySet()) {
-				Object value = entry.getValue();
-				if (value instanceof BigDecimal) {
-					mapMontants.put(entry.getKey(), (BigDecimal) value);
-				}
-			}
-			controller.setMontants(mapMontants);
+			controller.setMontants(
+					montants.getMap().entrySet().stream()
+					.filter(filterValueClass(BigDecimal.class))
+					.collect(castValueAndCollect()));
+		}
+		
+		/**
+		 * Renvoie un prédicat qui teste la classe de la valeur d'une entrée.
+		 * 
+		 * @param classe	La classe souhaitée pour la valeur.
+		 * @return			<code>true</code> si la valeur est une instance de
+		 * 					cette classe ou d'une classe fille.
+		 */
+		private Predicate<Entry<Month, Object>> filterValueClass(
+				Class<?> classe) {
+			return e -> classe.isAssignableFrom(e.getValue().getClass());
+		}
+		
+		/**
+		 * Renvoie un collecteur qui caste les valeurs de chaque entrée.
+		 * 
+		 * @return	Un collecteur qui prend un flux de
+		 * 			<code>Entry&lt;Month, Object&gt;</code> et renvoie une
+		 * 			<code>Map&lt;Month, T&gt;</code>.
+		 */
+		@SuppressWarnings("unchecked")
+		private <T> Collector<Entry<Month, Object>, ?, Map<Month, T>>
+		castValueAndCollect() {
+			return Collectors.toMap(e -> e.getKey(), e -> (T) e.getValue());
 		}
 	
 		/**
@@ -955,7 +970,7 @@ public class SetupPermanent {
 	 */
 	private Permanent applyAllAndGetSelection() throws IOException {
 		PermanentController selected = dataMediator.getController();
-		Permanent selection = null;
+		Permanent selection = selected.getPermanent();	// Sélection actuelle
 		for (PermanentController pc : controllers) {
 			try {
 				// Appliquer les modifications
@@ -967,6 +982,10 @@ public class SetupPermanent {
 				}
 				
 			} catch (IOException e) {
+				
+				// Recharger les modifications déjà faites
+				updatePermanentList(selection);
+				
 				throw new IOException(
 						String.format(
 								"Impossible de sauvegarder l'opération%n%s",
@@ -1042,150 +1061,6 @@ public class SetupPermanent {
 		return false;
 	}
 }
-
-/**
- * Un <code>TableModel</code> pour la table des jours.
- */
-@SuppressWarnings("serial")
-class PlannerTableModel extends AbstractTableModel {
-
-	private final Class<?> classe;
-	private String titre;
-	private TreeMap<Month,Object> map = new TreeMap<Month,Object>();// La map
-	private Month moisSaisi = null;		// Mois dans la ligne de saisie
-	private Object valeurSaisie = null;	//Valeur du mois dans la ligne de saisie
-	
-	public PlannerTableModel(Class<?> classe, String titre) {
-		this.classe = classe;
-		this.titre = titre;
-	}
-	
-	/**
-	 * Retourne les données de la ligne spécifiée de la map.
-	 * 
-	 * @param index	Index de la map interne (et non du modèle).
-	 */
-	private Entry<Month,Object> getEntryAt(int index) {
-		Entry<Month,Object> entry = null;					// La variable
-		Iterator<Entry<Month,Object>> iterator =
-				map.entrySet().iterator();					// Itérateur
-		int i=0;											// Compteur
-		while (iterator.hasNext() && i++ <= index) {
-			entry = iterator.next();						// Suivant
-		}
-		return entry;
-	}
-	
-	@Override
-	public String getColumnName(int columnIndex) {
-		return (columnIndex == 0) ? "Mois" : titre;
-	}
-
-	@Override
-	public Class<?> getColumnClass(int columnIndex) {
-		return (columnIndex == 0) ? Month.class : classe;
-	}
-
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return true;
-	}
-
-	@Override
-	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		
-		// Récupérer la saisie dans le type adéquat (ou null)
-		Month month = null;							// Mois null par défaut
-		Object valeur = null;						// Valeur null par défaut
-		if (columnIndex == 0 && aValue instanceof Month) {
-			month = (Month) aValue;					// Le mois
-		} else if (columnIndex == 1 && classe.isInstance(aValue)) {
-			valeur = aValue;						// La valeur du mois
-		}
-		
-		// Modifier les données
-		if (rowIndex == 0) {						// Ligne de saisie ?
-			if (columnIndex == 0) {
-				moisSaisi = month;					// Saisie du mois
-			} else if (columnIndex == 1) {
-				valeurSaisie = valeur;				// Saisie valeur du mois
-			}
-			
-			// Si toutes les données sont saisies
-			if (moisSaisi != null && valeurSaisie != null) {
-				map.put(moisSaisi, valeurSaisie);	// Mettre dans une entrée
-				moisSaisi = null;					// Vider la ligne de saisie
-				valeurSaisie = null;
-			}
-			
-		} else {									// Ligne pré-remplie
-			Entry<Month,Object> entry =
-					getEntryAt(rowIndex-1);			// Entrée existante
-			if (columnIndex == 0) {					// Changement de mois ?
-				map.remove(entry.getKey());			// Supprimer l'entrée
-				if (month != null) {				// Si nouveau mois
-					map.put(month, entry.getValue());// Nouvelle entrée 
-				}// if month null
-			} else if (columnIndex == 1) {			// Changement de jour ?
-				if (valeur == null) {				// Saisie de valeur effacée?
-					map.remove(entry.getKey());		// Supprimer l'entrée
-				} else {
-					map.put(entry.getKey(), valeur);// Changer la valeur du mois
-				}
-			}
-		}
-		fireTableDataChanged();						// Avertir des changements
-	}
-
-	@Override
-	public int getRowCount() {
-		return map.size()+1;		// La taille de la map + une ligne de saisie
-	}
-
-	@Override
-	public int getColumnCount() {
-		return 2;
-	}
-
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		
-		// Ligne de saisie
-		if (rowIndex == 0) {
-			// Le mois ou le jour saisi
-			return (columnIndex == 0) ? moisSaisi : valeurSaisie;
-		}
-		
-		// L'entrée de la ligne (n-1 à cause de la ligne de saisie)
-		Entry<Month,Object> entry = getEntryAt(rowIndex-1);
-		
-		// Retourner le mois ou le jour du mois, suivant la colonne
-		return (columnIndex == 0) ? entry.getKey() : entry.getValue();
-	}
-	
-	/**
-	 * Renvoie la <code>Map</code> actuelle.
-	 */
-	public Map<Month,Object> getMap() {
-		return map;
-	}
-	
-	/**
-	 * Remplace les données actuelles par celles qui sont contenues dans la Map
-	 * spécifiée.
-	 * 
-	 * @param jours	La Map contenant les valeurs à utiliser. L'objet fourni en
-	 * 				paramètre n'est pas modifié. Par contrat, cette	Map ne doit
-	 * 				contenir comme valeurs que des objets de la	classe fournie
-	 * 				au constructeur. Sinon, le comportement est indéfini.
-	 */
-	public void setMap(Map<Month,? extends Object> jours) {
-		map = (jours == null)
-				? new TreeMap<>()
-				: new TreeMap<>(jours);					// Nouvelles données
-		fireTableDataChanged();							// Avertir du changement
-	}
-}// class PlannerTableModel
 
 /**
  * Un <code>TableCellEditor</code> pour la classe <code>Month</code>.
