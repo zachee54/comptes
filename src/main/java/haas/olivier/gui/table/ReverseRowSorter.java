@@ -11,7 +11,7 @@ import javax.swing.table.TableModel;
  *
  * @author Olivier Haas
  */
-class ReverseRowSorter extends RowSorter<TableModel> {
+public class ReverseRowSorter extends RowSorter<TableModel> {
 
 	/**
 	 * Le modèle de table.
