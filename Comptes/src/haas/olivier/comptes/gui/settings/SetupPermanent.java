@@ -516,7 +516,7 @@ public class SetupPermanent {
 	 * 
 	 * @throws IOException
 	 * 				Si une erreur se produit pendant la récupération des
-	 * 				comptes.
+	 * 				comptes ou des <code>Permanent</code>s.
 	 */
 	public SetupPermanent(JFrame owner, SimpleGUI gui) throws IOException {
 		this.gui = gui;
@@ -670,6 +670,8 @@ public class SetupPermanent {
 	 * 			élément <code>null</code>.
 	 * 
 	 * @throws IOException
+	 * 			En cas d'erreur pendant la récupération des
+	 * 			<code>Permanent</code>s.
 	 */
 	private static Collection<Permanent> getAllPermanentsAndNull()
 			throws IOException {
@@ -861,6 +863,8 @@ public class SetupPermanent {
 	 * 					"Nouveau..."
 	 * 
 	 * @throws IOException
+	 * 					En cas d'erreur pendant la récupération des
+	 * 					<code>Permanent</code>s.
 	 */
 	private void updatePermanentList(Permanent selection) throws IOException {
 		
@@ -901,6 +905,8 @@ public class SetupPermanent {
 	 * Applique toutes les modifications et quitte la boîte de dialogue.
 	 * 
 	 * @throws IOException
+	 * 			En cas d'erreur pendant la récupération des
+	 * 			<code>Permanent</code>s.
 	 */
 	public void applyAllAndQuit() throws IOException {
 		applyAllAndGetSelection();
@@ -911,6 +917,8 @@ public class SetupPermanent {
 	 * Applique toutes les modifications et recharge les données.
 	 * 
 	 * @throws IOException
+	 * 			En cas d'erreur pendant la récupération des
+	 * 			<code>Permanent</code>s.
 	 */
 	public void applyAllAndReload() throws IOException {
 		updatePermanentList(applyAllAndGetSelection());
@@ -920,6 +928,8 @@ public class SetupPermanent {
 	 * Applique toutes les modifications.
 	 * 
 	 * @throws IOException
+	 * 			En cas d'erreur pendant la récupération des
+	 * 			<code>Permanent</code>s.
 	 */
 	private Permanent applyAllAndGetSelection() throws IOException {
 		PermanentController selected = dataMediator.getController();
