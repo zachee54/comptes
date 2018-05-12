@@ -1,7 +1,6 @@
 package haas.olivier.comptes.gui.table;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.gui.FilterCompte;
@@ -46,14 +45,13 @@ implements SoldesObserver {
 	/**
 	 * Liste des comptes.
 	 */
-	private List<Compte> comptes = new ArrayList<Compte>();
+	private List<Compte> comptes = new ArrayList<>();
 	
-	/**
-	 * Totaux par type de solde.
-	 */
-	private BigDecimal totalHistorique = BigDecimal.ZERO,
-			totalSoldeAVue = BigDecimal.ZERO,
-			totalMoyenne = BigDecimal.ZERO;
+	private BigDecimal totalHistorique = BigDecimal.ZERO;
+	
+	private BigDecimal totalSoldeAVue = BigDecimal.ZERO;
+	
+	private BigDecimal totalMoyenne = BigDecimal.ZERO;
 	
 	/**
 	 * Construit un modèle de table de synthèse des comptes.
@@ -108,7 +106,7 @@ implements SoldesObserver {
 		Month month = MonthObservable.getMonth();			// Mois à utiliser
 		
 		// Récupérer les comptes
-		comptes = new ArrayList<Compte>();
+		comptes = new ArrayList<>();
 		try {
 			// Parcourir tous les comptes
 			for (Compte c :
@@ -125,9 +123,9 @@ implements SoldesObserver {
 							totalHistorique.add(c.getHistorique(month));
 					totalSoldeAVue =					// Solde à vue
 							totalSoldeAVue.add(c.getSoldeAVue(month));
-					if (c instanceof CompteBudget) {	// Si compte budgétaire
-						totalMoyenne = totalMoyenne.add(// Moyenne
-								((CompteBudget) c).getMoyenne(month));
+					if (c.getType().isBudgetaire()) {	// Si compte budgétaire
+						totalMoyenne =					// Moyenne
+								totalMoyenne.add(c.getMoyenne(month));
 					}
 				}
 			}
@@ -151,16 +149,12 @@ implements SoldesObserver {
 			Compte c = comptes.get(row);					// Compte à utiliser
 			Month month = MonthObservable.getMonth();		// Mois à utiliser
 			
-			switch (disposition[col]) {						// Selon la colonne
-			case COMPTE :	return c;						// Le compte
-			case HISTORIQUE:return c.getHistorique(month);	// Solde théorique
-			case AVUE :		return c.getSoldeAVue(month);	// Solde à vue
-			case MOYENNE :
-				if (c instanceof CompteBudget)				// Si compte budget
-					return ((CompteBudget) c).getMoyenne(month);// Moyenne
-				// Pas de break : si compte bancaire, pas de moyenne (null)
-			default:
-				return null;
+			switch (disposition[col]) {
+			case COMPTE :	return c;
+			case HISTORIQUE:return c.getHistorique(month);
+			case AVUE :		return c.getSoldeAVue(month);
+			case MOYENNE :	return c.getMoyenne(month);
+			default:		return null;
 			}
 			
 		} else {											// Ligne de total

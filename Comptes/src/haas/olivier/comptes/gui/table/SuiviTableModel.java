@@ -1,7 +1,5 @@
 package haas.olivier.comptes.gui.table;
 
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.gui.actions.CompteObservable;
 import haas.olivier.comptes.gui.actions.MonthObservable;
@@ -23,12 +21,14 @@ implements SoldesObserver {
 	/**
 	 * Disposition des colonnes pour un compte bancaire.
 	 */
-	private static ColumnType[] dispositionBancaire = {ColumnType.MOIS, ColumnType.HISTORIQUE, ColumnType.AVUE };
+	private static ColumnType[] dispositionBancaire =
+		{ColumnType.MOIS, ColumnType.HISTORIQUE, ColumnType.AVUE };
 
 	/**
 	 * Disposition des colonnes pour un compte budgétaire.
 	 */
-	private static ColumnType[] dispositionBudget = {ColumnType.MOIS, ColumnType.HISTORIQUE, ColumnType.MOYENNE };
+	private static ColumnType[] dispositionBudget =
+		{ColumnType.MOIS, ColumnType.HISTORIQUE, ColumnType.MOYENNE };
 
 	/**
 	 * Construit un modèle de table de suivi d'un compte.
@@ -51,9 +51,7 @@ implements SoldesObserver {
 	 * disposition est modifiée.
 	 */
 	private void defineDisposition() {
-		
-		// Selon qu'il s'agit d'un compte bancaire ou budgétaire.
-		disposition = compte instanceof CompteBancaire
+		disposition = compte.getType().isBancaire()
 				? dispositionBancaire : dispositionBudget;
 	}
 
@@ -80,22 +78,16 @@ implements SoldesObserver {
 
 	@Override
 	public Object getValueAt(int row, int col) {
-
-		// Déterminer le mois concerné
-		Month m = MonthObservable.getMonth().getTranslated(-row);
-
-		// Renvoyer la valeur en fonction de la colonne
+		Month month = MonthObservable.getMonth().getTranslated(-row);
 		switch (disposition[col]) {
 		case MOIS:
-			return m;									// Renvoyer le mois
+			return month;
 		case HISTORIQUE:
-			return compte.getHistorique(m);				// Solde théorique
+			return compte.getHistorique(month);
 		case AVUE:
-			return compte.getSoldeAVue(m);				// Solde à vue
+			return compte.getSoldeAVue(month);
 		case MOYENNE:
-			if (compte instanceof CompteBudget)			// Si compte budgétaire
-				return ((CompteBudget) compte).getMoyenne(m);// La moyenne
-			// Pas de break : pas de moyenne pour un compte bancaire, donc null
+			return compte.getMoyenne(month);
 		default:
 			return null;
 		}
