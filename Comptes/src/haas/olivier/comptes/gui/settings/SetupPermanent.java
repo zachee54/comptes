@@ -115,19 +115,12 @@ public class SetupPermanent {
 					TableModelListener.class, this, "montantsChanged"));
 			taux.addChangeListener(EventHandler.create(
 					ChangeListener.class, this, "tauxChanged"));
-			
-			/*
-			 * Les ItemListener sont notifiés que lorsque la modification vient
-			 * de l'utilisateur, pas en cas de changement programmatique. On
-			 * peut donc renvoyer vers le contrôleur sans tester le drapeau
-			 * updating.
-			 */
 			debit.addItemListener(EventHandler.create(
-					ItemListener.class, controller, "setDebit", "item"));
+					ItemListener.class, this, "debitChanged"));
 			credit.addItemListener(EventHandler.create(
-					ItemListener.class, controller, "setCredit", "item"));
+					ItemListener.class, this, "creditChanged"));
 			dependance.addItemListener(EventHandler.create(
-					ItemListener.class, controller, "setDependance", "item"));
+					ItemListener.class, this, "dependanceChanged"));
 		}
 		
 		/**
@@ -190,6 +183,48 @@ public class SetupPermanent {
 			.forEach(p -> dependance.addItem(p)); 
 			
 			dependance.setSelectedItem(controller.getDependance());
+		}
+		
+		/**
+		 * Met à jour le compte débité dans le contrôleur actuel.
+		 */
+		public void debitChanged() {
+			if (updating)
+				return;
+			
+			Object selectedDebit = debit.getSelectedItem();
+			controller.setDebit(
+					selectedDebit instanceof Compte
+					? (Compte) selectedDebit
+					: null);
+		}
+		
+		/**
+		 * Met à jour le compte crédité dans le contrôleur actuel.
+		 */
+		public void creditChanged() {
+			if (updating)
+				return;
+			
+			Object selectedCredit = credit.getSelectedItem();
+			controller.setCredit(
+					selectedCredit instanceof Compte
+					? (Compte) selectedCredit
+					: null);
+		}
+		
+		/**
+		 * Met à jour la dépendance dans le contrôleur actuel.
+		 */
+		public void dependanceChanged() {
+			if (updating)
+				return;
+			
+			Object selectedDependance = dependance.getSelectedItem();
+			controller.setDependance(
+					selectedDependance instanceof Permanent
+					? (Permanent) selectedDependance
+					: null);
 		}
 	
 		/**
