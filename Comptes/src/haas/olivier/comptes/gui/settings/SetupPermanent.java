@@ -184,7 +184,7 @@ public class SetupPermanent {
 		 * <code>Permanent</code>s, sauf celui qui dépend du contrôleur
 		 * actuellement sélectionné.
 		 * <p>
-		 * À l'issue de la méthode, lé dépendance actuelle est sélectionnée,
+		 * À l'issue de la méthode, la dépendance actuelle est sélectionnée,
 		 * s'il y en a une.
 		 */
 		private void updateDependanceComboBox() {
@@ -353,9 +353,7 @@ public class SetupPermanent {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
-			changeVue(command);						// Extraire la commande
-			
-			// Faire suivre au contrôleur
+			changeVue(command);
 			dataMediator.getController().setType(command);
 		}
 	
@@ -396,7 +394,7 @@ public class SetupPermanent {
 	/**
 	 * Contrôleur de type.
 	 */
-	private final TypeController typeController = new TypeController();
+	private final TypeController typeController;
 	
 	/**
 	 * Le bouton de sélection du type d'opérations permanentes à montants fixes.
@@ -524,6 +522,7 @@ public class SetupPermanent {
 		 */
 		dataMediator = new DataMediator();
 		
+		
 		// Configurer les composants de saisie
 		Compte[] comptes = getComptes();
 		debit = createComptesComboBox(comptes);
@@ -533,6 +532,12 @@ public class SetupPermanent {
 		initComptesASolder(comptes);
 		listPermanents = createPermanentList(dataMediator);
 		updatePermanentList(null);
+		
+		/*
+		 * Le contrôleur de type désactive la liste déroulante débit si le type
+		 * est "soldeur".
+		 */
+		typeController = new TypeController(debit);
 		
 		// Disposer tout ensemble
 		JPanel main = createContent();
