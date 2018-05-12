@@ -32,8 +32,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.function.Predicate;
-
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -260,7 +258,6 @@ public class SetupPermanent {
 		public void joursChanged() {
 			controller.setJours(
 					jours.getMap().entrySet().stream()
-					.filter(filterValueClass(Integer.class))
 					.collect(castValueAndCollect()));
 		}	
 			
@@ -280,20 +277,7 @@ public class SetupPermanent {
 		public void montantsChanged() {		
 			controller.setMontants(
 					montants.getMap().entrySet().stream()
-					.filter(filterValueClass(BigDecimal.class))
 					.collect(castValueAndCollect()));
-		}
-		
-		/**
-		 * Renvoie un prédicat qui teste la classe de la valeur d'une entrée.
-		 * 
-		 * @param classe	La classe souhaitée pour la valeur.
-		 * @return			<code>true</code> si la valeur est une instance de
-		 * 					cette classe ou d'une classe fille.
-		 */
-		private Predicate<Entry<Month, Object>> filterValueClass(
-				Class<?> classe) {
-			return e -> classe.isAssignableFrom(e.getValue().getClass());
 		}
 		
 		/**
