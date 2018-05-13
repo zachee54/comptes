@@ -3,7 +3,7 @@
   realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
   <class id="1" language="java" name="haas.olivier.comptes.dao.cache.EcrituresIterator" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheEcritureDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="167" width="315" x="1103" y="1721"/>    
+    <position height="167" width="315" x="1085" y="1721"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -13,7 +13,7 @@
   <class id="2" language="java" name="haas.olivier.comptes.dao.cache.EmptyCacheableDAOFactory" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/EmptyCacheableDAOFactory.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="329" width="385" x="41" y="524"/>    
+    <position height="329" width="320" x="41" y="524"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -23,357 +23,414 @@
   <class id="3" language="java" name="haas.olivier.comptes.dao.cache.WriteOnlyCacheableDAOFactory" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/WriteOnlyCacheableDAOFactory.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="329" width="385" x="447" y="37"/>    
+    <position height="329" width="320" x="382" y="37"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="4" language="java" name="haas.olivier.comptes.dao.cache.CacheDAOFactory.CacheCompteDAO" project="Comptes" 
-    file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheDAOFactory.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="221" width="216" x="1684" y="929"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="5" language="java" name="haas.olivier.comptes.dao.cache.CachePermanentDAO" project="Comptes" 
+  <class id="4" language="java" name="haas.olivier.comptes.dao.cache.CachePermanentDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CachePermanentDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="257" width="322" x="1940" y="929"/>    
+    <position height="275" width="359" x="1749" y="929"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="6" language="java" name="haas.olivier.comptes.dao.cache.CacheBanqueDAO" project="Comptes" 
+  <class id="5" language="java" name="haas.olivier.comptes.dao.cache.CacheBanqueDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheBanqueDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="221" width="211" x="2302" y="929"/>    
+    <position height="221" width="211" x="2148" y="929"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="haas.olivier.comptes.dao.cache.CacheSuiviDAO" project="Comptes" 
+  <class id="6" language="java" name="haas.olivier.comptes.dao.cache.CacheSuiviDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheSuiviDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="185" width="360" x="872" y="929"/>    
+    <position height="221" width="315" x="2399" y="929"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="8" language="java" name="haas.olivier.comptes.dao.cache.CacheEcritureDAO" project="Comptes" 
+  <class id="7" language="java" name="haas.olivier.comptes.dao.cache.CacheEcritureDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheEcritureDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="455" width="372" x="1272" y="929"/>    
+    <position height="455" width="372" x="1337" y="929"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="9" language="java" name="haas.olivier.comptes.dao.cache.CacheableDAOFactory" project="Comptes" 
+  <interface id="8" language="java" name="haas.olivier.comptes.dao.cache.CacheableDAOFactory" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheableDAOFactory.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="293" width="385" x="447" y="929"/>    
+    <position height="293" width="320" x="382" y="929"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="10" language="java" name="haas.olivier.comptes.dao.cache.CachePropertiesDAO" project="Comptes" 
+  <class id="9" language="java" name="haas.olivier.comptes.dao.cache.CachePropertiesDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CachePropertiesDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="221" width="280" x="2553" y="929"/>    
+    <position height="221" width="280" x="742" y="929"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="11" language="java" name="haas.olivier.comptes.dao.cache.CacheablePropertiesDAO" project="Comptes" 
+  <interface id="10" language="java" name="haas.olivier.comptes.dao.cache.CacheablePropertiesDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheablePropertiesDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="77" width="293" x="447" y="1424"/>    
+    <position height="77" width="293" x="232" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="12" language="java" name="haas.olivier.comptes.dao.cache.CacheDAOFactory" project="Comptes" 
+  <class id="11" language="java" name="haas.olivier.comptes.dao.cache.CacheDAOFactory" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheDAOFactory.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="365" width="242" x="1402" y="524"/>    
+    <position height="365" width="242" x="1749" y="524"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="13" language="java" name="haas.olivier.comptes.dao.cache.EcrituresIterable" project="Comptes" 
+  <class id="12" language="java" name="haas.olivier.comptes.dao.cache.EcrituresIterable" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheEcritureDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="131" width="359" x="1103" y="1424"/>    
+    <position height="131" width="359" x="1085" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="14" language="java" name="haas.olivier.comptes.dao.IdGenerator" project="Comptes" 
+  <class id="13" language="java" name="haas.olivier.comptes.dao.IdGenerator" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/IdGenerator.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="131" width="114" x="1797" y="1424"/>    
+    <position height="131" width="114" x="1994" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="15" language="java" name="haas.olivier.comptes.dao.BanqueDAO" project="Comptes" 
+  <interface id="14" language="java" name="haas.olivier.comptes.dao.BanqueDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/BanqueDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="113" width="148" x="2302" y="1424"/>    
+    <position height="113" width="148" x="2148" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <interface id="16" language="java" name="haas.olivier.comptes.dao.PermanentDAO" project="Comptes" 
+  <interface id="15" language="java" name="haas.olivier.comptes.dao.PermanentDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/PermanentDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="149" width="164" x="1951" y="1424"/>    
+    <position height="149" width="175" x="1779" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="17" language="java" name="haas.olivier.comptes.dao.CompteDAO" project="Comptes" 
+  <interface id="16" language="java" name="haas.olivier.comptes.dao.CompteDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/CompteDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="311" width="187" x="1684" y="524"/>    
+    <position height="131" width="160" x="885" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
-  </class>  
-  <class id="18" language="java" name="haas.olivier.comptes.dao.DAOFactory" project="Comptes" 
+  </interface>  
+  <class id="17" language="java" name="haas.olivier.comptes.dao.DAOFactory" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/DAOFactory.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="437" width="213" x="1402" y="37"/>    
+    <position height="437" width="215" x="1749" y="37"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="19" language="java" name="haas.olivier.comptes.dao.EcritureDAO" project="Comptes" 
+  <interface id="18" language="java" name="haas.olivier.comptes.dao.EcritureDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/EcritureDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="257" width="255" x="1502" y="1424"/>    
+    <position height="257" width="255" x="1484" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <interface id="20" language="java" name="haas.olivier.comptes.dao.PropertiesDAO" project="Comptes" 
+  <interface id="19" language="java" name="haas.olivier.comptes.dao.PropertiesDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/PropertiesDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="113" width="280" x="2553" y="1424"/>    
+    <position height="113" width="280" x="565" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <interface id="21" language="java" name="haas.olivier.comptes.dao.SuiviDAO" project="Comptes" 
+  <interface id="20" language="java" name="haas.olivier.comptes.dao.SuiviDAO" project="Comptes" 
     file="/Comptes/src/haas/olivier/comptes/dao/SuiviDAO.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="131" width="253" x="810" y="1424"/>    
+    <position height="149" width="200" x="2399" y="1424"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <association id="22">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="23" name="mDAO"/>      
-      <multiplicity id="24" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="7" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="25">    
-    <bendpoint x="477" y="524"/>    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="26" name="writeFactory"/>      
-      <multiplicity id="27" minimum="0" maximum="1"/>    
+  <class id="21" language="java" name="haas.olivier.comptes.dao.csv.CsvDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/csv/CsvDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="49" width="132" x="443" y="524"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false" static="true"/>      
+      <operations public="false" package="false" protected="false" private="false" static="true"/>    
+    </display>  
+  </class>  
+  <class id="22" language="java" name="haas.olivier.comptes.dao.cache.CacheCompteDAO" project="Comptes" 
+    file="/Comptes/src/haas/olivier/comptes/dao/cache/CacheCompteDAO.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="221" width="235" x="1062" y="929"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <realization id="23">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="8"/>  
+  </realization>  
+  <association id="24">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="25" name="propsDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="26" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="28">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="29" name="hDAO"/>      
-      <multiplicity id="30" minimum="0" maximum="1"/>    
+  <association id="27">    
+    <end type="SOURCE" refId="4" navigable="false">      
+      <attribute id="28" name="idGen">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="29" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="7" navigable="true"/>    
+    <end type="TARGET" refId="13" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <generalization id="31">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="17"/>  
-  </generalization>  
-  <association id="32">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="33" name="bDAO"/>      
-      <multiplicity id="34" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="35">    
-    <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="36" name="idGen"/>      
-      <multiplicity id="37" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="14" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <realization id="38">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="19"/>  
-  </realization>  
-  <realization id="39">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="21"/>  
-  </realization>  
-  <association id="40">    
-    <end type="SOURCE" refId="18" navigable="false">      
-      <attribute id="41" name="factory"/>      
-      <multiplicity id="42" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="18" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <realization id="43">    
-    <bendpoint x="456" y="524"/>    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="9"/>  
-  </realization>  
-  <dependency id="44">    
-    <end type="SOURCE" refId="13"/>    
-    <end type="TARGET" refId="1"/>  
-  </dependency>  
-  <association id="45">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="46" name="cDAO"/>      
-      <multiplicity id="47" minimum="0" maximum="1"/>    
+  <association id="30">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="31" name="pDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="32" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="4" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <nesting id="48">    
-    <end type="SOURCE" refId="12"/>    
-    <end type="TARGET" refId="4"/>  
-  </nesting>  
-  <association id="49">    
-    <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="50" name="idGen"/>      
-      <multiplicity id="51" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="14" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="52">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="53" name="dao"/>      
-      <multiplicity id="54" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="9" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <realization id="55">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="9"/>  
-  </realization>  
-  <generalization id="56">    
-    <end type="SOURCE" refId="12"/>    
-    <end type="TARGET" refId="18"/>  
-  </generalization>  
-  <association id="57">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="58" name="eDAO"/>      
-      <multiplicity id="59" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="8" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="60">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="61" name="idGen"/>      
-      <multiplicity id="62" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="14" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <realization id="63">    
-    <end type="SOURCE" refId="6"/>    
-    <end type="TARGET" refId="15"/>  
-  </realization>  
-  <dependency id="64">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="13"/>  
-  </dependency>  
-  <dependency id="65">    
-    <end type="SOURCE" refId="9"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <realization id="66">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="20"/>  
-  </realization>  
-  <realization id="67">    
-    <end type="SOURCE" refId="5"/>    
+  <realization id="33">    
+    <end type="SOURCE" refId="22"/>    
     <end type="TARGET" refId="16"/>  
   </realization>  
-  <association id="68">    
-    <end type="SOURCE" refId="4" navigable="false">      
-      <attribute id="69" name="idGen"/>      
-      <multiplicity id="70" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="14" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="71">    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="72" name="readFactory"/>      
-      <multiplicity id="73" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="74">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="75" name="propsDAO"/>      
-      <multiplicity id="76" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="10" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="77">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="78" name="pDAO"/>      
-      <multiplicity id="79" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="80">    
-    <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="81" name="sDAO"/>      
-      <multiplicity id="82" minimum="0" maximum="1"/>    
+  <association id="34">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="35" name="eDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="36" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
+  <association id="37">    
+    <end type="SOURCE" refId="17" navigable="false">      
+      <attribute id="38" name="factory">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="39" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="17" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="40">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="14"/>  
+  </realization>  
+  <dependency id="41">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="10"/>  
+  </dependency>  
+  <association id="42">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="43" name="dao">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="44" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="45">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="46" name="sDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="47" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="48">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="18"/>  
+  </realization>  
+  <association id="49">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="50" name="readFactory">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="51" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="52">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="53" name="bDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="54" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="55">    
+    <bendpoint x="412" y="524"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="8"/>  
+  </realization>  
+  <dependency id="56">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="12"/>  
+  </dependency>  
+  <realization id="57">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="8"/>  
+  </realization>  
+  <association id="58">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="59" name="cDAO"/>      
+      <multiplicity id="60" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="22" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="61">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="17"/>  
+  </generalization>  
+  <association id="62">    
+    <bendpoint x="391" y="524"/>    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="63" name="writeFactory">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="64" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="65">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="66" name="mDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="67" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="68">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <realization id="69">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="15"/>  
+  </realization>  
+  <association id="70">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="71" name="idGen">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="72" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="13" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="73">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="74">    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="75" name="idGen">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="76" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="13" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="77">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="78" name="hDAO">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="79" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="80">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="19"/>  
+  </realization>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     sort-features="false" accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    

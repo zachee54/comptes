@@ -77,14 +77,12 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	 * Sauvegarde les éléments.
 	 * 
 	 * @param elements		Un itérateur des écritures à sauvegarder.
-	 * @param idByCompte	Les comptes, avec leurs identifiants.
 	 * @param writer		Un flux CSV.
 	 * 
 	 * @throws IOException
 	 */
-	static void save(Iterator<Ecriture> elements,
-			Map<Compte, Integer> idByCompte, CsvWriter writer)
-					throws IOException {
+	static void save(Iterator<Ecriture> elements, CsvWriter writer)
+			throws IOException {
 		
 		// Ecrire les en-têtes
 		writer.writeRecord(STANDARD_HEADERS);
@@ -92,7 +90,7 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 		// Écrire les éléments
 		DateFormat dateFormat = CsvDAO.createDateFormat();
 		while (elements.hasNext())
-			writeEcriture(elements.next(), writer, idByCompte, dateFormat);
+			writeEcriture(elements.next(), writer, dateFormat);
 	}
 	
 	/**
@@ -100,13 +98,12 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	 * 
 	 * @param e				L'écriture à écrire.
 	 * @param writer		Le flux d'écriture CSV
-	 * @param idByCompte	Les comptes, classés par identifiants.
 	 * @param dateFormat	Le format de date;
 	 * 
 	 * @throws IOException
 	 */
 	private static void writeEcriture(Ecriture e, CsvWriter writer,
-			Map<Compte, Integer> idByCompte, DateFormat dateFormat)
+			DateFormat dateFormat)
 					throws IOException {
 		for (String header : STANDARD_HEADERS) {
 			String value = null;
@@ -117,11 +114,11 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 			case HEADER_MONTANT:value = e.montant.toPlainString();	break;
 			
 			case HEADER_DEBIT :
-				value = idByCompte.get(e.debit).toString();
+				value = Integer.toString(e.debit.getId());
 				break;
 				
 			case HEADER_CREDIT :
-				value = idByCompte.get(e.credit).toString();
+				value = Integer.toString(e.credit.getId());
 				break;
 				
 			case HEADER_DATE :
