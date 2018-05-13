@@ -49,13 +49,12 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	 * Sauvegarde des opérations permanentes vers un flux XML.
 	 * 
 	 * @param it			Un itérateur des opérations permanentes à écrire.
-	 * @param idByCompte	Les comptes, avec leurs identifiants.
 	 * @param out			Le flux XML.
 	 * 
 	 * @throws IOException
 	 */
 	public static void save(Iterator<haas.olivier.comptes.Permanent> it,
-			Map<Compte, Integer> idByCompte, OutputStream out)
+			OutputStream out)
 					throws IOException {
 		
 		// Objet racine de l'arbre XML
@@ -64,7 +63,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		
 		// Construire une instance pour chaque opération permanente
 		while (it.hasNext())
-			listPermanents.add(preparePermanent(it.next(), idByCompte));
+			listPermanents.add(preparePermanent(it.next()));
 		
 		// Sérialiser vers XML
 		try {
@@ -108,12 +107,11 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	 * permanente.
 	 * 
 	 * @param p				L'opération permanente à représenter.
-	 * @param idByCompte	Les comptes, avec leurs identifiants.
 	 * 
 	 * @return	Une instance d'une classe JAXB.
 	 */
-	private static Permanent preparePermanent(haas.olivier.comptes.Permanent p,
-			Map<Compte, Integer> idByCompte) {
+	private static Permanent preparePermanent(
+			haas.olivier.comptes.Permanent p) {
 		Permanent result = new Permanent();
 		
 		// Les caractéristiques générales de l'opération
@@ -121,8 +119,8 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		result.setNom(p.nom);
 		result.setLibelle(p.libelle);
 		result.setTiers(p.tiers);
-		result.setCredit(idByCompte.get(p.credit));
-		result.setDebit(idByCompte.get(p.debit));
+		result.setCredit(p.credit.getId());
+		result.setDebit(p.debit.getId());
 		result.setPointage(p.pointer);
 		result.setJours(prepareJours(p.jours));
 		

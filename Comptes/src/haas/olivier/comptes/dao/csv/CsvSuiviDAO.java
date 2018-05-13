@@ -5,8 +5,10 @@ import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
 import haas.olivier.comptes.dao.cache.Solde;
 import haas.olivier.util.Month;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
@@ -28,41 +30,35 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 	 * 
 	 * @param cache			Le cache des suivis.
 	 * 
-	 * @param idByCompte	Les comptes, avec leurs identifiants.
-	 * 
 	 * @param writer		Le flux d'écriture CSV dans lequel sauvegarder les
 	 * 						données de suivi.
 	 * 
 	 * @throws IOException
 	 */
-	static void save(CacheSuiviDAO cache, Map<Compte, Integer> idByCompte,
-			CsvWriter writer) throws IOException {
+	static void save(CacheSuiviDAO cache, CsvWriter writer) throws IOException {
 		
-		// Fixer l'ordre des identifiants
-		Compte[] comptes =
-				idByCompte.keySet().toArray(new Compte[idByCompte.size()]);
+		// Fixer l'ordre des comptes
+		List<Compte> comptes = cache.getComptes();
 		
 		// Écrire les en-têtes
-		Integer[] ids = new Integer[comptes.length];
-		for (int i=0; i<ids.length; i++)
-			ids[i] = idByCompte.get(comptes[i]);
+		String[] ids = comptes.stream()
+				.map(compte -> Integer.toString(compte.getId()))
+				.sorted()
+				.toArray(String[]::new);
 		writeHeaders(ids, writer);
 		
-		// Écrire les soldes
+		// Écrire les mois et les soldes
 		DateFormat dateFormat = CsvDAO.createDateFormat();
 		for (Month month : cache.getMonths()) {
-			String[] values = new String[comptes.length];
 			
 			// Écrire le mois
-			values[0] = dateFormat.format(month.getFirstDay());
+			writer.write(dateFormat.format(month.getFirstDay()));
 			
 			// Écrire les soldes
-			int i = 1;
-			for (Compte compte : comptes)
-				values[i++] = cache.get(compte, month).toPlainString();
-			
-			// Écrire la ligne
-			writer.writeRecord(values);
+			for (Compte compte : comptes) {
+				BigDecimal solde = cache.get(compte, month);
+				writer.write(solde == null ? "" : solde.toPlainString());
+			}
 		}
 	}
 	
@@ -75,15 +71,10 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 	 * 
 	 * @throws IOException
 	 */
-	private static void writeHeaders(Integer[] ids, CsvWriter writer)
+	private static void writeHeaders(String[] ids, CsvWriter writer)
 			throws IOException {
-		String[] headers =							// Autant que de comptes + 1
-				new String[ids.length + 1];
-		headers[0] = MONTH_HEADER;					// Colonne du mois
-		int n = 1;
-		for (Integer id : ids)
-			headers[n++] = id.toString();
-		writer.writeRecord(headers);
+		writer.write(MONTH_HEADER);						// Colonne du mois
+		writer.writeRecord(ids);						// Autres colonnes
 	}
 	
 	/**
