@@ -34,11 +34,20 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * pour un compte implémentant un poste budgétaire quelconque.
 	 */
 	public static final Compte compteEpargne =
-			new Compte(TypeCompte.SUIVI_EPARGNE);
+			new Compte(-1, TypeCompte.SUIVI_EPARGNE);
 	
 	static {
 		compteEpargne.nom = " Épargne";
 	}
+	
+	/**
+	 * Identifiant unique et persistant.
+	 * <p>
+	 * Il sert à sauvegarder la configuration des comptes dans les diagrammes.
+	 * 
+	 * @see {@link haas.olivier.comptes.gui.diagram.ComptesDiagramFactory#newModel()}
+	 */
+	private final int id;
 	
 	/**
 	 * Nom du compte.
@@ -68,9 +77,11 @@ public class Compte implements Comparable<Compte>, Serializable {
 	/**
 	 * Construit un compte.
 	 * 
+	 * @param id	L'identifiant unique du compte.
 	 * @param type	Le type de compte.
 	 */
-	public Compte(TypeCompte type) {
+	public Compte(int id, TypeCompte type) {
+		this.id = id;
 		setType(type);
 		
 		/* Date d'ouverture par défaut */
@@ -102,6 +113,15 @@ public class Compte implements Comparable<Compte>, Serializable {
 		DAOFactory.getFactory().getMoyenneDAO().removeFrom(debut);
 	}
 
+	/**
+	 * Renvoie l'identifiant unique et persistant du compte.
+	 * 
+	 * @return	Un identifiant unique et persistant.
+	 */
+	public int getId() {
+		return id;
+	}
+	
 	/**
 	 * Renvoie le nom du compte.
 	 */
