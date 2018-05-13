@@ -65,16 +65,23 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		HEADER_TYPE, HEADER_OUV, HEADER_CLOTURE, HEADER_NUM, HEADER_COLOR };
 	
 	/**
-	 * Sauvegarde les éléments.
+	 * Construit un objet d'accès aux comptes, au format CSV.
 	 * 
-	 * @param idByCompte	Une collection des comptes à sauvegarder, avec leurs
-	 * 						identifiants.
+	 * @param reader	Un lecteur de la source CSV.
+	 */
+	public CsvCompteDAO(CsvReader reader) throws IOException {
+		super(reader);
+	}
+
+	/**
+	 * Sauvegarde les comptes.
 	 * 
-	 * @param writer		Un flux CSV.
+	 * @param comptes	Les comptes à sauvegarder
+	 * @param writer	Un flux CSV.
 	 * 
 	 * @throws IOException
 	 */
-	public static void save(Map<Compte, Integer> idByCompte, CsvWriter writer)
+	public static void save(Iterable<Compte> comptes, CsvWriter writer)
 			throws IOException {
 		
 		// Ecrire les en-têtes
@@ -82,29 +89,26 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 	
 		// Parcourir les comptes
 		DateFormat dateFormat = CsvDAO.createDateFormat();
-		for (Entry<Compte, Integer> compteById : idByCompte.entrySet()) {
-			writeCompte(compteById.getKey(), compteById.getValue(), writer,
-					dateFormat);
-		}
+		for (Compte compte : comptes)
+			writeCompte(compte, writer, dateFormat);
 	}
 	
 	/**
 	 * Écrit les caractérisiques du compte dans une ligne CSV.
 	 * 
 	 * @param compte		Le compte à écrire.
-	 * @param id			L'identifiant du compte.
 	 * @param writer		Le flux d'écriture CSV.
 	 * @param dateFormat	Le format de date.
 	 * 
 	 * @throws IOException
 	 */
-	private static void writeCompte(Compte compte, Integer id, CsvWriter writer,
+	private static void writeCompte(Compte compte, CsvWriter writer,
 			DateFormat dateFormat) throws IOException {
 		for (String header : STANDARD_HEADERS) {
 			String value = null;
 			switch (header) {
 			case HEADER_ID :
-				value = id.toString();
+				value = Integer.toString(compte.getId());
 				break;
 				
 			case HEADER_TYPE :
@@ -149,15 +153,6 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 	 */
 	private final DateFormat dateFormat = CsvDAO.createDateFormat();
 	
-	/**
-	 * Construit un objet d'accès aux comptes, au format CSV.
-	 * 
-	 * @param reader	Un lecteur de la source CSV.
-	 */
-	public CsvCompteDAO(CsvReader reader) throws IOException {
-		super(reader);
-	}
-
 	/**
 	 * Lit les comptes à partir d'un flux CSV et les renvoie classés par
 	 * identifiant.

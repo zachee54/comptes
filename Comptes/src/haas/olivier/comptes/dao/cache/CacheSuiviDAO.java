@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.dao.SuiviDAO;
@@ -23,6 +25,7 @@ public class CacheSuiviDAO implements SuiviDAO {
 	/**
 	 * Les suivis des comptes.
 	 */
+	// FIXME Réécrire Compte.equals() en tenant compte des id et ne pas utiliser IdentityHashMap ici
 	private final Map<Month, IdentityHashMap<Compte, BigDecimal>> suivis =
 			new HashMap<>();
 
@@ -52,6 +55,19 @@ public class CacheSuiviDAO implements SuiviDAO {
 	@Override
 	public Iterator<Solde> getAll() {
 		return new SoldeIterator();
+	}
+	
+	/**
+	 * Renvoie une liste des comptes suivis.
+	 * 
+	 * @return	Une liste des comptes. Chaque compte apparaît au plus une fois
+	 * 			dans la liste. Cette liste n'est pas triée.
+	 */
+	public List<Compte> getComptes() {
+		return suivis.values().stream()
+				.flatMap(map -> map.keySet().stream())
+				.distinct()
+				.collect(Collectors.toList());
 	}
 
 	public Iterable<Month> getMonths() {
