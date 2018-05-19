@@ -4,12 +4,9 @@ import java.awt.Color;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
 
@@ -21,7 +18,7 @@ import haas.olivier.comptes.TypeCompte;
  * 
  * @author Olivier HAAS
  */
-class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
+class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 
 	/**
 	 * Nom du champ CSV contenant l'identifiant du compte.
@@ -168,15 +165,14 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		CsvCompteDAO compteDAO = new CsvCompteDAO(reader);
 		
 		compteDAO.forEachRemaining(
-				idAndCompte ->
-				comptesById.put(idAndCompte.getKey(), idAndCompte.getValue()));
+				compte -> comptesById.put(compte.getId(), compte));
 		
 		compteDAO.close();
 		return comptesById;
 	}
 
 	@Override
-	protected Entry<Integer, Compte> readNext(CsvReader reader)
+	protected Compte readNext(CsvReader reader)
 			throws IOException, ParseException {
 		Integer id = Integer.valueOf(reader.get(HEADER_ID));
 
@@ -204,19 +200,19 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		}
 
 		// Instancier le compte
-		Compte c = new Compte(type);
-		c.setNom(reader.get(HEADER_NOM));
+		Compte compte = new Compte(id, type);
+		compte.setNom(reader.get(HEADER_NOM));
 		
 		// Numéro du compte bancaire, le cas échéant
 		String numText = reader.get(HEADER_NUM);
 		if (!numText.isEmpty())
-			c.setNumero(Long.valueOf(numText));
+			compte.setNumero(Long.valueOf(numText));
 
 		// Ajouter la couleur
 		String colorText = reader.get(HEADER_COLOR);	// Valeur enregistrée
 		if (!colorText.isEmpty()) {						// Si définie
 			long color = Long.parseLong(colorText, 16);	// Couleur hexadécimale
-			c.setColor(new Color(						// Définir cette couleur
+			compte.setColor(new Color(						// Définir cette couleur
 					(int) (color >> 16) & 0xFF,
 					(int) (color >> 8) & 0xFF,
 					(int) color & 0xFF,
@@ -226,13 +222,13 @@ class CsvCompteDAO extends AbstractCsvLayer<Entry<Integer, Compte>> {
 		// Ajouter la date d'ouverture s'il y en a une
 		String textOuv = reader.get(HEADER_OUV);		// Texte de date
 		if (textOuv != "")								// Si non vide
-			c.setOuverture(dateFormat.parse(textOuv));	// Définir
+			compte.setOuverture(dateFormat.parse(textOuv));	// Définir
 
 		// Ajouter la date de clôture s'il y en a une
 		String textClot = reader.get(HEADER_CLOTURE);	// Texte de date
 		if (textClot != "")								// Si non vide
-			c.setCloture(dateFormat.parse(textClot));	// Définir
+			compte.setCloture(dateFormat.parse(textClot));	// Définir
 		
-		return new SimpleEntry<>(id, c);
+		return compte;
 	}
 }
