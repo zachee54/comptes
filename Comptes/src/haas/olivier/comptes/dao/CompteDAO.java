@@ -3,6 +3,7 @@ package haas.olivier.comptes.dao;
 import java.io.IOException;
 import java.util.Collection;
 import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.TypeCompte;
 
 /**
  * L'accès aux comptes dans le modèle de données.
@@ -18,12 +19,19 @@ public interface CompteDAO {
 	
 	/**
 	 * Ajoute un compte.
-	 * <p>
-	 * Si le compte existe déjà, cette méthode est sans effet.
 	 * 
 	 * @param compte	Le compte à ajouter.
 	 */
 	void add(Compte compte);
+	
+	/**
+	 * Crée un nouveau compte et l'ajoute au modèle.
+	 * 
+	 * @param type	Le type du nouveau compte.
+	 * 
+	 * @return		Le nouveau compte créé.
+	 */
+	Compte createAndAdd(TypeCompte type);
 	
 	/**
 	 * Supprime un compte.

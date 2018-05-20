@@ -7,8 +7,12 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
 
 /**
@@ -25,8 +29,9 @@ class CacheCompteDAO implements CompteDAO {
 	private boolean mustBeSaved;
 	
 	/**
-	 * Les instances existantes.
+	 * Les instances existantes, et leurs identifiants.
 	 */
+	// FIXME Utiliser les id dans equals() et ne pas utiliser HashSet au lieu de IdentityHashMap ici
 	private final IdentityHashMap<Compte, Void> instances =
 			new IdentityHashMap<>();
 	
@@ -49,6 +54,27 @@ class CacheCompteDAO implements CompteDAO {
 		return list;
 	}
 	
+	@Override
+	public Compte createAndAdd(TypeCompte type) {
+		Compte compte = new Compte(findFirstUnusedId(), type);
+		add(compte);
+		return compte;
+	}
+	
+	/**
+	 * Renvoie le premier identifiant inutilisé.
+	 * 
+	 * @return	Le premier identifiant inutilisé.
+	 */
+	private int findFirstUnusedId() {
+		Set<Integer> ids = instances.keySet().stream()
+				.map(compte -> compte.getId())
+				.collect(Collectors.toSet());
+		return IntStream.range(0, Integer.MAX_VALUE)
+				.filter(i -> !ids.contains(i))
+				.findFirst().getAsInt();
+	}
+
 	@Override
 	public void add(Compte compte) {
 		instances.put(compte, null);

@@ -3,7 +3,6 @@ package haas.olivier.comptes.gui.settings;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.Date;
-
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.DAOFactory;
@@ -168,10 +167,8 @@ class CompteController implements Comparable<CompteController> {
 			return compte;							// Ne rien faire
 		
 		// Instancier un nouveau Compte si besoin
-		if (compte == null) {
-			compte = new Compte(type);
-			DAOFactory.getFactory().getCompteDAO().add(compte);
-		}
+		if (compte == null)
+			compte = DAOFactory.getFactory().getCompteDAO().createAndAdd(type);
 		
 		// Ajuster les nouvelles propriétés
 		compte.setColor(color);
