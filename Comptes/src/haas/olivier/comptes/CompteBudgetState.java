@@ -4,10 +4,10 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
-/** L'état d'un compte budgétaire.
+/**
+ * L'état d'un compte budgétaire.
  * <p>
  * Les comptes budgétaires enregistrent les mouvements sur un poste de dépenses
  * ou de recettes.<br>
@@ -16,17 +16,21 @@ import java.math.BigDecimal;
  * @author Olivier HAAS
  */
 class CompteBudgetState implements CompteState {
+	private static final long serialVersionUID = -1159441918416714602L;
 
-	/** Le type de compte. */
+	/**
+	 * Le type de compte.
+	 */
 	private TypeCompte type;
 	
-	/** Construit un état de compte budgétaire.
+	/**
+	 * Construit un état de compte budgétaire.
 	 * 
 	 * @param type	Le type de compte.
 	 */
 	public CompteBudgetState(TypeCompte type) {
 		this.type = type;
-	}// constructeur
+	}
 	
 	@Override
 	public TypeCompte getType() {
@@ -38,9 +42,12 @@ class CompteBudgetState implements CompteState {
 		return null;
 	}
 	
-	/** Aucune implémentation. */
+	/**
+	 * Aucune implémentation.
+	 */
 	@Override
 	public void setNumero(Long numero) {
+		// Les comptes budgétaires ne gèrent pas les numéros
 	}
 
 	@Override
@@ -54,19 +61,19 @@ class CompteBudgetState implements CompteState {
 	 * les comptes budgétaires présentent des soldes en miroir.
 	 */
 	@Override
-	public void addHistorique(Compte compte, Month month, BigDecimal delta)
-			throws IOException {
+	public void addHistorique(Compte compte, Month month, BigDecimal delta) {
 		SuiviDAO historique = DAOFactory.getFactory().getHistoriqueDAO();
-		BigDecimal newSolde = historique.get(compte, month).subtract(delta);
-		historique.set(compte, month, newSolde);
+		BigDecimal solde = historique.get(compte, month);
+		historique.set(compte, month,
+				(solde == null) ? delta.negate() : solde.subtract(delta));
 	}
 	
 	/**
-	 * Aucune implémentation : les comptes budgétaires ne sont pas concernés par
-	 * les pointages.
+	 * Aucune implémentation.
 	 */
 	@Override
 	public void addPointage(Compte compte, Month month, BigDecimal delta) {
+		// Les comptes budgétaires ne sont pas concernés par les pointages
 	}
 
 	/**
@@ -85,5 +92,13 @@ class CompteBudgetState implements CompteState {
 	public boolean equals(Object obj) {
 		return obj instanceof CompteBudgetState
 				&& type == ((CompteBudgetState) obj).type;
+	}
+
+	/**
+	 * Le hash code est celui du {@link #type}.
+	 */
+	@Override
+	public int hashCode() {
+		return type.hashCode();
 	}
 }
