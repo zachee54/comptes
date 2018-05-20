@@ -10,14 +10,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -33,20 +32,23 @@ public class CompteTest {
 	 * Un parseur de dates.
 	 */
 	private static final DateFormat DF = new SimpleDateFormat("dd/MM/yy");
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
 
 	@Mock
 	private DAOFactory factory;
 	
 	@Mock
 	private SuiviDAO hDAO, sDAO, mDAO;
+	
+	/**
+	 * Renvoie un tableau des types de comptes triés par ordre naturel.
+	 * 
+	 * @return	Un tableau trié.
+	 */
+	private static TypeCompte[] getSortedTypeComptes() {
+		TypeCompte[] types = TypeCompte.values();
+		Arrays.sort(types);
+		return types;
+	}
 	
 	@Before
 	public void setUp() throws Exception {
@@ -56,6 +58,8 @@ public class CompteTest {
 		when(factory.getSoldeAVueDAO()).thenReturn(sDAO);
 		when(factory.getMoyenneDAO()).thenReturn(mDAO);
 		
+		when(factory.getDebut()).thenReturn(new Month(DF.parse("01/01/05")));
+		
 		DAOFactory.setFactory(factory, false);
 	}
 
@@ -64,21 +68,21 @@ public class CompteTest {
 	}
 
 	/**
-	 * Vérifie que la date d'ouverture, la date exacte de clôture et la couleur
-	 * sont sans influcence sur le hashcode.
-	 * 
-	 * @throws ParseException
+	 * Vérifie que la date d'ouverture, la date exacte de clôture, la couleur et
+	 * le numéro sont sans influence sur le hashcode.
 	 */
 	@Test
 	public void testHashCode() throws ParseException {
-		Compte c1 = new Compte(TypeCompte.COMPTE_COURANT);
-		Compte c2 = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c1 = new Compte(1, TypeCompte.COMPTE_COURANT);
+		Compte c2 = new Compte(1, TypeCompte.COMPTE_COURANT);
 		c1.setOuverture(DF.parse("01/01/00"));
 		c2.setOuverture(DF.parse("14/07/89"));
 		c1.setCloture(DF.parse("25/12/07"));
 		c2.setCloture(DF.parse("31/12/10"));
 		c1.setColor(Color.BLACK);
 		c2.setColor(Color.RED);
+		c1.setNumero(45L);
+		c2.setNumero(28L);
 		
 		assertEquals(c1.hashCode(), c2.hashCode());
 	}
@@ -98,16 +102,17 @@ public class CompteTest {
 		Month month = new Month();
 		when(factory.getDebut()).thenReturn(month);
 		
-		Compte c = new Compte(TypeCompte.ENFANTS);
-		assertSame(TypeCompte.ENFANTS, c.getType());	// Type demandé
-		assertEquals(month, c.getOuverture());			// Date par défaut
-		assertNull(c.getCloture());						// Pas de clôture
-		assertNotNull(c.getColor());					// Couleur quelconque
+		Compte c = new Compte(0, TypeCompte.ENFANTS);
+		assertSame("Type demandé", TypeCompte.ENFANTS, c.getType());
+		assertEquals("Date par défaut du DAO",
+				month.getFirstDay(), c.getOuverture());
+		assertNull("Pas de clôture", c.getCloture());
+		assertNotNull("Couleur quelconque non null", c.getColor());
 	}
 
 	@Test
 	public void testSetNom() {
-		Compte c = new Compte(TypeCompte.DEPENSES_EN_EPARGNE);
+		Compte c = new Compte(0, TypeCompte.DEPENSES_EN_EPARGNE);
 		
 		c.setNom("un nom");
 		assertEquals("un nom", c.getNom());
@@ -115,7 +120,7 @@ public class CompteTest {
 
 	@Test
 	public void testSetNumeroBancaire() {
-		Compte c = new Compte(TypeCompte.COMPTE_CARTE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
 		
 		c.setNumero(258L);
 		assertEquals(Long.valueOf(258L), c.getNumero());
@@ -126,14 +131,14 @@ public class CompteTest {
 	 */
 	@Test
 	public void testSetNumeroBudget() {
-		Compte c = new Compte(TypeCompte.RECETTES);
+		Compte c = new Compte(0, TypeCompte.RECETTES);
 		c.setNumero(684L);
 		assertNull(c.getNumero());
 	}
 
 	@Test
 	public void testSetTypeBudget() {
-		Compte c = new Compte(TypeCompte.EMPRUNT);
+		Compte c = new Compte(0, TypeCompte.EMPRUNT);
 		c.setNumero(89L);
 		
 		c.setType(TypeCompte.DEPENSES_EN_EPARGNE);
@@ -143,7 +148,7 @@ public class CompteTest {
 	
 	@Test
 	public void testSetTypeBancaire() {
-		Compte c = new Compte(TypeCompte.RECETTES);
+		Compte c = new Compte(0, TypeCompte.RECETTES);
 		c.setType(TypeCompte.ENFANTS);
 		assertSame(TypeCompte.ENFANTS, c.getType());
 		
@@ -154,7 +159,7 @@ public class CompteTest {
 
 	@Test
 	public void testSetOuverture() throws ParseException {
-		Compte c = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		Date date = DF.parse("05/12/78");
 		
 		c.setOuverture(date);
@@ -163,7 +168,7 @@ public class CompteTest {
 	
 	@Test
 	public void testSetOuvertureNull() {
-		Compte c = new Compte(TypeCompte.COMPTE_EPARGNE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_EPARGNE);
 		try {
 			c.setOuverture(null);
 			fail("Devrait lever une exception");
@@ -173,7 +178,7 @@ public class CompteTest {
 
 	@Test
 	public void testSetCloture() throws ParseException {
-		Compte c = new Compte(TypeCompte.EMPRUNT);
+		Compte c = new Compte(0, TypeCompte.EMPRUNT);
 		Date date = DF.parse("26/10/74");
 		c.setCloture(date);
 		assertEquals(date, c.getCloture());
@@ -181,14 +186,14 @@ public class CompteTest {
 
 	@Test
 	public void testSetColor() {
-		Compte c = new Compte(TypeCompte.RECETTES);
+		Compte c = new Compte(0, TypeCompte.RECETTES);
 		c.setColor(Color.GREEN);
 		assertEquals(Color.GREEN, c.getColor());
 	}
 
 	@Test
 	public void testGetHistoriqueBancaire() {
-		Compte c = new Compte(TypeCompte.COMPTE_EPARGNE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_EPARGNE);
 		Month month = new Month();
 		Month past = month.getTranslated(-3);		// 3 mois plus tôt
 		
@@ -201,7 +206,7 @@ public class CompteTest {
 	
 	@Test
 	public void testGetHistoriqueBudget() {
-		Compte c = new Compte(TypeCompte.DEPENSES);
+		Compte c = new Compte(0, TypeCompte.DEPENSES);
 		Month month = new Month();
 		
 		when(hDAO.get(c, month)).thenReturn(BigDecimal.ONE);
@@ -212,7 +217,7 @@ public class CompteTest {
 
 	@Test
 	public void testGetHistoriqueIn() throws ParseException, EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_CARTE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
 		Month month = new Month(DF.parse("01/02/2016"));	// Février 2016
 		
 		// Solde en fin de mois
@@ -249,7 +254,7 @@ public class CompteTest {
 
 	@Test
 	public void testGetSoldeAVue() {
-		Compte c = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		Month month = new Month();
 		
 		when(sDAO.get(c, month)).thenReturn(BigDecimal.ONE);
@@ -263,7 +268,7 @@ public class CompteTest {
 
 	@Test
 	public void testGetSoldeAVueIn() throws ParseException, IOException, EcritureMissingArgumentException, InconsistentArgumentsException {
-		Compte c = new Compte(TypeCompte.COMPTE_CARTE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
 		Month month = new Month(DF.parse("01/02/2016"));	// Février 2016
 		
 		// Solde en fin de mois
@@ -282,26 +287,26 @@ public class CompteTest {
 		ecritures.add(new Ecriture(null, date1, date1, c, c2, new BigDecimal("89.7"), null, null, null));
 		ecritures.add(new Ecriture(null, date0, date1, c2, c, new BigDecimal("15"), null, null, null));
 		ecritures.add(new Ecriture(null, date0, date0, c, c2, BigDecimal.ONE, null, null, null));// Écriture à ignorer
-		when(eDAO.getAllTo(month)).thenReturn(ecritures);
+		when(eDAO.getPointagesTo(month)).thenReturn(ecritures);
 		
 		// Vérifier
 		BigDecimal histo2 = new BigDecimal("412.89");	// du 15 au 27/02
 		BigDecimal histo1 = new BigDecimal("487.59");	// du 1er au 14/02
-		for (Entry<Date, BigDecimal> dateSolde : c.getSoldeAVueIn(month)) {
-			Date date = dateSolde.getKey();
+		for (Entry<Date, BigDecimal> soldeByDate : c.getSoldeAVueIn(month)) {
+			Date date = soldeByDate.getKey();
 			if (date.before(date1)) {
-				assertEquals(0, histo1.compareTo(dateSolde.getValue()));
+				assertEquals(0, histo1.compareTo(soldeByDate.getValue()));
 			} else if (date.before(date2)) {
-				assertEquals(0, histo2.compareTo(dateSolde.getValue()));
+				assertEquals(0, histo2.compareTo(soldeByDate.getValue()));
 			} else {
-				assertEquals(0, histo3.compareTo(dateSolde.getValue()));
+				assertEquals(0, histo3.compareTo(soldeByDate.getValue()));
 			}
 		}
 	}
 
 	@Test
 	public void testGetMoyenne() {
-		Compte c = new Compte(TypeCompte.RECETTES);
+		Compte c = new Compte(0, TypeCompte.RECETTES);
 		Month month = new Month();
 		when(mDAO.get(c, month)).thenReturn(BigDecimal.TEN);
 		assertEquals(0, BigDecimal.TEN.compareTo(c.getMoyenne(month)));
@@ -310,12 +315,10 @@ public class CompteTest {
 	/**
 	 * Ajoute un montant au solde bancaire théorique alors qu'il n'y avait pas
 	 * encore de suivi pour ce compte sur ce mois.
-	 * 
-	 * @throws IOException
 	 */
 	@Test
 	public void testAddHistoriqueBancaireFromNone() throws IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_EPARGNE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_EPARGNE);
 		Month month = new Month();
 		
 		c.addHistorique(month, BigDecimal.ONE);
@@ -328,36 +331,18 @@ public class CompteTest {
 	 */
 	@Test
 	public void testAddHistoriqueBancaire() throws IOException {
-		testAddHistorique(new Compte(TypeCompte.ENFANTS));
-	}
-	
-	/**
-	 * Teste l'ajout d'un montant à un historique existant pour un compte
-	 * budgétaire.
-	 * <p>
-	 * Comme pour les comptes bancaires, mais il existe une duplication de code
-	 * donc on double le test.
-	 * 
-	 * @throws IOException
-	 */
-	@Test
-	public void testAddHistoriqueBudget() throws IOException {
-		testAddHistorique(new Compte(TypeCompte.RECETTES_EN_EPARGNE));
-	}
-	
-	/**
-	 * Teste l'ajout d'un montant à un historique existant.
-	 * 
-	 * @param c	Le compte à tester.
-	 * 
-	 * @throws IOException
-	 */
-	private void testAddHistorique(Compte c) throws IOException {
+		
+		// Objet testé
+		Compte c = new Compte(0, TypeCompte.ENFANTS);
+		
 		Month month = new Month();
 		when(hDAO.get(c, month)).thenReturn(new BigDecimal("15"));
 		
+		// Méthode testée
 		c.addHistorique(month, new BigDecimal("-25"));
-		/* Attention parce que cette vérification utilise BigDecimal.equals(),
+		
+		/*
+		 * Attention parce que cette vérification utilise BigDecimal.equals(),
 		 * qui exige non seulement l'égalité en valeur mais également en échelle
 		 * des BigDecimal. Il faut donc être sûr que le nombre calculé par
 		 * l'objet testé et le nombre attendu aient la même échelle... ici 0.
@@ -365,9 +350,36 @@ public class CompteTest {
 		verify(hDAO).set(eq(c), eq(month), eq(new BigDecimal("-10")));
 	}
 	
+	/**
+	 * Teste l'ajout d'un montant à un historique existant pour un compte
+	 * budgétaire.
+	 * <p>
+	 * Comme pour les comptes bancaires, mais le montant ajouté est inversé.
+	 */
+	@Test
+	public void testAddHistoriqueBudget() throws IOException {
+		
+		// Objet testé
+		Compte c = new Compte(0, TypeCompte.RECETTES_EN_EPARGNE);
+		
+		Month month = new Month();
+		when(hDAO.get(c, month)).thenReturn(new BigDecimal("15"));
+		
+		// Méthode testée
+		c.addHistorique(month, new BigDecimal("-25"));
+		
+		/*
+		 * Attention parce que cette vérification utilise BigDecimal.equals(),
+		 * qui exige non seulement l'égalité en valeur mais également en échelle
+		 * des BigDecimal. Il faut donc être sûr que le nombre calculé par
+		 * l'objet testé et le nombre attendu aient la même échelle... ici 0.
+		 */
+		verify(hDAO).set(eq(c), eq(month), eq(new BigDecimal("40")));
+	}
+	
 	@Test
 	public void testAddHistoriqueNull() throws IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_CARTE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
 		Month month = new Month();
 		c.addHistorique(month, null);
 		verifyZeroInteractions(hDAO);
@@ -375,7 +387,7 @@ public class CompteTest {
 
 	@Test
 	public void testAddHistoriqueZero() throws IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		Month month = new Month();
 		c.addHistorique(month, BigDecimal.ZERO);
 		verifyZeroInteractions(hDAO);
@@ -383,7 +395,7 @@ public class CompteTest {
 	
 	@Test
 	public void testAddPointagesBancaire() throws IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		Month month = new Month();
 		when(sDAO.get(c, month)).thenReturn(new BigDecimal("15"));
 		
@@ -398,14 +410,14 @@ public class CompteTest {
 	
 	@Test
 	public void testAddPointagesBudget() throws IOException {
-		new Compte(TypeCompte.DEPENSES_EN_EPARGNE).addPointages(
+		new Compte(0, TypeCompte.DEPENSES_EN_EPARGNE).addPointages(
 				new Month(), BigDecimal.ONE);
 		verifyZeroInteractions(sDAO);
 	}
 	
 	@Test
 	public void testAddPointagesNull() throws IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_CARTE);
+		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
 		Month month = new Month();
 		c.addPointages(month, null);
 		verifyZeroInteractions(sDAO);
@@ -413,7 +425,7 @@ public class CompteTest {
 	
 	@Test
 	public void testAddPointagesZero() throws IOException {
-		Compte c = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		Month month = new Month();
 		c.addPointages(month, BigDecimal.ZERO);
 		verifyZeroInteractions(sDAO);
@@ -421,8 +433,8 @@ public class CompteTest {
 
 	@Test
 	public void testGetViewSignBancaire() {
-		Compte bancaire = new Compte(TypeCompte.COMPTE_EPARGNE);
-		Compte budget = new Compte(TypeCompte.DEPENSES);
+		Compte bancaire = new Compte(1, TypeCompte.COMPTE_EPARGNE);
+		Compte budget = new Compte(2, TypeCompte.DEPENSES);
 		
 		// Vu depuis le compte bancaire
 		assertEquals(1, bancaire.getViewSign(budget, bancaire));
@@ -437,10 +449,10 @@ public class CompteTest {
 
 	@Test
 	public void testGetImpactOf() throws EcritureMissingArgumentException, InconsistentArgumentsException {
-		Compte bancaire = new Compte(TypeCompte.COMPTE_CARTE);
-		Compte budget = new Compte(TypeCompte.RECETTES);
-		Compte cNeutre1 = new Compte(TypeCompte.DEPENSES);
-		Compte cNeutre2 = new Compte(TypeCompte.ENFANTS);
+		Compte bancaire = new Compte(1, TypeCompte.COMPTE_CARTE);
+		Compte budget = new Compte(2, TypeCompte.RECETTES);
+		Compte cNeutre1 = new Compte(3, TypeCompte.DEPENSES);
+		Compte cNeutre2 = new Compte(4, TypeCompte.ENFANTS);
 		Date date = mock(Date.class);
 		BigDecimal montant = new BigDecimal("8");
 		BigDecimal inverse = montant.negate();
@@ -461,26 +473,106 @@ public class CompteTest {
 
 	@Test
 	public void testIsEpargne() {
-		assertFalse(new Compte(TypeCompte.COMPTE_COURANT).isEpargne());
-		assertTrue(new Compte(TypeCompte.COMPTE_EPARGNE).isEpargne());
-		assertFalse(new Compte(TypeCompte.DEPENSES).isEpargne());
-		assertTrue(new Compte(TypeCompte.RECETTES_EN_EPARGNE).isEpargne());
+		assertFalse(new Compte(0, TypeCompte.COMPTE_COURANT).isEpargne());
+		assertTrue(new Compte(0, TypeCompte.COMPTE_EPARGNE).isEpargne());
+		assertFalse(new Compte(0, TypeCompte.DEPENSES).isEpargne());
+		assertTrue(new Compte(0, TypeCompte.RECETTES_EN_EPARGNE).isEpargne());
 	}
 
+	/**
+	 * Teste les caractéristiques auxquelles la comparaison est insensible.
+	 */
 	@Test
-	public void testGetSituationCritique() {
-		fail("Not yet implemented");
+	public void testCompareToInsensible() throws ParseException {
+		Compte c1 = new Compte(1, TypeCompte.COMPTE_COURANT);
+		Compte c2 = new Compte(1, TypeCompte.COMPTE_COURANT);
+		c1.setColor(Color.BLACK);
+		c2.setColor(Color.WHITE);
+		c1.setNumero(4L);
+		Date cloture = DF.parse("14/07/17");
+		c1.setCloture(cloture);
+		c2.setCloture(cloture);
+		c1.setOuverture(DF.parse("01/01/04"));
+		c2.setOuverture(DF.parse("31/12/04"));
+		
+		assertEquals(0, c1.compareTo(c2));
+		assertEquals(0, c2.compareTo(c1));
 	}
-
+	
+	/**
+	 * Teste la priorité de la clôture sur le type.
+	 */
 	@Test
-	public void testCompareTo() {
-		fail("Not yet implemented");
+	public void testCompareToCloture() {
+		TypeCompte[] types = getSortedTypeComptes();
+		
+		// c2 a un type "inférieur" mais est clôturé et passe donc après
+		Compte c1 = new Compte(0, types[1]);
+		Compte c2 = new Compte(0, types[0]);
+		c2.setCloture(new Date());
+		
+		assertTrue("Non clôturé avant", c1.compareTo(c2) < 0);
+		assertTrue("Clôturé après", c2.compareTo(c1) > 0);
+	}
+	
+	/**
+	 * Teste la priorité du type sur le nom.
+	 */
+	@Test
+	public void testCompareToType() {
+		TypeCompte[] types = getSortedTypeComptes();
+		
+		// c1 a un nom qui passe après mais un type qui passe avant
+		Compte c1 = new Compte(0, types[0]);
+		Compte c2 = new Compte(0, types[1]);
+		c1.setNom("z");
+		c2.setNom("a");
+		
+		assertTrue(c1.compareTo(c2) < 0);
+		assertTrue(c2.compareTo(c1) > 0);
+	}
+	
+	/**
+	 * Teste la priorité du nom sur l'identifiant.
+	 */
+	@Test
+	public void testCompareToNom() {
+		
+		// c1 a un identifiant qui passe après mais un nom qui passe avant
+		Compte c1 = new Compte(2, TypeCompte.COMPTE_COURANT);
+		Compte c2 = new Compte(1, TypeCompte.COMPTE_COURANT);
+		c1.setNom("a");
+		c2.setNom("z");
+		
+		assertTrue(c1.compareTo(c2) < 0);
+		assertTrue(c2.compareTo(c1) > 0);
+	}
+	
+	/**
+	 * Teste le tri par identifiant en dernier recours.
+	 */
+	@Test
+	public void testCompareToId() {
+		Compte c1 = new Compte(1, TypeCompte.COMPTE_COURANT);
+		Compte c2 = new Compte(2, TypeCompte.COMPTE_COURANT);
+		
+		assertTrue(c1.compareTo(c2) < 0);
+		assertTrue(c2.compareTo(c1) > 0);
 	}
 
 	@Test
 	public void testEqualsObject() throws ParseException {
 		Compte c = createReference();
 		Compte c2;
+		
+		// Tout pareil sauf l'identifiant
+		c2 = new Compte(1, c.getType());
+		c2.setCloture(c.getCloture());
+		c2.setColor(c.getColor());
+		c2.setNom(c.getNom());
+		c2.setNumero(c.getNumero());
+		c2.setOuverture(c.getOuverture());
+		assertFalse(c.equals(c2));
 		
 		// Type différent
 		c2 = createReference();
@@ -492,37 +584,39 @@ public class CompteTest {
 		c2.setNom("un autre nom");
 		assertFalse(c.equals(c2));
 		
+		// Pas de date de clôture
+		c2 = createReference();
+		c2.setCloture(null);
+		assertFalse(c.equals(c2));
+		assertFalse(c2.equals(c));
+
+		// Ici, les paramètres sans influence
+		
 		// Numéro différent
 		c2 = createReference();
 		c2.setNumero(15L);
-		assertFalse(c.equals(c2));
+		assertTrue(c.equals(c2));
 
 		// Numéro null
 		c2 = createReference();
 		c2.setNumero(null);
-		assertFalse(c.equals(c2));
-		assertFalse(c2.equals(c));
+		assertTrue(c.equals(c2));
+		assertTrue(c2.equals(c));
 		
 		// Date d'ouverture différente
 		c2 = createReference();
 		c2.setOuverture(DF.parse("25/12/14"));
-		assertFalse(c.equals(c2));
+		assertTrue(c.equals(c2));
 		
 		// Date de clôture différente
 		c2 = createReference();
 		c2.setCloture(DF.parse("01/09/19"));
 		assertTrue(c.equals(c2));
 		
-		// Pas de date de clôture
-		c2 = createReference();
-		c2.setCloture(null);
-		assertFalse(c.equals(c2));
-		assertFalse(c2.equals(c));
-		
 		// Couleur différente
 		c2 = createReference();
 		c2.setColor(Color.GREEN);
-		assertFalse(c.equals(c2));
+		assertTrue(c.equals(c2));
 	}
 
 	/**
@@ -531,7 +625,7 @@ public class CompteTest {
 	 * @throws ParseException
 	 */
 	private Compte createReference() throws ParseException {
-		Compte c = new Compte(TypeCompte.COMPTE_COURANT);
+		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		c.setCloture(DF.parse("15/08/17"));
 		c.setNom("mon compte");
 		c.setNumero(64L);
@@ -541,7 +635,7 @@ public class CompteTest {
 	
 	@Test
 	public void testToStringBancaire() {
-		Compte c = new Compte(TypeCompte.ENFANTS);
+		Compte c = new Compte(0, TypeCompte.ENFANTS);
 		c.setNom("un nom");
 		c.setNumero(1789L);
 		String s = c.toString();
@@ -551,7 +645,7 @@ public class CompteTest {
 	
 	@Test
 	public void testToStringBudget() {
-		Compte c = new Compte(TypeCompte.DEPENSES_EN_EPARGNE);
+		Compte c = new Compte(0, TypeCompte.DEPENSES_EN_EPARGNE);
 		c.setNom("un nom");
 		assertEquals("un nom", c.toString());
 	}

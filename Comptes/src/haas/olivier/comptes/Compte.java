@@ -25,15 +25,15 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * Le comparateur de la classe.
 	 * <p>
 	 * Il compare les comptes par :<ul>
-	 * <li>	existence d'une date de clôture (les clôturés en premier ; s'il y a
-	 * 		une date de clôture, sa valeur n'a aucune importance)
+	 * <li>	existence d'une date de clôture (les clôturés en dernier ; si les
+	 * 		deux comptes ont une date de clôture, ils sont considérés comme
+	 * 		égaux à ce stade)
 	 * <li>	type
 	 * <li>	nom ; les éventuels comptes sans nom passent en premier
-	 * <li>	numéro ; les comptes non numérotés passent en premier
 	 * <li> identifiant.</ul>
 	 */
 	private static final Comparator<Compte> COMPARATOR =
-			Comparator.comparing(
+			Comparator.comparing(		// Existence seule d'une date de clôture
 					Compte::getCloture,
 					Comparator.nullsFirst((d1, d2) -> 0))
 			.thenComparing(
@@ -108,7 +108,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 		this.id = id;
 		setType(type);
 		
-		/* Date d'ouverture par défaut */
+		// Date d'ouverture par défaut
 		Month debut = DAOFactory.getFactory().getDebut();
 		if (debut != null)
 			ouverture = debut.getFirstDay();
@@ -438,9 +438,8 @@ public class Compte implements Comparable<Compte>, Serializable {
 
 	/**
 	 * Compare deux comptes selon qu'ils sont clôturés (les clôturés passent en
-	 * derniers), selon leur type, selon leur nom, puis leur numéro.<br>
-	 * Si l'un des deux n'est pas numéroté, il passe en dernier.<br>
-	 * En dernier lieu, ils sont départagés par leurs identifiants.
+	 * derniers), selon leur type, selon leur nom (ceux qui n'ont pas de nom en
+	 * premier), puis leur identifiant.
 	 */
 	@Override
 	public int compareTo(Compte c) {
@@ -449,9 +448,8 @@ public class Compte implements Comparable<Compte>, Serializable {
 
 	/**
 	 * Deux comptes sont égaux s'ils ont le même type, le même nom, le même
-	 * numéro, la même situation de clôture (tous les deux clôturés ou tous
-	 * les deux non clôturés) et le même identifiant.<br>
-	 * La date d'ouverture et la date exacte de clôture n'ont pas d'importance. 
+	 * identifiant, et s'ils sont tous les deux clôturés ou tous les deux non
+	 * clôturés.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -464,15 +462,19 @@ public class Compte implements Comparable<Compte>, Serializable {
 		return compareTo(c) == 0;
 	}
 
+	/**
+	 * Les éléments caractéristiques d'un compte sont l'existence d'une date de
+	 * clôture, le type, le nom et l'identifiant.
+	 */
 	@Override
 	public int hashCode() {
 		int res = 13;
 		int mul = 29;
 		
-		res = mul*res + (cloture == null ? 0 : cloture.hashCode());
+		res = mul*res + Integer.hashCode(id);
+		res = mul*res + (cloture == null ? 0 : -45782);
 		res = mul*res + state.hashCode();
 		res = mul*res + (nom == null ? 0 : nom.hashCode());
-		res = mul*res + Integer.valueOf(id).hashCode();
 		return res;
 	}
 	
@@ -480,6 +482,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * Renvoie le nom du compte, suivi de son numéro s'il en a un.
 	 */
 	public String toString() {
-		return nom + state.toString();
+		Long numero = getNumero();
+		return (numero == null) ? nom : String.format("%s %s", nom, numero);
 	}
 }
