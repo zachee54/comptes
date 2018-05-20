@@ -215,10 +215,10 @@ public class EcritureController {
 			 */
 			switch (e.epargne) {
 			case EPARGNE:
-				Compte.compteEpargne.addHistorique(mois, e.montant.negate());
+				Compte.COMPTE_EPARGNE.addHistorique(mois, e.montant.negate());
 				break;
 			case PRELEVEMENT:
-				Compte.compteEpargne.addHistorique(mois, e.montant);
+				Compte.COMPTE_EPARGNE.addHistorique(mois, e.montant);
 				break;
 			case NEUTRE:
 				break;
