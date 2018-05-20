@@ -1,6 +1,6 @@
 package haas.olivier.comptes;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import haas.olivier.comptes.dao.SuiviDAO;
@@ -13,7 +13,7 @@ import haas.olivier.util.Month;
  *
  * @author Olivier Haas
  */
-interface CompteState {
+interface CompteState extends Serializable {
 
 	/** Renvoie le type de compte */
 	TypeCompte getType();
@@ -49,11 +49,8 @@ interface CompteState {
 	 * @param compte	Le compte dont le solde doit être modifié.
 	 * @param month		Le mois au titre duquel modifier le solde.
 	 * @param delta		Le montant à ajouter au solde actuel.
-	 * 
-	 * @throws IOException 
 	 */
-	void addHistorique(Compte compte, Month month, BigDecimal delta)
-			throws IOException;
+	void addHistorique(Compte compte, Month month, BigDecimal delta);
 	
 	/**
 	 * Modifie le solde à vue du compte au titre d'un mois, en lui ajoutant le
@@ -62,11 +59,8 @@ interface CompteState {
 	 * @param compte	Le compte dont le solde doit être modifié.
 	 * @param month		Le mois au titre duquel modifier le solde.
 	 * @param delta		Le montant à ajouter au solde actuel.
-	 * 
-	 * @throws IOException 
 	 */
-	void addPointage(Compte compte, Month month, BigDecimal delta)
-			throws IOException;
+	void addPointage(Compte compte, Month month, BigDecimal delta);
 	
 	/**
 	 * Renvoie le sens dans lequel il faut lire l'écriture en consultant le

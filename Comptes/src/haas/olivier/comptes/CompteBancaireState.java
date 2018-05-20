@@ -4,7 +4,6 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Date;
@@ -23,6 +22,7 @@ import java.util.Date;
  * @author Olivier HAAS
  */
 class CompteBancaireState implements CompteState {
+	private static final long serialVersionUID = -225986016944002291L;
 
 	/**
 	 * Format de rendu des numéros de compte.
@@ -70,46 +70,32 @@ class CompteBancaireState implements CompteState {
 	}
 
 	/**
-	 * Retourne le numéro de compte avec un séparateur de milliers.
-	 */
-	// TODO Méthode inutilisée ?
-	public synchronized String getFormattedNumero() {
-		return numero == null ? "" : format.format(numero);
-	}
-
-	/**
 	 * @return	Le solde du mois, à défaut le dernier solde connu avant ce mois,
 	 * 			ou zéro s'il n'y a aucun solde à ce mois ni avant.
 	 */
 	@Override
 	public BigDecimal getSuivi(Compte compte, SuiviDAO dao, Month month) {
-		BigDecimal solde = null;
-		Month m = month;
 		Date ouverture = compte.getOuverture();
 	
-		/* Remonter mois par mois jusqu'à la date d'ouverture si besoin */
-		while (!m.before(ouverture)) {
-			solde = dao.get(compte, m);
+		// Remonter mois par mois jusqu'à la date d'ouverture si besoin
+		for(Month m = month; !m.before(ouverture); m = m.getPrevious()) {
+			BigDecimal solde = dao.get(compte, m);
 			if (solde != null)
 				return solde;
-			
-			m = m.getPrevious();
 		}
 	
-		/* Valeur par défaut */
+		// Valeur par défaut
 		return BigDecimal.ZERO;
 	}
 
 	@Override
-	public void addHistorique(Compte compte, Month month, BigDecimal delta)
-			throws IOException {
+	public void addHistorique(Compte compte, Month month, BigDecimal delta) {
 		addSuivi(compte, DAOFactory.getFactory().getHistoriqueDAO(), month,
 				delta);
 	}
 	
 	@Override
-	public void addPointage(Compte compte, Month month, BigDecimal delta)
-			throws IOException {
+	public void addPointage(Compte compte, Month month, BigDecimal delta) {
 		addSuivi(compte, DAOFactory.getFactory().getSoldeAVueDAO(), month,
 				delta);
 	}
@@ -121,13 +107,11 @@ class CompteBancaireState implements CompteState {
 	 * @param suivi		Le suivi à modifier.
 	 * @param month		Le mois au titre duquel modifier le suivi.
 	 * @param delta		Le montant à ajouter au suivi du mois.
-	 * 
-	 * @throws IOException
 	 */
 	private void addSuivi(Compte compte, SuiviDAO suivi, Month month,
-			BigDecimal delta) throws IOException {
-		BigDecimal newSolde = suivi.get(compte, month).add(delta);
-		suivi.set(compte, month, newSolde);
+			BigDecimal delta) {
+		BigDecimal solde = suivi.get(compte, month);
+		suivi.set(compte, month, (solde == null) ? delta : solde.add(delta));
 	}
 
 	@Override
@@ -149,11 +133,11 @@ class CompteBancaireState implements CompteState {
 		
 		CompteBancaireState compteBancaireState = (CompteBancaireState) obj;
 		
-		/* Comparer les types */
+		// Comparer les types
 		if (type != compteBancaireState.type)
 			return false;
 		
-		/* Comparer les numéros */
+		// Comparer les numéros
 		if (numero == null) {
 			return compteBancaireState.numero == null;
 		} else {
@@ -161,12 +145,12 @@ class CompteBancaireState implements CompteState {
 		}
 	}
 	
+	/**
+	 * Le hash code est celui du {@link #type}.
+	 */
 	@Override
 	public int hashCode() {
-		int h = type.hashCode();
-		if (numero != null)
-			h = h*17 + numero.hashCode();
-		return h;
+		return type.hashCode();
 	}
 
 	/**
