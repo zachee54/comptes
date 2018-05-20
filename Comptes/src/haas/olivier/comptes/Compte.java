@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Random;
 
@@ -19,6 +20,29 @@ import java.util.Random;
  */
 public class Compte implements Comparable<Compte>, Serializable {
 	private static final long serialVersionUID = 445986158370514520L;
+	
+	/**
+	 * Le comparateur de la classe.
+	 * <p>
+	 * Il compare les comptes par :<ul>
+	 * <li>	existence d'une date de clôture (les clôturés en premier ; s'il y a
+	 * 		une date de clôture, sa valeur n'a aucune importance)
+	 * <li>	type
+	 * <li>	nom ; les éventuels comptes sans nom passent en premier
+	 * <li>	numéro ; les comptes non numérotés passent en premier
+	 * <li> identifiant.</ul>
+	 */
+	private static final Comparator<Compte> COMPARATOR =
+			Comparator.comparing(
+					Compte::getCloture,
+					Comparator.nullsFirst((d1, d2) -> 0))
+			.thenComparing(
+					Compte::getType)
+			.thenComparing(
+					Compte::getNom,
+					Comparator.nullsFirst(Comparator.naturalOrder()))
+			.thenComparingInt(
+					Compte::getId);
 	
 	/**
 	 * Le compte budgétaire virtuel permettant de retracer les versements en
@@ -33,11 +57,11 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * glissante sur 12 mois est calculée et mise à jour automatiquement comme
 	 * pour un compte implémentant un poste budgétaire quelconque.
 	 */
-	public static final Compte compteEpargne =
+	public static final Compte COMPTE_EPARGNE =
 			new Compte(-1, TypeCompte.SUIVI_EPARGNE);
 	
 	static {
-		compteEpargne.nom = " Épargne";
+		COMPTE_EPARGNE.nom = " Épargne";
 	}
 	
 	/**
@@ -415,55 +439,18 @@ public class Compte implements Comparable<Compte>, Serializable {
 	/**
 	 * Compare deux comptes selon qu'ils sont clôturés (les clôturés passent en
 	 * derniers), selon leur type, selon leur nom, puis leur numéro.<br>
-	 * Si l'un des deux n'est pas numéroté, il passe en dernier.
+	 * Si l'un des deux n'est pas numéroté, il passe en dernier.<br>
+	 * En dernier lieu, ils sont départagés par leurs identifiants.
 	 */
 	@Override
 	public int compareTo(Compte c) {
-		
-		/* Comparer l'existence de dates de clôture */
-		if (cloture != c.cloture) {
-			if (cloture == null)
-				return -1;
-			if (c.cloture == null)
-				return 1;
-		}
-		
-		/* Comparer par les types */
-		TypeCompte type = getType();
-		TypeCompte type2 = c.getType();
-		if (type != type2)
-			return type.compareTo(type2);
-
-		/* Comparer par les noms */
-		if (nom != c.nom) {
-			if (c.nom == null)
-				return 1;
-			if (nom == null)
-				return -1;
-
-			int compNoms = nom.compareTo(c.nom);
-			if (compNoms != 0)
-				return compNoms;
-		}
-		
-		/* Comparer les numéros */
-		Long numero = getNumero();
-		Long numero2 = c.getNumero();
-		if (numero != numero2) {
-			if (numero == null)
-				return 1;
-			if (numero2 == null)
-				return -1;
-			
-			return numero.compareTo(numero2);
-		}
-		return 0;
+		return COMPARATOR.compare(this, c);
 	}
 
 	/**
 	 * Deux comptes sont égaux s'ils ont le même type, le même nom, le même
-	 * numéro, et la même situation de clôture (tous les deux clôturés ou tous
-	 * les deux non clôturés).<br>
+	 * numéro, la même situation de clôture (tous les deux clôturés ou tous
+	 * les deux non clôturés) et le même identifiant.<br>
 	 * La date d'ouverture et la date exacte de clôture n'ont pas d'importance. 
 	 */
 	@Override
@@ -474,9 +461,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 			return false;
 		
 		Compte c = (Compte) obj;
-		return state.equals(c.state)
-				&& nom.equals(c.nom)
-				&& (cloture == null) == (c.cloture == null);
+		return compareTo(c) == 0;
 	}
 
 	@Override
@@ -487,6 +472,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 		res = mul*res + (cloture == null ? 0 : cloture.hashCode());
 		res = mul*res + state.hashCode();
 		res = mul*res + (nom == null ? 0 : nom.hashCode());
+		res = mul*res + Integer.valueOf(id).hashCode();
 		return res;
 	}
 	
