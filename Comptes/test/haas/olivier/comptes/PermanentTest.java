@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.Permanent;
@@ -65,6 +64,7 @@ public class PermanentTest {
 
 	@Test
 	public void testCreateEcritureMontantsPredefinis() throws Exception {
+		
 		// Les montants
 		Map<Month, BigDecimal> montants = new HashMap<Month, BigDecimal>();
 		montants.put(avril, new BigDecimal("69"));
@@ -77,11 +77,11 @@ public class PermanentTest {
 		Permanent perm = new PermanentFixe(7, "", debit, credit, libelle, tiers,
 				false, jours, montants);
 		assertEquals(e, perm.createEcriture(juin));
-	}// testCreateEcritureMontantsPredefinis
+	}
 
 	@Test
 	public void testCreateEcritureCompteASolder() throws Exception {
-		CompteBancaire compteASolder = mock(CompteBancaire.class);
+		Compte compteASolder = mock(Compte.class);
 		BigDecimal montant = new BigDecimal("456.78");
 		when(compteASolder.getSoldeAVue(aout)).thenReturn(montant);
 
@@ -91,7 +91,7 @@ public class PermanentTest {
 		Permanent perm = new PermanentSoldeur(7, "", compteASolder, credit,
 				libelle, tiers, false, jours);
 		assertEquals(e, perm.createEcriture(aout.getNext()));
-	}// testCreateEcritureCompteASolder
+	}
 
 	@Test
 	public void testCreateEcritureDependance() throws Exception {
@@ -110,7 +110,7 @@ public class PermanentTest {
 		Permanent perm = new PermanentProport(7, "", debit, credit, libelle,
 				tiers, false, jours, dependance, new BigDecimal("2.01"));
 		assertEquals(e, perm.createEcriture(avril));
-	}// testCreateEcritureDependance
+	}
 
 	@Test
 	public void testCreateEcritureThrowException() {
@@ -123,13 +123,13 @@ public class PermanentTest {
 			perm.createEcriture(avril);
 			fail("Doit lever une exception");
 		} catch (Exception e2) {
-		}// try
+		}
 
 		// Aucune date
 		try {
 			perm.createEcriture(avril.getPrevious());
 			fail("Doit lever une exception");
 		} catch (Exception e1) {
-		}// try
-	}// testCreateEcritureThrowException
+		}
+	}
 }
