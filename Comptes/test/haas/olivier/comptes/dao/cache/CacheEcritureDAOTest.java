@@ -11,8 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.EcritureMissingArgumentException;
 import haas.olivier.comptes.InconsistentArgumentsException;
@@ -27,21 +25,31 @@ import org.junit.Test;
 
 public class CacheEcritureDAOTest {
 
-	/** Des comptes. */
+	/**
+	 * Des comptes.
+	 */
 	private static final Compte c1 =
 			new CompteBancaire(1, "compte1", 0L, TypeCompte.COMPTE_COURANT),
 			c2 = new CompteBudget(2, "compte2", TypeCompte.DEPENSES);
 	
-	/** Des dates. */
+	/**
+	 * Des dates.
+	 */
 	private static Date date1, date2, date3;
 	
-	/** Des mois correspondant aux dates. */
+	/**
+	 * Des mois correspondant aux dates.
+	 */
 	private static Month month1, month2, month3;
 	
-	/** Des écritures. */
+	/**
+	 * Des écritures.
+	 */
 	private static Ecriture e1, e1bis, e2, e3;
 	
-	/** Objet testé. */
+	/**
+	 * Objet testé.
+	 */
 	private CacheEcritureDAO dao;
 	
 	@BeforeClass
@@ -74,7 +82,7 @@ public class CacheEcritureDAOTest {
 		e1bis = new Ecriture(0, date1, null, c1, c2, BigDecimal.ONE, "libelle1", "tiers1", null);
 		e2 = new Ecriture(2, date2, date3, c2, c1, BigDecimal.TEN, "libelle2", "tiers2", 3);
 		e3 = new Ecriture(3, date3, null, c1, c2, BigDecimal.TEN, "libelle3", "tiers3", null);
-	}// setUpBeforeClass
+	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
@@ -92,13 +100,14 @@ public class CacheEcritureDAOTest {
 		
 		// Instancier l'objet testé
 		dao = new CacheEcritureDAO(ecritures.iterator());
-	}// setUp
+	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
 
-	/** Vérifie que l'itérable spécifié contient exactement les écritures
+	/** 
+	 * Vérifie que l'itérable spécifié contient exactement les écritures
 	 * spécifiées, dans cet ordre.
 	 * 
 	 * @param result	Le résultat.
@@ -117,7 +126,7 @@ public class CacheEcritureDAOTest {
 		
 		// Vérifier qu'il n'y a rien de plus
 		assertFalse(it.hasNext());
-	}// check
+	}
 	
 	@Test
 	public void testGet() {
@@ -126,12 +135,12 @@ public class CacheEcritureDAOTest {
 		assertSame(e2, dao.get(2));
 		assertSame(e3, dao.get(3));
 		assertNull(dao.get(4));
-	}// testGet
+	}
 	
 	@Test
 	public void testGetAll() {
 		check(dao.getAll(), e3, e2, e1bis, e1);
-	}// testGetAll
+	}
 
 	@Test
 	public void testGetAllBetween() {
@@ -147,13 +156,13 @@ public class CacheEcritureDAOTest {
 		// Vérifier la borne supérieure
 		check(dao.getAllBetween(month1.getPrevious(), month2),
 				e2, e1bis, e1);
-	}// testGetAllBetween
+	}
 
 	@Test
 	public void testGetAllSince() {
 		check(dao.getAllSince(month2),
 				e2, e3);
-	}// testGetAllSince
+	}
 
 	@Test
 	public void testGetPointagesSince() {
@@ -161,13 +170,13 @@ public class CacheEcritureDAOTest {
 				e1, e2, e1bis, e3);
 		check(dao.getPointagesSince(month3),
 				e2, e1bis, e3);
-	}// testGetPointagesSince
+	}
 
 	@Test
 	public void testGetAllTo() {
 		check(dao.getAllTo(month2),
 				e2, e1bis, e1);
-	}// testGetAllTo
+	}
 
 	@Test
 	public void testGetPointagesTo() {
@@ -179,7 +188,7 @@ public class CacheEcritureDAOTest {
 		// Pointages jusqu'à un mois passé : pas les non pointées,ni pointées après
 		check(dao.getPointagesTo(month2),
 				e1);
-	}// testGetPointagesTo
+	}
 
 	@Test
 	public void testAdd() throws EcritureMissingArgumentException, InconsistentArgumentsException {
@@ -208,16 +217,16 @@ public class CacheEcritureDAOTest {
 		for (Ecriture e : all) {
 			if (e.id.equals(6)) {
 				return;			// Tout le test est fini
-			}// if
-		}// for
+			}
+		}
 		fail("Ecriture ajoutée non numérotée 6");
-	}// testAdd
+	}
 
 	@Test
 	public void testRemove() {
 		dao.remove(2);
 		check(dao.getAll(), e3, e1bis, e1);
-	}// testRemove
+	}
 
 	@Test
 	public void testUpdate() throws EcritureMissingArgumentException, InconsistentArgumentsException {
@@ -226,7 +235,7 @@ public class CacheEcritureDAOTest {
 		Ecriture e2bis = new Ecriture(2, date1, date1, c2, c1, BigDecimal.TEN, "libelle2", "tiers2", null);
 		dao.update(e2bis);								// Méthode testée
 		check(dao.getAll(), e3, e1bis, e1, e2bis);		// A remplacé e2
-	}// testUpdate
+	}
 
 	@Test
 	public void testErase() {
@@ -247,7 +256,7 @@ public class CacheEcritureDAOTest {
 		assertEquals(1, (int) map.get(e2.tiers));
 		assertEquals(1, (int) map.get(e3.libelle));
 		assertEquals(1, (int) map.get(e3.tiers));
-	}// testConstructCommentIndex
+	}
 
 	@Test
 	public void testMustBeSaved() throws EcritureMissingArgumentException, InconsistentArgumentsException {
@@ -281,5 +290,5 @@ public class CacheEcritureDAOTest {
 		assertFalse(dao.mustBeSaved());	// Vérifier la remise à blanc
 		dao.remove(3);
 		assertTrue(dao.mustBeSaved());
-	}// testMustBeSaved
+	}
 }
