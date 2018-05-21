@@ -926,34 +926,18 @@ public class SetupPermanent {
 	
 	/**
 	 * Applique toutes les modifications.
-	 * 
-	 * @throws IOException
-	 * 			En cas d'erreur pendant la récupération des
-	 * 			<code>Permanent</code>s.
 	 */
-	private Permanent applyAllAndGetSelection() throws IOException {
+	private Permanent applyAllAndGetSelection() {
 		PermanentController selected = dataMediator.getController();
 		Permanent selection = selected.getPermanent();	// Sélection actuelle
 		for (PermanentController pc : controllers) {
-			try {
-				// Appliquer les modifications
-				Permanent p = pc.applyChanges();
-				
-				// Actualiser la sélection si besoin
-				if (pc == selected) {
-					selection = p;
-				}
-				
-			} catch (IOException e) {
-				
-				// Recharger les modifications déjà faites
-				updatePermanentList(selection);
-				
-				throw new IOException(
-						String.format(
-								"Impossible de sauvegarder l'opération%n%s",
-								pc),
-						e);
+
+			// Appliquer les modifications
+			Permanent p = pc.applyChanges();
+
+			// Actualiser la sélection si besoin
+			if (pc == selected) {
+				selection = p;
 			}
 		}
 		return selection;
@@ -977,7 +961,7 @@ public class SetupPermanent {
 		if (confirm == JOptionPane.YES_OPTION) {
 			try {
 				selected.deletePermanent();
-			} catch (IOException e1) {
+			} catch (DeletionException e1) {
 				LOGGER.log(Level.SEVERE,
 						"Impossible de supprimer " + selected, e1);
 			}
