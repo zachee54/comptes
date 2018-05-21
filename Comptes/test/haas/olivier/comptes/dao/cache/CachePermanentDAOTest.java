@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
@@ -27,17 +26,25 @@ import org.junit.Test;
 
 public class CachePermanentDAOTest {
 
-	/** Des opérations permanentes. */
+	/**
+	 * Des opérations permanentes.
+	 */
 	private static Permanent p1, p2, p3;
 	
-	/** Des comptes. */
+	/**
+	 * Des comptes.
+	 */
 	private static final Compte c1 = mock(Compte.class),
 			c2 = mock(Compte.class);
 	
-	/** L'ensembles des opérations permanentes au départ. */
+	/**
+	 * L'ensembles des opérations permanentes au départ.
+	 */
 	private static final Set<Permanent> all = new HashSet<Permanent>();
 	
-	/** Objet testé. */
+	/**
+	 * Objet testé.
+	 */
 	private CachePermanentDAO dao;
 	
 	@BeforeClass
@@ -52,7 +59,7 @@ public class CachePermanentDAOTest {
 		all.add(p1);
 		all.add(p2);
 		all.add(p3);
-	}// setUpBeforeClass
+	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
@@ -71,7 +78,7 @@ public class CachePermanentDAOTest {
 		
 		// Objet testé
 		dao = new CachePermanentDAO(factory, cDAO);
-	}// setUp
+	}
 
 	@After
 	public void tearDown() throws Exception {
@@ -90,7 +97,7 @@ public class CachePermanentDAOTest {
 		
 		// Vérifier
 		assertTrue(all.equals(result));
-	}// testGetAll
+	}
 
 	@Test
 	public void testGet() {
@@ -102,7 +109,7 @@ public class CachePermanentDAOTest {
 		
 		// Comportement avec un identifiant inexistant
 		assertNull(dao.get(5));
-	}// testGet
+	}
 
 	@Test
 	public void testAdd() {
@@ -118,7 +125,7 @@ public class CachePermanentDAOTest {
 		assertTrue(dao.mustBeSaved());
 		dao.setSaved();
 		assertFalse(dao.mustBeSaved());
-	}// testAdd
+	}
 
 	@Test
 	public void testUpdate() {
@@ -138,7 +145,7 @@ public class CachePermanentDAOTest {
 		assertTrue(dao.mustBeSaved());
 		dao.setSaved();
 		assertFalse(dao.mustBeSaved());
-	}// testUpdate
+	}
 
 	@Test
 	public void testRemove() throws IOException {
@@ -160,7 +167,7 @@ public class CachePermanentDAOTest {
 		assertTrue(it.hasNext());
 		assertSame(p2, it.next());
 		assertFalse(it.hasNext());
-	}// testRemove
+	}
 
 	@Test
 	public void testErase() throws IOException {
@@ -174,7 +181,7 @@ public class CachePermanentDAOTest {
 		// Vérification par l'accès par identifiant
 		for (int i=0; i<4; i++)
 			assertNull(dao.get(i));
-	}// testErase
+	}
 
 	@Test
 	public void testMustBeSaved() {
@@ -185,5 +192,5 @@ public class CachePermanentDAOTest {
 		// Après de simples consultations
 		dao.get(1);
 		assertFalse(dao.mustBeSaved());
-	}// testMustBeSaved
+	}
 }

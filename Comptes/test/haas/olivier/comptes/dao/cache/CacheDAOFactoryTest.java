@@ -5,8 +5,6 @@ import static org.mockito.Mockito.*;
 
 import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.PermanentFixe;
@@ -35,27 +33,41 @@ import org.junit.Test;
 
 public class CacheDAOFactoryTest {
 
-	/** Source de données mockée. */
+	/**
+	 * Source de données mockée.
+	 */
 	private static final CacheableDAOFactory cacheable =
 			mock(CacheableDAOFactory.class);
 	
-	/** Une banque. */
+	/**
+	 * Une banque.
+	 */
 	private static final Banque b = mock(Banque.class);//new Banque(1, "banque", new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR), null);
 	
-	/** Deux comptes. */
+	/**
+	 * Deux comptes.
+	 */
 	private static final Compte c1 = new CompteBudget(1, "compte", TypeCompte.DEPENSES),
 			c2 = new CompteBancaire(2, "compte2", 0L, TypeCompte.COMPTE_COURANT);
 	
-	/** Une écriture. */
+	/**
+	 * Une écriture.
+	 */
 	private static Ecriture e;
 	
-	/** Une opération permanente. */
+	/**
+	 * Une opération permanente.
+	 */
 	private static final Permanent p = new PermanentFixe(1, "permanent", c1, c2, "permanent", "tiers", false, new HashMap<Month, Integer>(), new HashMap<Month, BigDecimal>());
 	
-	/** Un mois. */
+	/**
+	 * Un mois.
+	 */
 	private static final Month month = new Month();
 	
-	/** Des suivis minimalistes. */
+	/**
+	 * Des suivis minimalistes.
+	 */
 	private static Entry<Month, Entry<Integer, BigDecimal>> h =
 			new SimpleImmutableEntry<Month, Entry<Integer, BigDecimal>>(month.getPrevious(), 
 					new SimpleImmutableEntry<Integer, BigDecimal>(2, BigDecimal.TEN)),
@@ -67,20 +79,26 @@ public class CacheDAOFactoryTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		e = new Ecriture(1, new Date(), null, c1, c2, BigDecimal.ONE, "ecriture", "tiers", null);
-	}// setUpBeforeClass
+	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}
 	
-	/** Objet testé. */
+	/**
+	 * Objet testé.
+	 */
 	private CacheDAOFactory factory;
 	
-	/** Un DAO de bas niveau pour les propriétés. */
+	/**
+	 * Un DAO de bas niveau pour les propriétés.
+	 */
 	private final CacheablePropertiesDAO propsDAO =
 			mock(CacheablePropertiesDAO.class);
 	
-	/** Un mock de memento de diagramme. */
+	/**
+	 * Un mock de memento de diagramme.
+	 */
 	private final DiagramMemento memento = mock(DiagramMemento.class);
 
 	@Before
@@ -107,13 +125,15 @@ public class CacheDAOFactoryTest {
 		
 		// Objet testé
 		factory = new CacheDAOFactory(cacheable);
-	}// setUp
+	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
 
-	/** Teste une instanciation à vide (aucune donnée source). */
+	/**
+	 * Teste une instanciation à vide (aucune donnée source).
+	 */
 	@Test
 	public void testCacheDAOFactory() throws IOException {
 		factory = new CacheDAOFactory(null);
@@ -127,7 +147,7 @@ public class CacheDAOFactoryTest {
 		assertFalse(factory.getPermanentDAO().getAll().iterator().hasNext());
 		assertFalse(factory.getPropertiesDAO().getDiagramNames().iterator().hasNext());
 		assertEquals("indéfini", factory.getName());
-	}// testCacheDAOFactory
+	}
 	
 	@Test
 	public void testGetBanqueDAO() {
@@ -139,7 +159,7 @@ public class CacheDAOFactoryTest {
 		assertTrue(banques.hasNext());
 		assertSame(b, banques.next());
 		assertFalse(banques.hasNext());
-	}// testGetBanqueDAO
+	}
 
 	@Test
 	public void testGetCompteDAO() throws IOException {
@@ -152,7 +172,7 @@ public class CacheDAOFactoryTest {
 		while (comptes.hasNext())
 			liste.add(comptes.next());
 		assertEquals(Arrays.asList(c1, c2), liste);
-	}// testGetCompteDAO
+	}
 
 	@Test
 	public void testGetEcritureDAO() throws IOException {
@@ -164,7 +184,7 @@ public class CacheDAOFactoryTest {
 		assertTrue(ecritures.hasNext());
 		assertEquals(e, ecritures.next());
 		assertFalse(ecritures.hasNext());
-	}// testGetEcritures
+	}
 
 	@Test
 	public void testGetPermanentDAO() throws IOException {
@@ -176,7 +196,7 @@ public class CacheDAOFactoryTest {
 		assertTrue(permanents.hasNext());
 		assertEquals(p, permanents.next());
 		assertFalse(permanents.hasNext());
-	}// testGetPermanents
+	}
 
 	@Test
 	public void testGetHistoriqueDAO() {
@@ -184,7 +204,7 @@ public class CacheDAOFactoryTest {
 				factory.getHistoriqueDAO().get(
 						h.getValue().getKey(),
 						h.getKey()));
-	}// testGetHistoriqueDAO
+	}
 
 	@Test
 	public void testGetSoldeAVueDAO() {
@@ -192,7 +212,7 @@ public class CacheDAOFactoryTest {
 				factory.getSoldeAVueDAO().get(
 						s.getValue().getKey(),
 						s.getKey()));
-	}// testGetSoldeAVueDAO
+	}
 
 	@Test
 	public void testGetMoyenneDAO() {
@@ -200,13 +220,13 @@ public class CacheDAOFactoryTest {
 				factory.getMoyenneDAO().get(
 						m.getValue().getKey(),
 						m.getKey()));
-	}// testGetMoyenneDAO
+	}
 
 	@Test
 	public void testGetPropertiesDAO() {
 		assertSame(memento,
 				factory.getPropertiesDAO().getDiagramProperties("diagram"));
-	}// testGetPropertiesDAO
+	}
 
 	@Test
 	public void testMustBeSaved() throws IOException {
@@ -236,22 +256,23 @@ public class CacheDAOFactoryTest {
 		factory.getPropertiesDAO().setDiagramProperties("diagram1", memento);
 		checkMustBeSaved();
 		
-		/* NB: il n'est pas nécessaire de sauvegarder les suivis, puisqu'ils
+		/*
+		 * NB: il n'est pas nécessaire de sauvegarder les suivis, puisqu'ils
 		 * peuvent être recalculés par l'application à partir des écritures.
 		 */
-	}// testMustBeSaved
+	}
 	
 	private void checkMustBeSaved() throws IOException {
 		assertTrue(factory.mustBeSaved());
 		factory.save();
 		assertFalse(factory.mustBeSaved());
-	}// checkMustBeSaved
+	}
 	
 	@Test
 	public void testSave() throws IOException {
 		factory.save();
 		verify(cacheable).save(factory);
-	}// testSave
+	}
 
 	@Test
 	public void testErase() throws IOException {
@@ -269,31 +290,31 @@ public class CacheDAOFactoryTest {
 		assertTrue(factory.getMoyenneDAO().getAll().isEmpty());
 		assertNotSame(memento,
 				factory.getPropertiesDAO().getDiagramProperties("diagram").getSeries());
-	}// testErase
+	}
 
 	@Test
 	public void testGetDebut() {
 		assertEquals(month, factory.getDebut());
-	}// testGetDebut
+	}
 
 	@Test
 	public void testGetDebutNull() throws IOException {
 		when(cacheable.getEcritures((CompteDAO) any())).thenReturn(
 				Collections.<Ecriture>emptyIterator());
 		assertNotNull(new CacheDAOFactory(cacheable).getDebut());
-	}// testGetDebutNull
+	}
 	
 	@Test
 	public void testGetSource() {
 		String result = "source name test";
 		when(cacheable.getSource()).thenReturn(result);
 		assertEquals(result, factory.getSource());
-	}// testGetSource
+	}
 	
 	@Test
 	public void testGetSourceFullName() {
 		String result = "source full name test";
 		when(cacheable.getSourceFullName()).thenReturn(result);
 		assertEquals(result, factory.getSourceFullName());
-	}// testGetSourceFullName
+	}
 }
