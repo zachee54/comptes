@@ -63,9 +63,8 @@ class CompteBudgetState implements CompteState {
 	@Override
 	public void addHistorique(Compte compte, Month month, BigDecimal delta) {
 		SuiviDAO historique = DAOFactory.getFactory().getHistoriqueDAO();
-		BigDecimal solde = historique.get(compte, month);
-		historique.set(compte, month,
-				(solde == null) ? delta.negate() : solde.subtract(delta));
+		BigDecimal solde = getSuivi(compte, historique, month);
+		historique.set(compte, month, solde.subtract(delta));
 	}
 	
 	/**

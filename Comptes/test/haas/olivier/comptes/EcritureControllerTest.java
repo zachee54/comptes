@@ -45,9 +45,20 @@ public class EcritureControllerTest {
 			sDAO = mock(SuiviDAO.class),
 			mDAO = mock(SuiviDAO.class);
 	
-	private Compte c1 = mock(CompteBudget.class),
-			c2 = mock(CompteBudget.class),
-			c3 = mock(Compte.class);
+	/**
+	 * Un compte bancaire qui n'est pas un compte d'epargne
+	 */
+	private Compte c1 = mock(Compte.class);
+	
+	/**
+	 * Un compte budgétaire qui est un compte d'épargne.
+	 */
+	private Compte c2 = mock(Compte.class);
+	
+	/**
+	 * Un compte budgétaire qui est un compte d'épargne.
+	 */
+	private Compte c3 = mock(Compte.class);
 	
 	private BigDecimal zero = BigDecimal.ZERO,
 			x = new BigDecimal("178.50"),
@@ -61,7 +72,7 @@ public class EcritureControllerTest {
 		octobre2011 = new Month(parser.parse("01/10/11"));
 		fevrier2012 = new Month(parser.parse("01/02/12"));
 		aout2012 = new Month(parser.parse("01/08/12"));
-	}// setUpBeforeClass
+	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
@@ -83,6 +94,9 @@ public class EcritureControllerTest {
 		when(c1.getId()).thenReturn(1);
 		when(c2.getId()).thenReturn(2);
 		when(c3.getId()).thenReturn(3);
+		when(c1.getType()).thenReturn(TypeCompte.COMPTE_COURANT);
+		when(c2.getType()).thenReturn(TypeCompte.RECETTES_EN_EPARGNE);
+		when(c3.getType()).thenReturn(TypeCompte.DEPENSES_EN_EPARGNE);
 		
 		// Créer un modèle mocké complet
 		DAOFactory dao = mock(DAOFactory.class);
@@ -104,8 +118,13 @@ public class EcritureControllerTest {
 		when(eDAO.getPointagesSince((Month) any())).thenReturn(
 				Collections.<Ecriture>emptyList());
 		
+		// Historiques pour éviter une NPE lors du recalcul de la moyenne
+		when(c1.getHistorique(any(Month.class))).thenReturn(BigDecimal.ZERO);
+		when(c2.getHistorique(any(Month.class))).thenReturn(BigDecimal.ZERO);
+		when(c3.getHistorique(any(Month.class))).thenReturn(BigDecimal.ZERO);
+		
 		DAOFactory.setFactory(dao, false);
-	}// setUp
+	}
 
 	@After
 	public void tearDown() throws Exception {
@@ -130,7 +149,7 @@ public class EcritureControllerTest {
 		
 		// Vérifier la mise à jour des suivis depuis septembre 2011
 		verify(c2).addHistorique(septembre2011, x);
-	}// testInsertMoreRecent
+	}
 
 	@Test
 	public void testInsertOlder() throws EcritureMissingArgumentException, InconsistentArgumentsException, ParseException, IOException {
@@ -154,7 +173,7 @@ public class EcritureControllerTest {
 		
 		// Vérifier la mise à jour des suivis depuis septembre 2011
 		verify(c1).addHistorique(octobre2011, z);
-	}// testInsertOlder
+	}
 	
 	@Test
 	public void testInsertNoId() throws EcritureMissingArgumentException, InconsistentArgumentsException, ParseException, IOException {
@@ -175,13 +194,13 @@ public class EcritureControllerTest {
 		
 		// Vérifier la mise à jour des suivis
 		verify(c1).addHistorique(fevrier2012, z);
-	}// testInsertNoId
+	}
 
 	@Test
 	public void testAdd() throws EcritureMissingArgumentException, InconsistentArgumentsException, ParseException, IOException {
 
-		
-		/* Faire comme si les écritures étaient déjà dans le modèle.
+		/*
+		 * Faire comme si les écritures étaient déjà dans le modèle.
 		 * Ça ne sert pas au moment de leur insertion, mais ça sert au moment de
 		 * la mise à jour des suivis : l'application reprend les écritures du
 		 * modèle à compter du mois choisi pour tout recalculer.
@@ -199,13 +218,14 @@ public class EcritureControllerTest {
 		// Vérifier que les suivis ont été mis à jour
 		// Au moins le suivi de c2 au mois de septembre 2011 (le plus ancien)
 		verify(c2).addHistorique(septembre2011, x);
-	}// testAdd
+	}
 
 	@Test
 	public void testRemove() throws IOException {
 		when(eDAO.get(1)).thenReturn(e1);
 		
-		/* Simuler des écritures depuis septembre pour vérifier la mise à jour
+		/*
+		 * Simuler des écritures depuis septembre pour vérifier la mise à jour
 		 * de leur historique.
 		 */
 		when(eDAO.getAllSince(septembre2011)).thenReturn(ecritures);
@@ -218,7 +238,7 @@ public class EcritureControllerTest {
 		
 		// Vérifier que les suivis ont été mis à jour
 		verify(c2).addHistorique(septembre2011, x);
-	}// testRemove
+	}
 
 	@Test
 	public void testUpdateSuivis() throws ParseException, EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
@@ -306,9 +326,9 @@ public class EcritureControllerTest {
 //		verify((CompteBudget) c1).updateMoyennes(octobre);
 //		verify((CompteBudget) c2).updateMoyennes(octobre);
 
-		// Vérification des épargnes (compte n° -1)
-		verify(hDAO).set(-1, octobre2011, y.negate());
-		verify(hDAO).set(-1, fevrier2012, z.negate());
-	}// testUpdateSuivis
+		// Vérification des épargnes
+		verify(hDAO).set(Compte.COMPTE_EPARGNE, octobre2011, y.negate());
+		verify(hDAO).set(Compte.COMPTE_EPARGNE, fevrier2012, z.negate());
+	}
 
 }

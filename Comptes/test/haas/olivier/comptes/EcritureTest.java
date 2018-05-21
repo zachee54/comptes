@@ -3,8 +3,6 @@ package haas.olivier.comptes;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.TypeCompte;
 import java.math.BigDecimal;
@@ -83,9 +81,9 @@ public class EcritureTest {
 	public void testEquals()
 			throws ParseException, EcritureMissingArgumentException, InconsistentArgumentsException {
 		Date date1 = parser.parse("15/08/04");
-		c1 = new CompteBancaire(1, "compte 1", 0, TypeCompte.COMPTE_CARTE);
-		c2 = new CompteBudget(2, "compte 2", TypeCompte.RECETTES_EN_EPARGNE);
-		c3 = new CompteBudget(3, "compte 3", TypeCompte.DEPENSES);
+		c1 = new Compte(1, TypeCompte.COMPTE_CARTE);
+		c2 = new Compte(2, TypeCompte.RECETTES_EN_EPARGNE);
+		c3 = new Compte(3, TypeCompte.DEPENSES);
 
 		// Ecriture à tester
 		Ecriture e = new Ecriture(5, date1, null, c1, c2, new BigDecimal(
