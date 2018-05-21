@@ -371,10 +371,8 @@ class PermanentController implements Comparable<PermanentController> {
 	 * @return	Le nouveau <code>Permanent</code> enregistré dans le DAO. S'il
 	 * 			n'y a pas de modifications, c'est la même instance
 	 * 			qu'auparavant.
-	 * 
-	 * @throws IOException
 	 */
-	public Permanent applyChanges() throws IOException {
+	public Permanent applyChanges() {
 		if (!modified)									// Si rien n'a changé
 			return permanent;							// Ne rien faire
 
@@ -407,10 +405,35 @@ class PermanentController implements Comparable<PermanentController> {
 	/**
 	 * Supprime le <code>Permanent</code>. 
 	 * 
-	 * @throws IOException
+	 * @throws DeletionException
+	 * 			Si une autre opération dépend de celle-ci ou s'il est
+	 * 			impossible de récupérer l'ensemble des opérations permanentes
+	 * 			pour le vérifier.
 	 */
-	public void deletePermanent() throws IOException {
+	public void deletePermanent() throws DeletionException {
+		try {
+			Permanent dependant = getDependant();
+			if (dependant != null) {
+				throw new DeletionException(String.format(
+						"L'opération %s dépend de celle-ci", dependant));
+			}
+		} catch (IOException e) {
+			throw new DeletionException(e);
+		}
+		
 		DAOFactory.getFactory().getPermanentDAO().remove(permanent.id);
+	}
+	
+	private Permanent getDependant() throws IOException {
+		for (Permanent p : DAOFactory.getFactory().getPermanentDAO().getAll()) {
+			if (p instanceof PermanentProport) {
+				PermanentProport dependant = (PermanentProport) p;
+				if (dependant.dependance == permanent) {
+					return dependant;
+				}
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -432,6 +455,17 @@ class PermanentController implements Comparable<PermanentController> {
 		} else {
 			return permanent.compareTo(permanent2);
 		}
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return (o instanceof PermanentController)
+				&& (compareTo((PermanentController) o) == 0);
+	}
+	
+	@Override
+	public int hashCode() {
+		return (permanent == null) ? 0 : permanent.hashCode();
 	}
 	
 	/**
