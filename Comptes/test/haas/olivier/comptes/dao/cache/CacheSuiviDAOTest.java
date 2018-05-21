@@ -19,16 +19,22 @@ import org.junit.Test;
 
 public class CacheSuiviDAOTest {
 
-	/** Des mois. */
+	/**
+	 * Des mois.
+	 */
 	private static final Month month2 = new Month(),
 			month1 = month2.getPrevious(),
 			month3 = month2.getNext();
 	
-	/** Des suivis fictifs. */
+	/**
+	 * Des suivis fictifs.
+	 */
 	private static final Map<Month, Map<Integer, BigDecimal>> suivis =
 			new HashMap<>();
 	
-	/** Objet testé. */
+	/**
+	 * Objet testé.
+	 */
 	private CacheSuiviDAO dao;
 	
 	@BeforeClass
@@ -52,7 +58,7 @@ public class CacheSuiviDAOTest {
 		values.put(2, new BigDecimal("200"));
 		values.put(3, BigDecimal.ONE.negate());
 		suivis.put(month3, values);
-	}// setUpBeforeClass
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -69,9 +75,11 @@ public class CacheSuiviDAOTest {
 		
 		// Objet testé
 		dao = new CacheSuiviDAO(entries.iterator());
-	}// setUp
+	}
+
 	
-	/** Méthode de confort pour créer facilement des entrées sur lesquelles
+	/**
+	 * Méthode de confort pour créer facilement des entrées sur lesquelles
 	 * itérer lors de l'instanciation de l'objet testé.
 	 * 
 	 * @param m	Le mois.
@@ -87,12 +95,12 @@ public class CacheSuiviDAOTest {
 				new SimpleImmutableEntry<Integer, BigDecimal>(
 						i,
 						d));
-	}// createEntry
+	}
 
 	@Test
 	public void testGetAll() throws IOException {
 		assertEquals(suivis, dao.getAll());
-	}// testGetAll
+	}
 
 	@Test
 	public void testGet() {
@@ -113,7 +121,7 @@ public class CacheSuiviDAOTest {
 				month1.getPrevious()));		// Mois inexistant (antérieur)
 		assertNull(dao.get(3,
 				month3.getNext()));			// Mois inexistant (postérieur)
-	}// testGet
+	}
 
 	@Test
 	public void testSet() {
@@ -135,7 +143,7 @@ public class CacheSuiviDAOTest {
 		// Vérifier l'absence d'interaction
 		assertEquals(BigDecimal.ONE.negate(), dao.get(3, month3));
 		assertNull(dao.get(3, month1));
-	}// testSet
+	}
 
 	@Test
 	public void testRemoveFrom() {
@@ -148,7 +156,7 @@ public class CacheSuiviDAOTest {
 		assertNull(dao.get(3, month3));
 		assertEquals(BigDecimal.TEN, dao.get(1, month1));
 		assertEquals(BigDecimal.ONE, dao.get(2, month1));
-	}// testRemoveFrom
+	}
 
 	@Test
 	public void testErase() throws IOException {
@@ -156,11 +164,12 @@ public class CacheSuiviDAOTest {
 		
 		// Vérifier qu'il n'y a plus rien dans getAll()
 		for (Map<Integer, BigDecimal> map : dao.getAll().values())
-			/* Normalement getAll est vide donc le code ci-dessous ne devrait
+			/*
+			 * Normalement getAll est vide donc le code ci-dessous ne devrait
 			 * même pas s'exécuter. S'il y a des entrées, il faut que les
 			 * valeurs soient des Map vides.
 			 */
 			assertEquals(0, map.size());
-	}// testErase
+	}
 
 }

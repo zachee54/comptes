@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.TypeCompte;
@@ -29,7 +27,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/** La classe
+/**
+ * La classe
  * {@link haas.olivier.comptes.dao.cache.CacheDAOFactory.CacheCompteDAO} étant
  * une classe interne de <code>CacheDAOFactory</code>, on doit instancier
  * complètement celle-ci pour pouvoir tester celle-là.
@@ -71,16 +70,20 @@ public class CacheCompteDAOTest {
 						Collections.<Permanent>emptyIterator());
 		when(cacheable.getProperties()).thenReturn(
 				mock(CacheablePropertiesDAO.class));
-	}// setUpBeforeClass
+	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}
 	
-	/** La fabrique. */
+	/**
+	 * La fabrique.
+	 */
 	private DAOFactory factory;
 	
-	/** Objet testé. */
+	/**
+	 * Objet testé.
+	 */
 	private CompteDAO dao;
 
 	@Before
@@ -92,7 +95,8 @@ public class CacheCompteDAOTest {
 		when(cacheable.getEcritures((CompteDAO) any())).thenReturn(
 				ecritures.iterator());
 		
-		/* Utiliser un nouvel itérateur des comptes à chaque test (sinon, il ne
+		/*
+		 * Utiliser un nouvel itérateur des comptes à chaque test (sinon, il ne
 		 * marche que pour le premier test et ensuite il ne renvoie plus rien !)
 		 */
 		when(cacheable.getComptes()).thenReturn(comptes.iterator());
@@ -102,7 +106,7 @@ public class CacheCompteDAOTest {
 		
 		// Objet testé
 		dao = factory.getCompteDAO();
-	}// setUp
+	}
 
 	@After
 	public void tearDown() throws Exception {
@@ -114,7 +118,7 @@ public class CacheCompteDAOTest {
 		assertEquals(3, result.size());
 		for (Compte c : result)
 			assertTrue(comptes.contains(c));
-	}// testGetAll
+	}
 	
 	@Test
 	public void testGet() throws IOException {
@@ -122,7 +126,7 @@ public class CacheCompteDAOTest {
 		assertEquals(c2, dao.get(2));
 		assertEquals(c3, dao.get(3));
 		assertNull(dao.get(4));
-	}// testGet
+	}
 	
 	@Test
 	public void testAddCompteBudget() throws IOException {
@@ -134,7 +138,7 @@ public class CacheCompteDAOTest {
 		
 		assertEquals(c4, dao.get(4));
 		assertEquals(4, dao.getAll().size());
-	}// testAddCompte Budget
+	}
 	
 	@Test
 	public void testAddCompteBancaire() throws IOException {
@@ -146,7 +150,7 @@ public class CacheCompteDAOTest {
 		
 		assertEquals(c4, dao.get(4));
 		assertEquals(4, dao.getAll().size());
-	}// testAddCompteBancaire
+	}
 	
 	@Test
 	public void testUpdate() throws IOException {
@@ -161,13 +165,13 @@ public class CacheCompteDAOTest {
 		EcritureDAO eDAO = factory.getEcritureDAO();
 		assertSame(c2bis, eDAO.get(1).credit);
 		assertSame(c2bis, eDAO.get(2).debit);
-	}// testUpdate
+	}
 	
 	@Test
 	public void testRemove() throws IOException {
 		dao.remove(2);
 		assertNull(dao.get(2));
 		assertEquals(2, dao.getAll().size());
-	}// testRemove
+	}
 
 }
