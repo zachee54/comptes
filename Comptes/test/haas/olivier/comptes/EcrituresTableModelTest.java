@@ -8,8 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.TreeSet;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.TypeCompte;
@@ -49,9 +47,9 @@ public class EcrituresTableModelTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		// Des données
-		compte = new CompteBancaire(1, "un", 1L, TypeCompte.COMPTE_CARTE);
-		compte2 = new CompteBudget(2, "deux", TypeCompte.DEPENSES);
-		compte3 = new CompteBudget(3, "trois", TypeCompte.RECETTES);
+		compte = new Compte(1, TypeCompte.COMPTE_CARTE);
+		compte2 = new Compte(2, TypeCompte.DEPENSES);
+		compte3 = new Compte(3, TypeCompte.RECETTES);
 
 		a = new BigDecimal("657.13");
 		b = new BigDecimal("18.20");
