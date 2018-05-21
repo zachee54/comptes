@@ -110,8 +110,8 @@ class CompteBancaireState implements CompteState {
 	 */
 	private void addSuivi(Compte compte, SuiviDAO suivi, Month month,
 			BigDecimal delta) {
-		BigDecimal solde = suivi.get(compte, month);
-		suivi.set(compte, month, (solde == null) ? delta : solde.add(delta));
+		BigDecimal solde = getSuivi(compte, suivi, month);
+		suivi.set(compte, month, solde.add(delta));
 	}
 
 	@Override
