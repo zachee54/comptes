@@ -5,10 +5,11 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Set;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
@@ -20,6 +21,7 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.PermanentDAO;
 import haas.olivier.comptes.dao.SuiviDAO;
+import haas.olivier.comptes.dao.cache.Solde;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,11 +71,9 @@ public class DAOFactoryTest {
 	@Mock
 	private SuiviDAO hDAO1, hDAO2, sDAO1, sDAO2, mDAO1, mDAO2;
 	
-	/**
-	 * Des comptes.
-	 */
-	private final Compte compte1 = new Compte(TypeCompte.DEPENSES_EN_EPARGNE),
-			compte2 = new Compte(TypeCompte.EMPRUNT);
+	private final Compte compte1 =
+			new Compte(1, TypeCompte.DEPENSES_EN_EPARGNE);
+	private final Compte compte2 = new Compte(2, TypeCompte.EMPRUNT);
 	
 	/**
 	 * Une écriture.
@@ -104,12 +104,10 @@ public class DAOFactoryTest {
 				Collections.<Permanent>singleton(permanent);
 		
 		// Suivis mockés
-		Map<Month, Map<Compte,BigDecimal>> suivi = new HashMap<>();
-		suivi.put(month1, new HashMap<>());
-		suivi.put(month2, new HashMap<>());
-		suivi.get(month1).put(compte1, d1);
-		suivi.get(month1).put(compte2, d2);
-		suivi.get(month2).put(compte1, d2);
+		Collection<Solde> suivi = new ArrayList<>();
+		suivi.add(new Solde(month1, compte1, d1));
+		suivi.add(new Solde(month1, compte2, d2));
+		suivi.add(new Solde(month2, compte1, d2));
 		
 		// Fabriques mockées
 		when(factory1.getCompteDAO()).thenReturn(cDAO1);
@@ -127,15 +125,15 @@ public class DAOFactoryTest {
 		when(cDAO1.getAll()).thenReturn(comptes);
 		when(eDAO1.getAll()).thenReturn(ecritures);
 		when(pDAO1.getAll()).thenReturn(permanents);
-		when(hDAO1.getAll()).thenReturn(suivi);
-		when(sDAO1.getAll()).thenReturn(suivi);
-		when(mDAO1.getAll()).thenReturn(suivi);
+		when(hDAO1.getAll()).thenReturn(suivi.iterator());
+		when(sDAO1.getAll()).thenReturn(suivi.iterator());
+		when(mDAO1.getAll()).thenReturn(suivi.iterator());
 		when(cDAO2.getAll()).thenReturn(comptes);
 		when(eDAO2.getAll()).thenReturn(ecritures);
 		when(pDAO2.getAll()).thenReturn(permanents);
-		when(hDAO2.getAll()).thenReturn(suivi);
-		when(sDAO2.getAll()).thenReturn(suivi);
-		when(mDAO2.getAll()).thenReturn(suivi);
+		when(hDAO2.getAll()).thenReturn(suivi.iterator());
+		when(sDAO2.getAll()).thenReturn(suivi.iterator());
+		when(mDAO2.getAll()).thenReturn(suivi.iterator());
 	}
 	
 	/**
@@ -189,16 +187,11 @@ public class DAOFactoryTest {
 		verify(eDAO2).add(ecriture);
 		verify(pDAO2).add(permanent);
 		
-		verify(hDAO2).set(compte1, month1, d1);
-		verify(hDAO2).set(compte2, month1, d2);
-		verify(hDAO2).set(compte1, month2, d2);
-		
-		verify(sDAO2).set(compte1, month1, d1);
-		verify(sDAO2).set(compte2, month1, d2);
-		verify(sDAO2).set(compte1, month2, d2);
-		
-		verify(mDAO2).set(compte1, month1, d1);
-		verify(mDAO2).set(compte2, month1, d2);
-		verify(mDAO2).set(compte1, month2, d2);
+		Iterator<Solde> soldes = factory1.getHistoriqueDAO().getAll();
+		while (soldes.hasNext()) {
+			verify(hDAO2).set(soldes.next());
+			verify(sDAO2).set(soldes.next());
+			verify(mDAO2).set(soldes.next());
+		}
 	}
 }
