@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +26,7 @@ import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
 
 public class CompteTest {
-
+	
 	/**
 	 * Un parseur de dates.
 	 */
@@ -430,7 +429,7 @@ public class CompteTest {
 		c.addPointages(month, BigDecimal.ZERO);
 		verifyZeroInteractions(sDAO);
 	}
-
+	
 	@Test
 	public void testGetViewSignBancaire() {
 		Compte bancaire = new Compte(1, TypeCompte.COMPTE_EPARGNE);
@@ -479,6 +478,7 @@ public class CompteTest {
 		assertTrue(new Compte(0, TypeCompte.RECETTES_EN_EPARGNE).isEpargne());
 	}
 
+	
 	/**
 	 * Teste les caractéristiques auxquelles la comparaison est insensible.
 	 */

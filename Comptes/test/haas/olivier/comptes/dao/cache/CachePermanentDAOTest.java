@@ -52,8 +52,8 @@ public class CachePermanentDAOTest {
 		
 		// Définir les opérations permanentes
 		p1 = new PermanentFixe(1, "permanent1", c1, c2, "libellé1", "tiers1", false, new HashMap<Month, Integer>(), new HashMap<Month, BigDecimal>());
-		p2 = new PermanentProport(2, "permanent2", c2, c1, "libellé2", "tiers2", true, new HashMap<Month, Integer>(), p1, new BigDecimal("0.2"));
-		p3 = new PermanentSoldeur(3, "permanent3", mock(CompteBancaire.class), c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
+		p2 = new PermanentSoldeur(2, "permanent2", mock(Compte.class), c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
+		p3 = new PermanentProport(3, "permanent3", c2, c1, "libellé2", "tiers2", true, new HashMap<Month, Integer>(), p2, new BigDecimal("0.2"));
 		
 		// Les ajouter à la collection
 		all.add(p1);
@@ -73,7 +73,7 @@ public class CachePermanentDAOTest {
 		
 		// Des mocks pour la sous-couche
 		CacheableDAOFactory factory = mock(CacheableDAOFactory.class);
-		when(factory.getPermanents((CachePermanentDAO) any(), eq(cDAO)))
+		when(factory.getPermanents((CachePermanentDAO) any()))
 		.thenReturn(all.iterator());
 		
 		// Objet testé
@@ -131,7 +131,7 @@ public class CachePermanentDAOTest {
 	public void testUpdate() {
 		
 		// Opération ayant un identifiant pré-existant
-		Permanent p2bis = new PermanentSoldeur(2, "permanent2bis", mock(CompteBancaire.class), c1, "libellé2bis", "tiers2bis", false, new HashMap<Month, Integer>());
+		Permanent p2bis = new PermanentSoldeur(2, "permanent2bis", mock(Compte.class), c1, "libellé2bis", "tiers2bis", false, new HashMap<Month, Integer>());
 		
 		// Méthode testée
 		dao.update(p2bis);
