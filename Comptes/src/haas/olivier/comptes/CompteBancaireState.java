@@ -76,6 +76,8 @@ class CompteBancaireState implements CompteState {
 	@Override
 	public BigDecimal getSuivi(Compte compte, SuiviDAO dao, Month month) {
 		Date ouverture = compte.getOuverture();
+		if (ouverture == null)
+			ouverture = DAOFactory.getFactory().getDebut().getFirstDay();
 	
 		// Remonter mois par mois jusqu'à la date d'ouverture si besoin
 		for(Month m = month; !m.before(ouverture); m = m.getPrevious()) {
