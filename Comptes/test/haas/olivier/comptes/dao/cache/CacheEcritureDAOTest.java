@@ -25,12 +25,8 @@ import org.junit.Test;
 
 public class CacheEcritureDAOTest {
 
-	/**
-	 * Des comptes.
-	 */
-	private static final Compte c1 =
-			new CompteBancaire(1, "compte1", 0L, TypeCompte.COMPTE_COURANT),
-			c2 = new CompteBudget(2, "compte2", TypeCompte.DEPENSES);
+	private static final Compte c1 = new Compte(1, TypeCompte.COMPTE_COURANT);
+	private static final Compte c2 = new Compte(2, TypeCompte.DEPENSES);
 	
 	/**
 	 * Des dates.
