@@ -13,7 +13,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumnModel;
 
-/** Un optimiseur des largeurs de colonnes.
+/**
+ * Un optimiseur des largeurs de colonnes.
  * <p>
  * L'optimisation des colonnes est un algorithme qui se peut se révéler
  * chronophage si la table est grande ou si les Renderer sont complexes. Il
@@ -52,23 +53,34 @@ import javax.swing.table.TableColumnModel;
  */
 public class ColumnOptimizer extends Thread {
 	
-	/** Une collection des instances en cours pour chaque table. */
+	/**
+	 * Une collection des instances en cours pour chaque table.
+	 */
 	private static Map<JTable, ColumnOptimizer> working =
 			new HashMap<JTable, ColumnOptimizer>();
 
-	/** La table à optimiser. */
+	/**
+	 * La table à optimiser.
+	 */
 	private final JTable table;
 	
-	/** Le modèle des colonnes. */ 
+	/**
+	 * Le modèle des colonnes.
+	 */ 
 	private final TableColumnModel cm;
 	
-	/** La tâche de redimensionnement utilisée pour chaque colonne. */
+	/**
+	 * La tâche de redimensionnement utilisée pour chaque colonne.
+	 */
 	private final ColumnOptimizerTask task;
 	
-	/** L'index de la colonne en cours d'optimisation. */
+	/**
+	 * L'index de la colonne en cours d'optimisation.
+	 */
 	private int index;
 
-	/** Construit un optimiseur de largeurs de colonnes.
+	/**
+	 * Construit un optimiseur de largeurs de colonnes.
 	 * 
 	 * @param table	La table à optimiser.
 	 */
@@ -76,9 +88,10 @@ public class ColumnOptimizer extends Thread {
 		this.table = table;
 		this.cm = table.getColumnModel();
 		this.task = new ColumnOptimizerTask();
-	}// constructeur
+	}
 	
-	/** Optimise en arrière-plan les largeurs de colonnes d'une table.<br>
+	/**
+	 * Optimise en arrière-plan les largeurs de colonnes d'une table.<br>
 	 * Si une tâche d'optimisation est en cours pour la même table, elle est
 	 * arrêtée.
 	 * 
@@ -86,9 +99,10 @@ public class ColumnOptimizer extends Thread {
 	 */
 	public static synchronized void optimize(JTable table) {
 		new ColumnOptimizer(table).start();
-	}// optimize
+	}
 
-	/** Enregistrer une instance auprès de la classe.
+	/**
+	 * Enregistrer une instance auprès de la classe.
 	 * 
 	 * La synchronisation <b>au niveau de la classe</b> est nécessaire non
 	 * seulement parce que <code>HashMap</code> n'est pas synchronisée, mais
@@ -106,26 +120,33 @@ public class ColumnOptimizer extends Thread {
 	
 		// Enregistrer l'instance
 		working.put(optimizer.table, optimizer);
-	}// register
+	}
 
-	/** Désenregistre une instance si elle est toujours associée à la table
+	/**
+	 * Désenregistre une instance si elle est toujours associée à la table
 	 * correspondante.
 	 * 
 	 * @param optimizer	L'instance à désenregistrer.
 	 */
 	private static synchronized void unregister(ColumnOptimizer optimizer) {
-		if (working.get(optimizer.table) == optimizer)	// Si c'est toujours lui
-			working.remove(optimizer.table);			// On l'enlève de la map
-	}// unregister
+		if (working.get(optimizer.table) == optimizer)
+			working.remove(optimizer.table);
+	}
 
-	/** Optimise les largeurs de colonnes par tâches successives dans l'EDT. */
+	/**
+	 * Optimise les largeurs de colonnes par tâches successives dans l'EDT.
+	 */
 	@Override
 	public void run() {
 		try {
 			register(this);
 			int nbCols = cm.getColumnCount();
 			for (index = 0; index < nbCols && !isInterrupted() ; index++) {
-				// invokeAndWait permet de garantir la cohérence de index
+				
+				/*
+				 * invokeAndWait permet de garantir la cohérence de index,
+				 * contrairement à invokeLater.
+				 */
 				SwingUtilities.invokeAndWait(task);
 			}
 			
@@ -139,10 +160,11 @@ public class ColumnOptimizer extends Thread {
 
 		} finally {
 			unregister(this);
-		}// try
-	}// run
+		}
+	}
 	
-	/** Une tâche de d'optimisation de colonne. Elle optimise une colonne à la
+	/**
+	 * Une tâche de d'optimisation de colonne. Elle optimise une colonne à la
 	 * fois.
 	 * <p>
 	 * On pourrait utiliser une classe à instancier pour chaque colonne, mais
@@ -158,11 +180,19 @@ public class ColumnOptimizer extends Thread {
 	 */
 	private class ColumnOptimizerTask implements Runnable {
 
-		/** Optimise la largeur de la colonne portant l'index en cours. */
+		/**
+		 * Optimise la largeur de la colonne portant l'index en cours, s'il est
+		 * toujours valable.
+		 * <p>
+		 * Si le modèle de table a changé entre deux invocations, l'index peut
+		 * être obsolète.
+		 */
 		@Override
 		public void run() {
-			cm.getColumn(index).setPreferredWidth(
-					SmartTable.getLargeurUtileColonne(table, index));
-		}// run
-	}// private inner class ColumnOptimizerTask
+			if (index < cm.getColumnCount()) {
+				cm.getColumn(index).setPreferredWidth(
+						SmartTable.getLargeurUtileColonne(table, index));
+			}
+		}
+	}
 }
