@@ -11,9 +11,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import haas.olivier.comptes.dao.CompteDAO;
-import haas.olivier.comptes.dao.DAOFactory;
-
 public class WriteOnlyCacheableDAOFactoryTest {
 
 	@BeforeClass
@@ -40,8 +37,8 @@ public class WriteOnlyCacheableDAOFactoryTest {
 		RuntimeException exception = new UnsupportedOperationException();
 		when(delegate.getBanques()).thenThrow(exception);
 		when(delegate.getComptes()).thenThrow(exception);
-		when(delegate.getEcritures((CompteDAO) any())).thenThrow(exception);
-		when(delegate.getPermanents((CachePermanentDAO) any(), (CompteDAO) any()))
+		when(delegate.getEcritures()).thenThrow(exception);
+		when(delegate.getPermanents(any(CachePermanentDAO.class)))
 		.thenThrow(exception);
 		when(delegate.getProperties()).thenThrow(exception);
 		when(delegate.getHistorique()).thenThrow(exception);
@@ -72,13 +69,12 @@ public class WriteOnlyCacheableDAOFactoryTest {
 
 	@Test
 	public void testGetEcritures() throws IOException {
-		assertFalse(writeOnly.getEcritures(mock(CompteDAO.class)).hasNext());
+		assertFalse(writeOnly.getEcritures().hasNext());
 	}
 
 	@Test
 	public void testGetPermanents() throws IOException {
-		assertFalse(writeOnly.getPermanents(
-				mock(CachePermanentDAO.class), mock(CompteDAO.class))
+		assertFalse(writeOnly.getPermanents(mock(CachePermanentDAO.class))
 				.hasNext());
 	}
 
@@ -104,7 +100,7 @@ public class WriteOnlyCacheableDAOFactoryTest {
 
 	@Test
 	public void testSave() throws IOException {
-		DAOFactory factory = mock(DAOFactory.class);
+		CacheDAOFactory factory = mock(CacheDAOFactory.class);
 		writeOnly.save(factory);
 		verify(delegate).save(factory);
 	}
