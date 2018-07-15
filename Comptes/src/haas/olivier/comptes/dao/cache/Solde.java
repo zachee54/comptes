@@ -39,4 +39,27 @@ public class Solde {
 		this.compte = compte;
 		this.montant = montant;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		
+		if (!(o instanceof Solde))
+			return false;
+		
+		Solde solde = (Solde) o;
+		return month.equals(solde.month)
+				&& compte.equals(solde.compte)
+				&& montant.equals(solde.montant);
+	}
+	
+	@Override
+	public int hashCode() {
+		int h = 73;
+		h = h * 59 + month.hashCode();
+		h = h * 59 + compte.hashCode();
+		h = h * 59 + montant.hashCode();
+		return h;
+	}
 }
