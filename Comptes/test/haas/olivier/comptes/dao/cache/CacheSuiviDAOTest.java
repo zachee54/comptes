@@ -1,16 +1,15 @@
 package haas.olivier.comptes.dao.cache;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
+import haas.olivier.comptes.Compte;
 import haas.olivier.util.Month;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Before;
@@ -19,18 +18,29 @@ import org.junit.Test;
 
 public class CacheSuiviDAOTest {
 
+	private static final Month MONTH2 = new Month();
+	private static final Month MONTH1 = MONTH2.getPrevious();
+	private static final Month MONTH3 = MONTH2.getNext();
+	
 	/**
-	 * Des mois.
+	 * Un compte mocké.
 	 */
-	private static final Month month2 = new Month(),
-			month1 = month2.getPrevious(),
-			month3 = month2.getNext();
+	private static final Compte COMPTE1 = mock(Compte.class);
+	
+	/**
+	 * Un compte mocké.
+	 */
+	private static final Compte COMPTE2 = mock(Compte.class);
+	
+	/**
+	 * Un compte mocké.
+	 */
+	private static final Compte COMPTE3 = mock(Compte.class);
 	
 	/**
 	 * Des suivis fictifs.
 	 */
-	private static final Map<Month, Map<Integer, BigDecimal>> suivis =
-			new HashMap<>();
+	private static final Set<Solde> SUIVIS = new HashSet<>();
 	
 	/**
 	 * Objet testé.
@@ -39,88 +49,64 @@ public class CacheSuiviDAOTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		
-		// Valeurs mois 1
-		Map<Integer, BigDecimal> values = new HashMap<>();
-		values.put(1, BigDecimal.TEN);
-		values.put(2, BigDecimal.ONE);
-		suivis.put(month1, values);
-		
-		// Valeurs mois 2
-		values = new HashMap<>();
-		values.put(2, BigDecimal.TEN.negate());
-		values.put(3, new BigDecimal("-895.23"));
-		suivis.put(month2, values);
-		
-		// Valeurs mois 3
-		values = new HashMap<>();
-		values.put(1, BigDecimal.ZERO);
-		values.put(2, new BigDecimal("200"));
-		values.put(3, BigDecimal.ONE.negate());
-		suivis.put(month3, values);
+		SUIVIS.add(new Solde(MONTH1, COMPTE1, BigDecimal.TEN));
+		SUIVIS.add(new Solde(MONTH1, COMPTE2, BigDecimal.ONE));
+		SUIVIS.add(new Solde(MONTH2, COMPTE2, BigDecimal.TEN.negate()));
+		SUIVIS.add(new Solde(MONTH2, COMPTE3, new BigDecimal("-895.23")));
+		SUIVIS.add(new Solde(MONTH3, COMPTE1, BigDecimal.ZERO));
+		SUIVIS.add(new Solde(MONTH3, COMPTE2, new BigDecimal("200")));
+		SUIVIS.add(new Solde(MONTH3, COMPTE3, BigDecimal.ONE.negate()));
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		
 		// Énumération des valeurs (ordre aléatoire)
-		Set<Entry<Month, Entry<Integer, BigDecimal>>> entries = new HashSet<>();
-		entries.add(createEntry(month1, 1, BigDecimal.TEN));
-		entries.add(createEntry(month1, 2, BigDecimal.ONE));
-		entries.add(createEntry(month2, 2, BigDecimal.TEN.negate()));
-		entries.add(createEntry(month2, 3, new BigDecimal("-895.23")));
-		entries.add(createEntry(month3, 1, BigDecimal.ZERO));
-		entries.add(createEntry(month3, 2, new BigDecimal("200")));
-		entries.add(createEntry(month3, 3, BigDecimal.ONE.negate()));
+		Set<Solde> entries = new HashSet<>();
+		entries.add(new Solde(MONTH1, COMPTE1, BigDecimal.TEN));
+		entries.add(new Solde(MONTH1, COMPTE2, BigDecimal.ONE));
+		entries.add(new Solde(MONTH2, COMPTE2, BigDecimal.TEN.negate()));
+		entries.add(new Solde(MONTH2, COMPTE3, new BigDecimal("-895.23")));
+		entries.add(new Solde(MONTH3, COMPTE1, BigDecimal.ZERO));
+		entries.add(new Solde(MONTH3, COMPTE2, new BigDecimal("200")));
+		entries.add(new Solde(MONTH3, COMPTE3, BigDecimal.ONE.negate()));
 		
 		// Objet testé
 		dao = new CacheSuiviDAO(entries.iterator());
 	}
 
-	
-	/**
-	 * Méthode de confort pour créer facilement des entrées sur lesquelles
-	 * itérer lors de l'instanciation de l'objet testé.
-	 * 
-	 * @param m	Le mois.
-	 * @param i	L'identifiant.
-	 * @param d	Le montant.
-	 * @return	Une entrée contenant <code>m</code>, <code>i</code> et
-	 * 			<code>d</code>.
-	 */
-	private static Entry<Month, Entry<Integer, BigDecimal>> createEntry(Month m,
-			Integer i, BigDecimal d) {
-		return new SimpleImmutableEntry<Month, Entry<Integer, BigDecimal>>(
-				m,
-				new SimpleImmutableEntry<Integer, BigDecimal>(
-						i,
-						d));
-	}
-
 	@Test
 	public void testGetAll() throws IOException {
-		assertEquals(suivis, dao.getAll());
+		Iterator<Solde> suivisIterator = dao.getAll();
+		Set<Solde> daoSuivis = new HashSet<>();
+		while (suivisIterator.hasNext())
+			daoSuivis.add(suivisIterator.next());
+		
+		assertEquals(SUIVIS, daoSuivis);
 	}
 
 	@Test
 	public void testGet() {
 		
 		// Tester toutes les valeurs
-		assertEquals(BigDecimal.TEN, dao.get(1, month1));
-		assertEquals(BigDecimal.ONE, dao.get(2, month1));
-		assertEquals(BigDecimal.TEN.negate(), dao.get(2, month2));
-		assertEquals(new BigDecimal("-895.23"), dao.get(3, month2));
-		assertEquals(BigDecimal.ZERO, dao.get(1, month3));
-		assertEquals(new BigDecimal("200"), dao.get(2, month3));
-		assertEquals(BigDecimal.ONE.negate(), dao.get(3, month3));
+		assertEquals(BigDecimal.TEN, dao.get(COMPTE1, MONTH1));
+		assertEquals(BigDecimal.ONE, dao.get(COMPTE2, MONTH1));
+		assertEquals(BigDecimal.TEN.negate(), dao.get(COMPTE2, MONTH2));
+		assertEquals(new BigDecimal("-895.23"), dao.get(COMPTE3, MONTH2));
+		assertEquals(BigDecimal.ZERO, dao.get(COMPTE1, MONTH3));
+		assertEquals(new BigDecimal("200"), dao.get(COMPTE2, MONTH3));
+		assertEquals(BigDecimal.ONE.negate(), dao.get(COMPTE3, MONTH3));
 		
 		// Valeurs non définies
-		assertNull(dao.get(4, month1));		// Compte inexistant
-		assertNull(dao.get(1, month2));		// Compte inexistant pour ce mois
-		assertNull(dao.get(3,
-				month1.getPrevious()));		// Mois inexistant (antérieur)
-		assertNull(dao.get(3,
-				month3.getNext()));			// Mois inexistant (postérieur)
+		assertNull(dao.get(
+				mock(Compte.class),			// Compte inexistant
+				MONTH1));
+		assertNull(dao.get(COMPTE1,
+				MONTH2));					// Compte inexistant pour ce mois
+		assertNull(dao.get(COMPTE3,
+				MONTH1.getPrevious()));		// Mois inexistant (antérieur)
+		assertNull(dao.get(COMPTE3,
+				MONTH3.getNext()));			// Mois inexistant (postérieur)
 	}
 
 	@Test
@@ -128,48 +114,42 @@ public class CacheSuiviDAOTest {
 		
 		// Définition d'un montant auparavant non défini
 		BigDecimal b = new BigDecimal("2016");
-		dao.set(1, month2, b);
-		assertEquals(b, dao.get(1, month2));
+		dao.set(COMPTE1, MONTH2, b);
+		assertEquals(b, dao.get(COMPTE1, MONTH2));
+		
 		// Vérifier l'absence d'interaction
-		assertEquals(BigDecimal.TEN, dao.get(1, month1));
-		assertEquals(BigDecimal.ZERO, dao.get(1, month3));
-		assertEquals(BigDecimal.TEN.negate(), dao.get(2, month2));
-		assertEquals(new BigDecimal("-895.23"), dao.get(3, month2));
+		assertEquals(BigDecimal.TEN, dao.get(COMPTE1, MONTH1));
+		assertEquals(BigDecimal.ZERO, dao.get(COMPTE1, MONTH3));
+		assertEquals(BigDecimal.TEN.negate(), dao.get(COMPTE2, MONTH2));
+		assertEquals(new BigDecimal("-895.23"), dao.get(COMPTE3, MONTH2));
 		
 		// Redéfinition d'un montant existant
 		b = new BigDecimal("-7.1");
-		dao.set(3, month2, b);
-		assertEquals(b, dao.get(3, month2));
+		dao.set(COMPTE3, MONTH2, b);
+		assertEquals(b, dao.get(COMPTE3, MONTH2));
+		
 		// Vérifier l'absence d'interaction
-		assertEquals(BigDecimal.ONE.negate(), dao.get(3, month3));
-		assertNull(dao.get(3, month1));
+		assertEquals(BigDecimal.ONE.negate(), dao.get(COMPTE3, MONTH3));
+		assertNull(dao.get(COMPTE3, MONTH1));
 	}
 
 	@Test
 	public void testRemoveFrom() {
-		dao.removeFrom(month2);						// Méthode testée
-		assertNull(dao.get(1, month2));
-		assertNull(dao.get(2, month2));
-		assertNull(dao.get(3, month2));
-		assertNull(dao.get(1, month3));
-		assertNull(dao.get(2, month3));
-		assertNull(dao.get(3, month3));
-		assertEquals(BigDecimal.TEN, dao.get(1, month1));
-		assertEquals(BigDecimal.ONE, dao.get(2, month1));
+		dao.removeFrom(MONTH2);						// Méthode testée
+		assertNull(dao.get(COMPTE1, MONTH2));
+		assertNull(dao.get(COMPTE2, MONTH2));
+		assertNull(dao.get(COMPTE3, MONTH2));
+		assertNull(dao.get(COMPTE1, MONTH3));
+		assertNull(dao.get(COMPTE2, MONTH3));
+		assertNull(dao.get(COMPTE3, MONTH3));
+		assertEquals(BigDecimal.TEN, dao.get(COMPTE1, MONTH1));
+		assertEquals(BigDecimal.ONE, dao.get(COMPTE2, MONTH1));
 	}
 
 	@Test
 	public void testErase() throws IOException {
 		dao.erase();								// Méthode testée
-		
-		// Vérifier qu'il n'y a plus rien dans getAll()
-		for (Map<Integer, BigDecimal> map : dao.getAll().values())
-			/*
-			 * Normalement getAll est vide donc le code ci-dessous ne devrait
-			 * même pas s'exécuter. S'il y a des entrées, il faut que les
-			 * valeurs soient des Map vides.
-			 */
-			assertEquals(0, map.size());
+		assertFalse(dao.getAll().hasNext());
 	}
 
 }
