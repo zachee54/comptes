@@ -4,12 +4,10 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
-import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.xml.JaxbPermanentDAO;
 import haas.olivier.util.Month;
@@ -22,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
@@ -33,20 +32,25 @@ import org.mockito.MockitoAnnotations;
 
 public class JaxbPermanentDAOTest {
 
-	/** Collection des objets à manipuler. */
+	/**
+	 * Collection des objets à manipuler.
+	 */
 	private final Collection<Permanent> permanents = new ArrayList<>();
 	
-	/** Des comptes. */
-	@Mock private Compte c1, c2;
-	@Mock private CompteBancaire c3;
+	@Mock
+	private Compte c1, c2, c3;
 	
-	/** Un cache pour les opérations permanentes, permettant de retrouver des
+	/**
+	 * Un cache pour les opérations permanentes, permettant de retrouver des
 	 * objets lus précédemment.
 	 */
-	@Mock private CachePermanentDAO cache;
+	@Mock
+	private CachePermanentDAO cache;
 	
-	/** Un objet d'accès aux comptes. */
-	@Mock private CompteDAO cDAO;
+	/**
+	 * Une collection des comptes par identifiants.
+	 */
+	private final Map<Integer, Compte> comptes = new HashMap<>();
 	
 	@Before
 	public void setUp() throws Exception {
@@ -57,10 +61,10 @@ public class JaxbPermanentDAOTest {
 		when(c2.getId()).thenReturn(2);
 		when(c3.getId()).thenReturn(3);
 		
-		// Comportement du mock CompteDAO
-		when(cDAO.get(1)).thenReturn(c1);
-		when(cDAO.get(2)).thenReturn(c2);
-		when(cDAO.get(3)).thenReturn(c3);
+		// La collection des comptes
+		comptes.put(1, c1);
+		comptes.put(2, c2);
+		comptes.put(3, c3);
 		
 		// Des mois
 		Month month = new Month(),
@@ -88,14 +92,12 @@ public class JaxbPermanentDAOTest {
 		p2.jours.put(month3, -15);
 		p3.jours.put(month, 7);
 		p3.jours.put(month4, 45);
-	}// setUp
+	}
 	
 	@Test
 	public void testSave() throws IOException, XMLStreamException, FactoryConfigurationError {
-		ByteArrayOutputStream out = null;
 		InputStream reader = null;
-		try {
-			out = new ByteArrayOutputStream();
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			
 			// Méthode testée n°1 : sauvegarde
 			JaxbPermanentDAO.save(permanents.iterator(), out);
@@ -104,9 +106,10 @@ public class JaxbPermanentDAOTest {
 			reader = new ByteArrayInputStream(out.toByteArray());
 			
 			// Méthode testée n°2 : relecture
-			JaxbPermanentDAO dao = new JaxbPermanentDAO(reader, cache, cDAO);
+			JaxbPermanentDAO dao = new JaxbPermanentDAO(reader, cache, comptes);
 			
-			/* Parcourir les opérations relues.
+			/*
+			 * Parcourir les opérations relues.
 			 * Au fur et à mesure de la relecture, on les référence dans le
 			 * cache mocké
 			 */
@@ -118,7 +121,7 @@ public class JaxbPermanentDAOTest {
 				
 				// Simuler son stockage dans le cache
 				when(cache.get(p.id)).thenReturn(p);
-			}// for
+			}
 			
 			assertFalse(dao.hasNext());					// Rien de plus
 			
@@ -128,8 +131,7 @@ public class JaxbPermanentDAOTest {
 			
 		} finally {
 			if (reader != null) reader.close();
-			if (out != null) out.close();
-		}// try
-	}// save
+		}
+	}
 
 }
