@@ -1,17 +1,21 @@
 package haas.olivier.comptes.dao.csv;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
+import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
+import haas.olivier.comptes.dao.cache.Solde;
 import haas.olivier.util.Month;
 
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,37 +24,67 @@ import com.csvreader.CsvWriter;
 
 public class CsvSuiviDAOTest {
 
-	/** Le délimiteur utilisé pour la sauvegarde CSV. */
+	/**
+	 * Le délimiteur utilisé pour la sauvegarde CSV.
+	 */
 	private static final char DELIMITER = '|';
 	
-	/** Une collection de données de suivi. */
-	private static final Map<Month, Map<Integer, BigDecimal>> data =
-			new HashMap<>();
+	/**
+	 * Une collection de données de suivi.
+	 */
+	private static final CacheSuiviDAO CACHE = mock(CacheSuiviDAO.class);
+	
+	/**
+	 * Une Map des comptes.
+	 */
+	private static final Map<Integer, Compte> COMPTES = new HashMap<>();
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		Compte compteSpecial = mock(Compte.class);
+		Compte compte0 = mock(Compte.class);
+		Compte compte1 = mock(Compte.class);
+		Compte compte3 = mock(Compte.class);
+		Compte compte5 = mock(Compte.class);
 		
-		// Générer des données quelconques pour plusieurs mois
+		when(compteSpecial.getId()).thenReturn(-1);
+		when(compte0.getId()).thenReturn(0);
+		when(compte1.getId()).thenReturn(1);
+		when(compte3.getId()).thenReturn(3);
+		when(compte5.getId()).thenReturn(5);
+		
+		COMPTES.put(-1, compteSpecial);
+		COMPTES.put(0, compte0);
+		COMPTES.put(1, compte1);
+		COMPTES.put(3, compte3);
+		COMPTES.put(5, compte5);
+		
+		// Des données quelconques pour plusieurs mois
 		Month month = new Month();
-		Map<Integer, BigDecimal> subMap = new HashMap<>();
-		subMap.put(1, BigDecimal.ONE);
-		subMap.put(3, BigDecimal.TEN);
-		subMap.put(-1, BigDecimal.TEN.negate());
-		data.put(month, subMap);
+		when(CACHE.get(compte1, month)).thenReturn(BigDecimal.ONE);
+		when(CACHE.get(compte3, month)).thenReturn(BigDecimal.TEN);
+		when(CACHE.get(compteSpecial, month))
+		.thenReturn(BigDecimal.TEN.negate());
 		
-		month = month.getNext();
-		subMap = new HashMap<>();
-		subMap.put(0, new BigDecimal("-42397.02"));
-		subMap.put(5, new BigDecimal("2330"));
-		data.put(month, subMap);
+		Month monthNext1 = month.getNext();
+		when(CACHE.get(compte0, monthNext1))
+		.thenReturn(new BigDecimal("-42397.02"));
+		when(CACHE.get(compte5, monthNext1)).thenReturn(new BigDecimal("2330"));
 		
-		month = month.getTranslated(2);
-		subMap = new HashMap<>();
-		subMap.put(1, BigDecimal.ONE);
-		subMap.put(3, BigDecimal.TEN.negate());
-		subMap.put(-1, new BigDecimal("9324.3"));
-		data.put(month, subMap);
-	}// setUpBeforeClass
+		Month monthNext2 = month.getTranslated(2);
+		when(CACHE.get(compte1, monthNext2)).thenReturn(BigDecimal.ONE);
+		when(CACHE.get(compte3, monthNext2))
+		.thenReturn(BigDecimal.TEN.negate());
+		when(CACHE.get(compteSpecial, monthNext2))
+		.thenReturn(new BigDecimal("9324.3"));
+		
+		// Les comptes en cache
+		when(CACHE.getComptes()).thenReturn(new ArrayList<>(COMPTES.values()));
+		
+		// Les mois en cache
+		when(CACHE.getMonths()).thenReturn(
+				Arrays.asList(new Month[] {month, monthNext1, monthNext2}));
+	}
 
 	@Test
 	public void testSave() throws IOException {
@@ -63,7 +97,7 @@ public class CsvSuiviDAOTest {
 			writer = new CsvWriter(out, DELIMITER);
 			
 			// Méthode testée n°1
-			CsvSuiviDAO.save(data, writer);
+			CsvSuiviDAO.save(CACHE, writer);
 			
 			// Préparer un flux pour relire ce qui a été écrit
 			reader = new CsvReader(
@@ -72,25 +106,24 @@ public class CsvSuiviDAOTest {
 			
 			// Méthode testée n°2
 			@SuppressWarnings("resource")
-			CsvSuiviDAO dao = new CsvSuiviDAO(reader);
+			CsvSuiviDAO dao = new CsvSuiviDAO(reader, COMPTES);
 			
 			// Vérifier le contenu
 			int n = 0;									// Compteur
 			while (dao.hasNext()) {
-				Entry<Month, Entry<Integer, BigDecimal>> e = dao.next();
-				assertTrue(data.containsKey(e.getKey()));
+				Solde solde = dao.next();
 				assertEquals(0,
-						data.get(e.getKey()).get(e.getValue().getKey())
-						.compareTo(e.getValue().getValue()));
+						CACHE.get(solde.compte, solde.month)
+						.compareTo(solde.montant));
 				n++;
-			}// while
+			}
 			
 			// Vérifier qu'il n'y a rien de plus que ce qu'on y a mis
-			assertTrue(n == 8);
+			assertEquals(8, n);
 			
 		} finally {
 			if (writer != null) writer.close();
 			if (out != null) out.close();
-		}// try
-	}// testSave
+		}
+	}
 }

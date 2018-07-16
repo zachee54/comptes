@@ -3,8 +3,6 @@ package haas.olivier.comptes.dao.csv;
 import static org.junit.Assert.*;
 
 import haas.olivier.comptes.Compte;
-import haas.olivier.comptes.CompteBancaire;
-import haas.olivier.comptes.CompteBudget;
 import haas.olivier.comptes.TypeCompte;
 
 import java.io.CharArrayReader;
@@ -24,14 +22,19 @@ import com.csvreader.CsvWriter;
 
 public class CsvCompteDAOTest {
 
-	/** Collection contenant le jeu de données. */
+	/**
+	 * Collection contenant le jeu de données.
+	 */
 	private static List<Compte> comptes = new ArrayList<>(3);
 	
-	/** Le séparateur de champs utilisé pour le test. */
+	/**
+	 * Le séparateur de champs utilisé pour le test.
+	 */
 	private static final char DELIMITER = '|';
 	
-	/** Sauvegarde le jeu de données à partir de la classe testée (ce qui
-	 * revient à tester la méthode
+	/**
+	 * Sauvegarde le jeu de données à partir de la classe testée (ce qui revient
+	 * à tester la méthode
 	 * {@link haas.olivier.comptes.dao.csv.CsvCompteDAO#save(java.util.Iterator, CsvWriter)})
 	 * et instancie un objet capable de relire les données sauvegardées.
 	 * 
@@ -46,13 +49,14 @@ public class CsvCompteDAOTest {
 		CharArrayWriter writer = new CharArrayWriter();
 		
 		// Écrire le jeu de données avec la classe testée
-		CsvCompteDAO.save(comptes.iterator(), new CsvWriter(writer, DELIMITER));
+		CsvCompteDAO.save(comptes, new CsvWriter(writer, DELIMITER));
 		
 		// Renvoyer un lecteur
 		return new CharArrayReader(writer.toCharArray());
-	}// reRead
+	}
 
-	/** Vérifie que le <code>Reader</code> spécifié a bien été fermé.
+	/**
+	 * Vérifie que le <code>Reader</code> spécifié a bien été fermé.
 	 * <p>
 	 * En pratique, on vérifie qu'une tentative de lecture lève une
 	 * <codE>IOException</code>, parce qu'il n'y a pas de méthode spécifique
@@ -62,27 +66,34 @@ public class CsvCompteDAOTest {
 		try {
 			reader.read();
 			fail("Aurait dû lever une IOException: le flux n'a pas été fermé");
-			
 		} catch (IOException e) {
-		}// try
-	}// checkClosed
+		}
+	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		
 		// Constituer le jeu de données
-		comptes.add(new CompteBudget(1, "compte1", TypeCompte.RECETTES));
-		comptes.add(new CompteBancaire(2, "compte2", 150125879823L, TypeCompte.COMPTE_COURANT));
-		comptes.add(new CompteBudget(3, "compte3", TypeCompte.DEPENSES_EN_EPARGNE));
+		Compte compte1 = new Compte(1, TypeCompte.RECETTES);
+		compte1.setNom("compte1");
+		compte1.setOuverture(new Date());
 		
-		// Ajouter quelques paramètres
-		comptes.get(0).setOuverture(new Date());
-		comptes.get(2).setCloture(new Date());
-	}// setUpBeforeClass
+		Compte compte2 = new Compte(2, TypeCompte.COMPTE_COURANT);
+		compte2.setNom("compte2");
+		compte2.setNumero(150125879823L);
+		
+		Compte compte3 = new Compte(3, TypeCompte.DEPENSES_EN_EPARGNE);
+		compte3.setNom("compte3");
+		compte3.setCloture(new Date());
+		
+		comptes.add(compte1);
+		comptes.add(compte2);
+		comptes.add(compte3);
+	}
 	
-	/** Teste ce qu'il se passe si aucun <code>CsvReader</code> n'est spécifié à
+	/**
+	 * Teste ce qu'il se passe si aucun <code>CsvReader</code> n'est spécifié à
 	 * l'instanciation.
-	 * @throws IOException 
 	 */
 	@Test
 	public void testReaderNull() throws IOException {
@@ -96,12 +107,13 @@ public class CsvCompteDAOTest {
 		try {
 			dao.next();
 			fail("Aurait dû lever une NoSuchElementException");
-			
 		} catch (NoSuchElementException e) {
-		}// try
-	}// testReaderNull
+		}
+	}
 	
-	/** Teste l'écriture puis la relecture de comptes. */
+	/**
+	 * Teste l'écriture puis la relecture de comptes.
+	 */
 	@Test
 	public void test() throws IOException {
 		
@@ -121,14 +133,14 @@ public class CsvCompteDAOTest {
 			assertTrue(dao.hasNext());
 			//...et ce qu'il renvoie fait partie de la solution
 			assertTrue(sol.remove(dao.next()));
-		}// while
+		}
 		
 		// Rien de plus que ce qu'il fallait
 		assertFalse(dao.hasNext());
 		
 		// Vérifier que le flux a été fermé automatiquement
 		checkClosed(reader);
-	}// test
+	}
 
 	@Test
 	public void testClose() throws IOException {
@@ -146,6 +158,6 @@ public class CsvCompteDAOTest {
 		
 		// Vérifier que le Reader a été fermé
 		checkClosed(reader);
-	}// testClose
+	}
 
 }
