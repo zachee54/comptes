@@ -59,6 +59,7 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 				BigDecimal solde = cache.get(compte, month);
 				writer.write(solde == null ? "" : solde.toPlainString());
 			}
+			writer.endRecord();
 		}
 	}
 	
