@@ -51,7 +51,7 @@ implements SoldesObserver {
 	 * disposition est modifiée.
 	 */
 	private void defineDisposition() {
-		disposition = compte.getType().isBancaire()
+		disposition = (compte == null || compte.getType().isBancaire())
 				? dispositionBancaire : dispositionBudget;
 	}
 

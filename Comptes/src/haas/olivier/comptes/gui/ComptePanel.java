@@ -175,7 +175,7 @@ public class ComptePanel extends JPanel {
 			if (filter.accepts(c)) {
 				comptes2display.add(c);
 			}
-		}// for comptes
+		}
 
 		// Ajouter le compte abstrait d'épargne si besoin
 		if (filter.accepts(Compte.COMPTE_EPARGNE)) {
