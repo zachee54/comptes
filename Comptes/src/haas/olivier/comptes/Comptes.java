@@ -23,6 +23,7 @@ public class Comptes implements Runnable {
 	
 	// Spécifier le Look&Feel
 	static {
+		Logger logger = Logger.getLogger(Comptes.class.getName());
 		try {
 			// CrossPlatform (Metal)
 //			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -59,13 +60,13 @@ public class Comptes implements Runnable {
 			// Windows Classic
 //			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel");
 		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
+			logger.log(Level.CONFIG, "Look&Feel non trouvé", e1);
 		} catch (InstantiationException e1) {
-			e1.printStackTrace();
+			logger.log(Level.CONFIG, "Look&Feel impossible à instancier", e1);
 		} catch (IllegalAccessException e1) {
-			e1.printStackTrace();
+			logger.log(Level.CONFIG, "Accès impossible au Look&Feel", e1);
 		} catch (UnsupportedLookAndFeelException e1) {
-			e1.printStackTrace();
+			logger.log(Level.CONFIG, "Look&Feel non supporté", e1);
 		}
 	}
 
