@@ -521,6 +521,14 @@ public class SetupPermanent {
 	public SetupPermanent(JFrame owner, SimpleGUI gui) throws IOException {
 		this.gui = gui;
 		
+		
+		// Configurer les composants de saisie
+		Compte[] comptes = getComptes();
+		debit = createComptesComboBox(comptes);
+		credit = createComptesComboBox(comptes);
+		initTypeButtons();
+		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
+		
 		/*
 		 * Le médiateur de données ne peut pas être instancié dans sa
 		 * déclaration parce que son constructeur a besoin des variables
@@ -530,13 +538,6 @@ public class SetupPermanent {
 		 */
 		dataMediator = new DataMediator();
 		
-		
-		// Configurer les composants de saisie
-		Compte[] comptes = getComptes();
-		debit = createComptesComboBox(comptes);
-		credit = createComptesComboBox(comptes);
-		initTypeButtons();
-		taux.setEditor(new JSpinner.NumberEditor(taux, "0.00 '%'"));
 		listPermanents = createPermanentList(dataMediator);
 		updatePermanentList(null);
 		
