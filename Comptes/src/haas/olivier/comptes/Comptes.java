@@ -67,16 +67,11 @@ public class Comptes implements Runnable {
 		} catch (UnsupportedLookAndFeelException e1) {
 			e1.printStackTrace();
 		}
-	}// static
-	
-//	/** Nom de la clé déterminant le DAO à utiliser. */
-//	public static final String DAO_NAME_PROPERTY = "source-format";
-//	/** Nom de la valeur correspondant au DAO SerializeDAOFactory. */
-//	public static final String DAO_NAME_SERIAL = "native";
-//	/** Nom de la valeur correspondant au DAO CsvDAO. */
-//	public static final String DAO_NAME_CSV = "csv";
+	}
 
-	/** Nom de la clé déterminant le fichier (ou autre source) à utiliser. */
+	/**
+	 * Nom de la clé déterminant le fichier (ou autre source) à utiliser.
+	 */
 	public static final String SOURCE_NAME_PROPERTY = "source";
 
 	public static void main(String[] args) {
@@ -86,9 +81,10 @@ public class Comptes implements Runnable {
 		
 		// Lancer une nouvelle instance de l'application
 		SwingUtilities.invokeLater(new Comptes(args));
-	}// main
+	}
 	
-	/** Met en place un affichage des exceptions dans des boîtes de dialogue et
+	/**
+	 * Met en place un affichage des exceptions dans des boîtes de dialogue et
 	 * un renvoi des exceptions non traitées vers le système de logs.
 	 */
 	private static void displayUncaughtExceptions() {
@@ -99,12 +95,15 @@ public class Comptes implements Runnable {
 		// Intercepter les exceptions non traitées
 		Thread.setDefaultUncaughtExceptionHandler(
 				new UncaughtExceptionLogger());
-	}// displayUncaughtExceptions
+	}
 	
-	/** Les préférences utilisateur. */
+	/**
+	 * Les préférences utilisateur.
+	 */
 	private final Preferences prefs;
 	
-	/** Construit une instance de l'application Comptes.
+	/**
+	 * Construit une instance de l'application Comptes.
 	 * 
 	 * @param args	Si l'option <code>-nostore</code> est donnée en argument,
 	 * 				les préférences utilisateurs ne sont pas lues depuis le
@@ -124,15 +123,17 @@ public class Comptes implements Runnable {
 			prefs = new NullPreferences();
 			
 		} else {
+			
 			// Préférences normales
 			prefs = Preferences.userNodeForPackage(getClass());
-		}// if
+		}
 		
 		// Ouvrir un fichier de comptes
 		chooseFile(args);
-	}// constructeur
+	}
 	
-	/** Choisit le fichier à ouvrir au lancement de l'application.
+	/**
+	 * Choisit le fichier à ouvrir au lancement de l'application.
 	 * <p>
 	 * Si <code>args</code> contient un nom de fichier existant, on essaye
 	 * d'ouvrir ce fichier.<br>
@@ -151,15 +152,17 @@ public class Comptes implements Runnable {
 				loadCsvFile(file);						// Charger ce fichier
 				fileInArg = true;
 				break;									// Ignorer args suivants
-			}// if
-		}// for
+			}
+		}
 		
 		// Si pas de fichier de comptes spécifié en argument, ouvrir le dernier
 		if (!fileInArg)
 			loadLastFile();
-	}// chooseFile
+	}
 	
-	/** Ouvre le dernier fichier utilisé, d'après les préférences. */
+	/**
+	 * Ouvre le dernier fichier utilisé, d'après les préférences.
+	 */
 	private void loadLastFile() {
 		
 		// Le nom du fichier à charger
@@ -168,9 +171,10 @@ public class Comptes implements Runnable {
 		// S'il y a un nom de fichier spécifié, on l'ouvre
 		if (!filename.isEmpty())
 			loadCsvFile(new File(filename));
-	}// loadLastFile
+	}
 	
-	/** Charge un fichier de comptes au format "CSV".
+	/**
+	 * Charge un fichier de comptes au format "CSV".
 	 * <p>
 	 * Si le fichier n'existe pas, la méthode ne fait rien.
 	 * 
@@ -184,19 +188,21 @@ public class Comptes implements Runnable {
 						new CacheDAOFactory(CsvDAO.newInstance(file)),
 						false);
 				return true;
-			}// if
+			}
 
 		} catch (IOException e) {
 			Logger.getLogger(getClass().getName()).log(Level.SEVERE,
 					"Impossible de charger le fichier " + file, e);
-		}// try
+		}
 		
 		// Arrivée ici, le chargement a échoué
 		return false;
-	}// loadFile
+	}
 	
-	/** Lance l'interface graphique. */
+	/**
+	 * Lance l'interface graphique.
+	 */
 	public void run() {
 		new SimpleGUI(prefs);
-	}// run
-}// class
+	}
+}
