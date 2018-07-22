@@ -142,7 +142,8 @@ public class DialogHandler extends Handler {
 		area.setEditable(false);
 		area.setLineWrap(true);
 		area.setWrapStyleWord(true);
-		area.setFont(frame.getFont());				// Même police que frame
+		if (frame != null)
+			area.setFont(frame.getFont());			// Même police que frame
 		return area;
 	}
 	
