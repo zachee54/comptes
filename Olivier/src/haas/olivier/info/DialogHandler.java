@@ -86,12 +86,7 @@ public class DialogHandler extends Handler {
 	 * @param record	Le message de log à publier.
 	 */
 	private void publishOnEventDispatchThread(final LogRecord record) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				publish(record);
-			}
-		});
+		SwingUtilities.invokeLater(() -> publish(record));
 	}
 	
 	/**
