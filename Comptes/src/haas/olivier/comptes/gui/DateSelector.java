@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.Hashtable;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -133,12 +135,11 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 				anneeInitial);
 
 		// Définir les étiquettes du slider année
-		@SuppressWarnings("unchecked")
-		Dictionary<Integer, JLabel> annees = sliderAnnee.getLabelTable();
+		Dictionary<Integer, JLabel> annees = new Hashtable<>();
 		for (int annee = anneeDebut; annee <= anneeFin; annee++) {
 			annees.put(annee, new JLabel("" + annee)); // Ajouter une étiquette
 		}
-//		sliderAnnee.setLabelTable(annees);	// Attribuer le dico d'étiquettes
+		sliderAnnee.setLabelTable(annees);	// Attribuer le dico d'étiquettes
 		sliderAnnee.setPaintLabels(true);	// Peindre les étiquettes
 
 		// L'aspect du slider année
@@ -165,8 +166,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 			unMois = new Month((dateParser.parse("01/12/00")));
 
 			// Définir un dictionnaire pour les étiquettes du slider mois
-			@SuppressWarnings("unchecked")
-			Dictionary<Integer, JLabel> tableMois = sliderMois.getLabelTable();
+			Dictionary<Integer, JLabel> tableMois = new Hashtable<>();
 
 			// Ecrire les mois
 			DateFormat moisFormatter = new SimpleDateFormat("MMM");
@@ -177,7 +177,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 			}
 
 			// Attribuer ces étiquettes au slider mois
-//			sliderMois.setLabelTable(tableMois);
+			sliderMois.setLabelTable(tableMois);
 			sliderMois.setPaintLabels(true);
 		} catch (ParseException e) {
 		}
@@ -195,8 +195,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		sliderJour = new JSlider(JSlider.VERTICAL, 1, 31, 31);
 
 		// Les labels
-		@SuppressWarnings("unchecked")
-		Dictionary<Integer, JLabel> labels = sliderJour.getLabelTable();
+		Dictionary<Integer, JLabel> labels = new Hashtable<>();
 		for (int n = 1; n <= 31; n++) {
 			JLabel label = new JLabel("" + n);	// Etiquette du jour n
 			label.setHorizontalAlignment(SwingConstants.RIGHT); // Alignement
