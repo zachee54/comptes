@@ -10,13 +10,11 @@ import java.awt.GridLayout;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -160,27 +158,22 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 				initial.getNumInYear());						// Mois en cours
 
 		// Partir d'un mois de décembre
-		DateFormat dateParser = new SimpleDateFormat("dd/MM/yy");
-		Month unMois = null;
-		try {
-			unMois = new Month((dateParser.parse("01/12/00")));
+		Month unMois = new Month(2000, 12);
 
-			// Définir un dictionnaire pour les étiquettes du slider mois
-			Dictionary<Integer, JLabel> tableMois = new Hashtable<>();
+		// Définir un dictionnaire pour les étiquettes du slider mois
+		Dictionary<Integer, JLabel> tableMois = new Hashtable<>();
 
-			// Ecrire les mois
-			DateFormat moisFormatter = new SimpleDateFormat("MMM");
-			for (int i=sliderMois.getMinimum(); i<=sliderMois.getMaximum(); i++) {
-				tableMois.put(i,
-						new JLabel(moisFormatter.format(unMois.getFirstDay())));
-				unMois = unMois.getNext();						// Mois suivant
-			}
-
-			// Attribuer ces étiquettes au slider mois
-			sliderMois.setLabelTable(tableMois);
-			sliderMois.setPaintLabels(true);
-		} catch (ParseException e) {
+		// Ecrire les mois
+		DateFormat moisFormatter = new SimpleDateFormat("MMM");
+		for (int i=sliderMois.getMinimum(); i<=sliderMois.getMaximum(); i++) {
+			tableMois.put(i,
+					new JLabel(moisFormatter.format(unMois.getFirstDay())));
+			unMois = unMois.getNext();						// Mois suivant
 		}
+
+		// Attribuer ces étiquettes au slider mois
+		sliderMois.setLabelTable(tableMois);
+		sliderMois.setPaintLabels(true);
 
 		// L'aspect du slider mois
 		sliderMois.setSnapToTicks(true); // Ajuster le curseur aux marques
