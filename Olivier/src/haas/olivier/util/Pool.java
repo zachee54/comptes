@@ -3,9 +3,8 @@
  */
 package haas.olivier.util;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 /**
  * Un pool de valeurs réutilisables.<br>
@@ -13,10 +12,14 @@ import java.util.Map;
  * <p>
  * Cette classe permet d'utiliser une instance unique pour des valeurs utilisées
  * fréquemment dans l'application.<br>
- * En principe, ce procédé n'a de sens que pour des valeurs immuables, ou en
- * tout cas qui ne sont pas modifiées pendant l'exécution. Sinon, les
- * changements effectués sur un objet pourraient se répercuter indument sur tous
- * les objets égaux à celui-ci et stockés dans le pool.
+ * Lorsqu'un objet n'est plus utilisé (collecté par le ramasse-miettes), il est
+ * supprimé du pool.
+ * <p>
+ * Cette classe ne peut être utilisée qu'avec des objets immuables, ou en tout
+ * cas non modifiés pendant leur utilisation. Sinon, cela aurait pour
+ * conséquence non seulement de perturber le stockage par clé de hachage dans le
+ * pool, mais aussi cela rendrait visibles les modifications faites par un objet
+ * à tous les objets utilisant l'instance modifiée.
  * <p>
  * La classe est thread-safe.
  *
@@ -25,10 +28,10 @@ import java.util.Map;
 public class Pool {
 
 	/**
-	 * La collection des valeurs stockées dans le pool.
+	 * La collection des objets stockés dans le pool.
 	 */
-	private Map<Object,Object> valeurs =
-			Collections.synchronizedMap(new HashMap<Object,Object>());
+	private WeakHashMap<Object, WeakReference<Object>> valeurs =
+			new WeakHashMap<Object, WeakReference<Object>>();
 	
 	/**
 	 * Renvoie l'objet unique, parmi les objets du pool, égal à un objet donné.
@@ -48,17 +51,17 @@ public class Pool {
 	 * 			lui-même.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T get(T t) {
-		if (!valeurs.containsKey(t)) {
-			valeurs.put(t, t);
+	public synchronized <T> T get(T t) {
+		WeakReference<Object> reference = valeurs.get(t);
+		if (reference != null) {				// Un objet égal a été inséré
+			Object value = reference.get();
+			if (value != null) {				// et n'a pas été collecté
+				return (T) value;				// Renvoyer l'objet connu
+			}
 		}
-		return (T) valeurs.get(t);
-	}
-	
-	/**
-	 * Renvoie le nombre de valeurs actuellement dans le pool.
-	 */
-	public int size() {
-		return valeurs.size();
+		
+		/* Objet non trouvé : l'insérer dans le pool et le renvoyer */
+		valeurs.put(t, new WeakReference<Object>(t));
+		return t;
 	}
 }
