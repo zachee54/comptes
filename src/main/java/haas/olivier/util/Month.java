@@ -11,12 +11,19 @@ import java.util.Date;
 
 /**
  * Un mois calendaire (mois et année).
+ * <p>
+ * Il s'agit d'objets immuables.
  * 
  * @author Olivier HAAS
  */
 public class Month implements Comparable<Month>, Serializable {
 	private static final long serialVersionUID = 4137756502743120255L;
 
+	/**
+	 * Le pool des instances existantes.
+	 */
+	private static final Pool instances = new Pool();
+	
 	/**
 	 * Le format d'affichage.
 	 */
@@ -33,67 +40,76 @@ public class Month implements Comparable<Month>, Serializable {
 	private final int annee;
 	
 	/**
-	 * Le numéro du mois.
+	 * Le numéro du mois, de 1 à 12.
 	 */
 	private final int mois;
 	
 	/**
-	 * Construit un mois correspondant au mois en cours.
+	 * Construit un mois calendaire correspondant au temps du calendrier
+	 * spécifié.
+	 *
+	 * @param calendar	Le calendrier.
 	 */
-	public Month() {
-		this(new Date());
+	private Month(Calendar calendar) {
+		date = calendar.getTime();
+		annee = calendar.get(Calendar.YEAR);
+		mois = calendar.get(Calendar.MONTH) + 1;	// Mois de 1 à 12
+	}
+
+	/**
+	 * Renvoie le mois calendaire actuel.
+	 *
+	 * @return	L'instance correspondant au mois actuel.
+	 */
+	public static Month getInstance() {
+		return getInstance((Date) null);
 	}
 	
 	/**
-	 * Construit un mois calendaire correspondant à celui de la date spécifiée.
-	 * 
-	 * @param date	La date dont on veut extraire le mois, ou <code>null</code>
-	 * 				pour obtenir le mois en cours.
+	 * Renvoie le mois calendaire correspondant à la date spécifiée.
+	 *
+	 * @param date	Une date.
+	 * @return		Le mois calendaire correspondant à la date.
 	 */
-	public Month(Date date) {
-		this(date == null
-				? new Date().getTime()
-				: date.getTime());
+	public static Month getInstance(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		if (date != null) {
+			calendar.setTime(date);
+		}
+		return getInstance(calendar);
 	}
 	
 	/**
-	 * Construit un mois calendaire correspondant à celui de la date spécifiée.
-	 * 
-	 * @param time	Un <code>long</code> correspondant à la date dont on veut
-	 * 				extraire le mois, ou <code>null</code> pour obtenir le mois
-	 * 				en cours.
-	 */
-	public Month(long time) {
-		
-		// Définir un calendrier à la date spécifiée
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(time);
-		
-		// Neutraliser tous les champs pour ne garder que le mois et l'année
-		eraseTime(cal);
-		
-		// Conserver cette date
-		this.date = cal.getTime();
-		annee = cal.get(Calendar.YEAR);
-		mois = cal.get(Calendar.MONTH) + 1;		// Mois de 1 à 12
-	}
-	
-	/**
-	 * Construit un mois à partir de l'année et du numéro du mois.
-	 * 
+	 * Renvoie le mois correspondant à l'année et au numéro du mois spécifiés.
+	 *
 	 * @param annee	L'année.
-	 * @param mois	Le numéro du mois.
+	 * @param mois	Le numéro du mois, de 1 à 12.
+	 * @return		Le mois correspondant à l'année et au numéro du mois.
 	 */
-	public Month(int annee, int mois) {
-		this.annee = annee;
-		this.mois = mois;
+	public static Month getInstance(int annee, int mois) {
+		Calendar calendar = Calendar.getInstance();
+		eraseTime(calendar);
+		calendar.set(Calendar.YEAR, annee);
+		calendar.set(Calendar.MONTH, mois - 1);	// Mois de 0 à 11 dans Calendar
+		return getInstance(calendar);
+	}
+	
+	/**
+	 * Renvoie le mois calendaire correspondant au temps du calendrier spécifié.
+	 *
+	 * @param calendar	Un calendrier. Son temps est modifié pendant l'exécution
+	 * 					de la méthode.
+	 * 
+	 * @return			Le mois calendaire correspondant au temps du calendrier.
+	 */
+	private static Month getInstance(Calendar calendar) {
 		
-		// Créer une date pour ce mois et cette année
-		Calendar cal = Calendar.getInstance();
-		eraseTime(cal);
-		cal.set(Calendar.YEAR, annee);
-		cal.set(Calendar.MONTH, mois - 1);		// Les mois vont de 0 à 11
-		date = cal.getTime();
+		/* Créer un mois à cette date */
+		eraseTime(calendar);
+		Month month = new Month(calendar);
+		
+		/* Réutiliser une instance existante si possible */
+		return instances.get(month);
 	}
 	
 	/**
@@ -102,7 +118,7 @@ public class Month implements Comparable<Month>, Serializable {
 	 * 
 	 * @param cal	Le calendrier à modifier.
 	 */
-	private void eraseTime(Calendar cal) {
+	private static void eraseTime(Calendar cal) {
 		cal.set(Calendar.DAY_OF_MONTH, 1);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
@@ -158,10 +174,10 @@ public class Month implements Comparable<Month>, Serializable {
 	 * @return	Une nouvelle instance.
 	 */
 	public Month getTranslated(int n) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		cal.add(Calendar.MONTH, n);
-		return new Month(cal.getTimeInMillis());
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.MONTH, n);
+		return new Month(calendar);
 	}
 	
 	
