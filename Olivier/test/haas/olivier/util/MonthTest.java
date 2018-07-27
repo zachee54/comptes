@@ -21,20 +21,14 @@ public class MonthTest {
 	private static DateFormat parser;
 	
 	/**
-	 * Objet testé, instancié à partir du constructeur
-	 * {@link haas.olivier.util.Month#Month(Date)}.
+	 * Objet testé, instancié à partir de la méthode
+	 * {@link haas.olivier.util.Month#getInstance(Date)}.
 	 */
 	private Month monthDate;
 	
 	/**
-	 * Objet testé, instancié à partir du constructeur
-	 * {@link haas.olivier.util.Month#Month(long)}.
-	 */
-	private Month monthLong;
-	
-	/**
-	 * Objet testé, instancié à partir du constructeur
-	 * {@link haas.olivier.util.Month#Month(int, int)}.
+	 * Objet testé, instancié à partir de la méthode
+	 * {@link haas.olivier.util.Month#getInstance(int, int)}.
 	 */
 	private Month monthMoisAnnee;
 
@@ -46,9 +40,8 @@ public class MonthTest {
 	@Before
 	public void setUp() throws Exception {
 		Date date = parser.parse("31/03/13");
-		monthDate = new Month(date);
-		monthLong = new Month(date.getTime());
-		monthMoisAnnee = new Month(2013, 3);
+		monthDate = Month.getInstance(date);
+		monthMoisAnnee = Month.getInstance(2013, 3);
 	}
 
 	/**
@@ -57,19 +50,14 @@ public class MonthTest {
 	 */
 	@Test
 	public void testMonth() {
-		Month month1 = new Month();
-		Month month2 = new Month(new Date());
+		Month month1 = Month.getInstance();
+		Month month2 = Month.getInstance(new Date());
 		assertEquals(month1, month2);
 	}
 
 	@Test
 	public void testGetYearFromDate() {
 		assertEquals(2013, monthDate.getYear());
-	}
-	
-	@Test
-	public void testGetYearFromLong() {
-		assertEquals(2013, monthLong.getYear());
 	}
 	
 	@Test
@@ -82,16 +70,7 @@ public class MonthTest {
 	 */
 	@Test
 	public void testGetYearInJanuaryFromDate() throws ParseException {
-		Month monthJanuary = new Month(parser.parse("01/01/14"));
-		assertEquals(2014, monthJanuary.getYear());
-	}
-	
-	/**
-	 * Vérifie l'année avec une instance située en janvier.
-	 */
-	@Test
-	public void testGetYearInJanuaryFromLong() throws ParseException {
-		Month monthJanuary = new Month(parser.parse("01/01/14").getTime());
+		Month monthJanuary = Month.getInstance(parser.parse("01/01/14"));
 		assertEquals(2014, monthJanuary.getYear());
 	}
 	
@@ -100,7 +79,7 @@ public class MonthTest {
 	 */
 	@Test
 	public void testGetYearInJanuaryFromMoisAnnee() throws ParseException {
-		Month monthJanuary = new Month(2014, 1);
+		Month monthJanuary = Month.getInstance(2014, 1);
 		assertEquals(2014, monthJanuary.getYear());
 	}
 	
@@ -109,7 +88,7 @@ public class MonthTest {
 	 */
 	@Test
 	public void testGetYearInDecemberFromDate() throws ParseException {
-		Month monthDecember = new Month(parser.parse("31/12/12"));
+		Month monthDecember = Month.getInstance(parser.parse("31/12/12"));
 		assertEquals(2012, monthDecember.getYear());
 	}
 	
@@ -118,7 +97,7 @@ public class MonthTest {
 	 */
 	@Test
 	public void testGetYearInDecemberFromLong() throws ParseException {
-		Month monthDecember = new Month(parser.parse("31/12/12").getTime());
+		Month monthDecember = Month.getInstance(parser.parse("31/12/12"));
 		assertEquals(2012, monthDecember.getYear());
 	}
 	
@@ -127,7 +106,7 @@ public class MonthTest {
 	 */
 	@Test
 	public void testGetYearInDecemberFromMoisAnnee() throws ParseException {
-		Month monthDecember = new Month(2012, 12);
+		Month monthDecember = Month.getInstance(2012, 12);
 		assertEquals(2012, monthDecember.getYear());
 	}
 	
@@ -137,84 +116,55 @@ public class MonthTest {
 	}
 	
 	@Test
-	public void testGetNumInYearFromLong() {
-		assertEquals(3, monthLong.getNumInYear());
-	}
-	
-	@Test
 	public void testGetNumInYearFromMoisAnnee() {
 		assertEquals(3, monthMoisAnnee.getNumInYear());
 	}
 	
 	@Test
 	public void testGetTranslatedinPastFromDate() throws ParseException {
-		Month monthPast = new Month(parser.parse("30/11/2012"));
+		Month monthPast = Month.getInstance(parser.parse("30/11/2012"));
 		assertEquals(monthDate.getTranslated(-4), monthPast);
 	}
 	
 	@Test
-	public void testGetTranslatedinPastFromLong() throws ParseException {
-		Month monthPast = new Month(parser.parse("30/11/2012"));
-		assertEquals(monthLong.getTranslated(-4), monthPast);
-	}
-	
-	@Test
 	public void testGetTranslatedinPastFromMoisAnnee() throws ParseException {
-		Month monthPast = new Month(parser.parse("30/11/2012"));
+		Month monthPast = Month.getInstance(parser.parse("30/11/2012"));
 		assertEquals(monthMoisAnnee.getTranslated(-4), monthPast);
 	}
 
 	@Test
 	public void testGetTranslatedinFutureFromDate() throws ParseException {
-		Month monthFuture = new Month(parser.parse("30/04/2015"));
+		Month monthFuture = Month.getInstance(parser.parse("30/04/2015"));
 		assertEquals(monthDate.getTranslated(25), monthFuture);
 	}
 	
 	@Test
-	public void testGetTranslatedinFutureFromLong() throws ParseException {
-		Month monthFuture = new Month(parser.parse("30/04/2015"));
-		assertEquals(monthLong.getTranslated(25), monthFuture);
-	}
-	
-	@Test
 	public void testGetTranslatedinFutureFromMoisAnnee() throws ParseException {
-		Month monthFuture = new Month(parser.parse("30/04/2015"));
+		Month monthFuture = Month.getInstance(parser.parse("30/04/2015"));
 		assertEquals(monthMoisAnnee.getTranslated(25), monthFuture);
 	}
 
 	@Test
 	public void testGetNextFromDate() throws ParseException {
-		Month monthNext = new Month(parser.parse("15/04/13"));
+		Month monthNext = Month.getInstance(parser.parse("15/04/13"));
 		assertEquals(monthDate.getNext(), monthNext);
 	}
 	
 	@Test
-	public void testGetNextFromLong() throws ParseException {
-		Month monthNext = new Month(parser.parse("15/04/13"));
-		assertEquals(monthLong.getNext(), monthNext);
-	}
-	
-	@Test
 	public void testGetNextFromMoisAnnee() throws ParseException {
-		Month monthNext = new Month(parser.parse("15/04/13"));
+		Month monthNext = Month.getInstance(parser.parse("15/04/13"));
 		assertEquals(monthMoisAnnee.getNext(), monthNext);
 	}
 
 	@Test
 	public void testGetPreviousFromDate() throws ParseException {
-		Month monthPrevious = new Month(parser.parse("03/02/13"));
+		Month monthPrevious = Month.getInstance(parser.parse("03/02/13"));
 		assertEquals(monthDate.getPrevious(), monthPrevious);
 	}
 	
 	@Test
-	public void testGetPreviousFromLong() throws ParseException {
-		Month monthPrevious = new Month(parser.parse("03/02/13"));
-		assertEquals(monthLong.getPrevious(), monthPrevious);
-	}
-	
-	@Test
 	public void testGetPreviousFromMoisAnnee() throws ParseException {
-		Month monthPrevious = new Month(parser.parse("03/02/13"));
+		Month monthPrevious = Month.getInstance(parser.parse("03/02/13"));
 		assertEquals(monthMoisAnnee.getPrevious(), monthPrevious);
 	}
 
@@ -224,14 +174,6 @@ public class MonthTest {
 		assertFalse(monthDate.includes(parser.parse("28/02/13")));
 		assertFalse(monthDate.includes(parser.parse("15/04/13")));
 		assertFalse(monthDate.includes(parser.parse("31/03/14")));
-	}
-	
-	@Test
-	public void testIncludesDateFromLong() throws ParseException {
-		assertTrue(monthLong.includes(parser.parse("14/03/13")));
-		assertFalse(monthLong.includes(parser.parse("28/02/13")));
-		assertFalse(monthLong.includes(parser.parse("15/04/13")));
-		assertFalse(monthLong.includes(parser.parse("31/03/14")));
 	}
 	
 	@Test
@@ -248,11 +190,6 @@ public class MonthTest {
 	}
 	
 	@Test
-	public void testAfterDateFromLong() throws ParseException {
-		assertTrue(monthLong.after(parser.parse("15/02/13")));
-	}
-	
-	@Test
 	public void testAfterDateFromMoisAnnee() throws ParseException {
 		assertTrue(monthMoisAnnee.after(parser.parse("15/02/13")));
 	}
@@ -260,11 +197,6 @@ public class MonthTest {
 	@Test
 	public void testNotAfterSameDateFromDate() throws ParseException {
 		assertFalse(monthDate.after(parser.parse("04/03/13")));
-	}
-	
-	@Test
-	public void testNotAfterSameDateFromLong() throws ParseException {
-		assertFalse(monthLong.after(parser.parse("04/03/13")));
 	}
 	
 	@Test
@@ -278,11 +210,6 @@ public class MonthTest {
 	}
 	
 	@Test
-	public void testNotAfterDateFromLong() throws ParseException {
-		assertFalse(monthLong.after(parser.parse("18/07/13")));
-	}
-	
-	@Test
 	public void testNotAfterDateFromMoisAnnee() throws ParseException {
 		assertFalse(monthMoisAnnee.after(parser.parse("18/07/13")));
 	}
@@ -290,11 +217,6 @@ public class MonthTest {
 	@Test
 	public void testBeforeDateFromDate() throws ParseException {
 		assertTrue(monthDate.before(parser.parse("03/04/13")));
-	}
-	
-	@Test
-	public void testBeforeDateFromLong() throws ParseException {
-		assertTrue(monthLong.before(parser.parse("03/04/13")));
 	}
 	
 	@Test
@@ -308,11 +230,6 @@ public class MonthTest {
 	}
 	
 	@Test
-	public void testNotBeforeSameDateFromLong() throws ParseException {
-		assertFalse(monthLong.before(parser.parse("01/03/13")));
-	}
-	
-	@Test
 	public void testNotBeforeSameDateFromMoisAnnee() throws ParseException {
 		assertFalse(monthMoisAnnee.before(parser.parse("01/03/13")));
 	}
@@ -323,11 +240,6 @@ public class MonthTest {
 	}
 	
 	@Test
-	public void testNotBeforeDateFromLong() throws ParseException {
-		assertFalse(monthLong.before(parser.parse("04/02/13")));
-	}
-	
-	@Test
 	public void testNotBeforeDateFromMoisAnnee() throws ParseException {
 		assertFalse(monthMoisAnnee.before(parser.parse("04/02/13")));
 	}
@@ -335,11 +247,6 @@ public class MonthTest {
 	@Test
 	public void testToStringFromDate() {
 		assertEquals("mars 2013", monthDate.toString());
-	}
-	
-	@Test
-	public void testToStringFromLong() {
-		assertEquals("mars 2013", monthLong.toString());
 	}
 	
 	@Test
