@@ -18,7 +18,7 @@ import org.junit.Test;
 
 public class CacheSuiviDAOTest {
 
-	private static final Month MONTH2 = new Month();
+	private static final Month MONTH2 = Month.getInstance();
 	private static final Month MONTH1 = MONTH2.getPrevious();
 	private static final Month MONTH3 = MONTH2.getNext();
 	

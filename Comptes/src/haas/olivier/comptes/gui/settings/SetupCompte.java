@@ -737,11 +737,11 @@ public class SetupCompte {
 	 */
 	private Month getOlderMonth(Month month, Date date) {
 		if (month == null) {
-			return (date == null) ? null : new Month(date);
+			return (date == null) ? null : Month.getInstance(date);
 		} else if (date == null) {
 			return month;
 		} else {
-			return month.before(date) ? month : new Month(date);
+			return month.before(date) ? month : Month.getInstance(date);
 		}
 	}
 	

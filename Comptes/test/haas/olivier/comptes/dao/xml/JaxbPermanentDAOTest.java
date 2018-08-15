@@ -67,7 +67,7 @@ public class JaxbPermanentDAOTest {
 		comptes.put(3, c3);
 		
 		// Des mois
-		Month month = new Month(),
+		Month month = Month.getInstance(),
 				month2 = month.getNext(),
 				month3 = month2.getNext(),
 				month4 = month3.getTranslated(5),

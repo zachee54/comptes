@@ -69,9 +69,9 @@ public class CacheEcritureDAOTest {
 		date1 = cal.getTime();
 		
 		// Les mois
-		month1 = new Month(date1);		// Mois de la date 1
-		month2 = new Month(date2);		// Mois de la date 2
-		month3 = new Month(date3);		// Mois de la date 3
+		month1 = Month.getInstance(date1);		// Mois de la date 1
+		month2 = Month.getInstance(date2);		// Mois de la date 2
+		month3 = Month.getInstance(date3);		// Mois de la date 3
 		
 		// Définition des écritures utilisées
 		e1 = new Ecriture(1, date1, date2, c1, c2, BigDecimal.ONE, "libelle1", "tiers1", null);

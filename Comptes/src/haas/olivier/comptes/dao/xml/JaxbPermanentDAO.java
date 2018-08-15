@@ -319,7 +319,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		Map<Month, Integer> result = new HashMap<>();
 		for (Jour jour : jours.getJour()) {
 			result.put(
-					new Month(jour.getAnnee(), jour.getMois()),
+					Month.getInstance(jour.getAnnee(), jour.getMois()),
 					jour.getValue());
 		}
 		return result;
@@ -336,7 +336,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		Map<Month, BigDecimal> result = new HashMap<>();
 		for (Montant montant : montants.getMontant()) {
 			result.put(
-					new Month(montant.getAnnee(), montant.getMois()),
+					Month.getInstance(montant.getAnnee(), montant.getMois()),
 					montant.getValue());
 		}
 		return result;
