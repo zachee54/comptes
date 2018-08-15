@@ -2,6 +2,7 @@ package haas.olivier.comptes.gui.settings;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Map;
 
 import haas.olivier.comptes.Compte;
@@ -18,6 +19,15 @@ import haas.olivier.util.Month;
  * modifications à apporter à un <code>Permanent</code>.
  */
 class PermanentController implements Comparable<PermanentController> {
+	
+	/**
+	 * Un comparateur d'opérations permanentes.
+	 * <p>
+	 * Il compare les opérations permanentes selon leur ordre naturel, en
+	 * plaçant les valeurs <code>null</code> en premier.
+	 */
+	private static final Comparator<Permanent> COMPARATOR =
+			Comparator.nullsFirst((a,b) -> a.compareTo(b));
 	
 	/**
 	 * L'opération permanente contrôlée. Peut être <code>null</code> dans le cas
@@ -443,18 +453,7 @@ class PermanentController implements Comparable<PermanentController> {
 	 */
 	@Override
 	public int compareTo(PermanentController controller) {
-		Permanent permanent2 = controller.getPermanent();
-		if (permanent == null) {
-			if (permanent2 == null) {
-				return 0;							// Deux null: égalité !
-			} else {
-				return -1;							// Le null en premier
-			}
-		} else if (permanent2 != null) {
-			return 1;								// Le non-null en deuxième
-		} else {
-			return permanent.compareTo(permanent2);
-		}
+		return COMPARATOR.compare(permanent, controller.permanent);
 	}
 	
 	@Override
