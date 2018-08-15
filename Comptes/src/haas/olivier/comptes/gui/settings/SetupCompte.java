@@ -98,18 +98,18 @@ public class SetupCompte {
 		 */
 		private DataMediator() {
 			
-			// La codification EventHandler pour obtenir le texte de la source
-			String eventText = "source.text";
+			// La codification EventHandler pour obtenir le document source
+			String eventDocument = "document";
 			
 			nom.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, controller, "setNom", eventText));
+					DocumentListener.class, this, "setNom", eventDocument));
 			numero.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, controller, "setNumero",
-					eventText));
+					DocumentListener.class, this, "setNumero", eventDocument));
 			ouverture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setOuverture", eventText));
+					DocumentListener.class, this, "setOuverture",
+					eventDocument));
 			cloture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setCloture", eventText));
+					DocumentListener.class, this, "setCloture", eventDocument));
 			typeComboBox.addItemListener(EventHandler.create(ItemListener.class,
 					this, "setTypeCompte", "source.selectedItem"));
 			colorButton.addActionListener(EventHandler.create(
@@ -170,6 +170,24 @@ public class SetupCompte {
 		 */
 		private String getNotNullDateText(Date date) {
 			return (date == null) ? "" : format.format(date);
+		}
+		
+		/**
+		 * Modifie le nom du compte dans le contrôleur actuel.
+		 * 
+		 * @param nom	Le nouveau nom.
+		 */
+		public void setNom(String nom) {
+			controller.setNom(nom);
+		}
+		
+		/**
+		 * Modifie le numéro du compte dans le contrôleur actuel.
+		 * 
+		 * @param numeroText	Le nouveau numéro de compte.
+		 */
+		public void setNumero(String numeroText) {
+			controller.setNumero(numeroText);
 		}
 		
 		/**
@@ -403,13 +421,13 @@ public class SetupCompte {
 	 * 						naturel.
 	 */
 	private Iterable<CompteController> createControllers(Compte selection) {
-		Collection<Compte> comptes = getAllComptes();
+		Collection<Compte> comptes = new ArrayList<>(getAllComptes());
 		
 		// Ajouter un compte null qui servira pour le contrôleur "Nouveau..."
 		comptes.add(null);
 		
 		controllers = new ArrayList<>();
-		for (Compte compte : getAllComptes()) {
+		for (Compte compte : comptes) {
 			CompteController controller = new CompteController(compte); 
 			controllers.add(controller);
 			if (compte == selection) {					// Éventuellement null
