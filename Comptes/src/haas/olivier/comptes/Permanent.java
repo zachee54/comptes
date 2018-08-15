@@ -17,7 +17,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Une opération récurrente capable de générer une écriture pré-définie.
+/**
+ * Une opération récurrente capable de générer une écriture pré-définie.
  * <p>
  * Les instances sont de trois types, selon l'écriture qu'ils génèrent:<ul>
  * <li>	une écriture avec un montant prédéfini (par exemple le prélèvement
@@ -33,11 +34,15 @@ import java.util.logging.Logger;
 public abstract class Permanent implements Comparable<Permanent>, Serializable {
 	private static final long serialVersionUID = 8897891019381288870L;
 	
-	/** Le Logger de cette classe. */
+	/**
+	 * Le Logger de cette classe.
+	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(Permanent.class.getName());
 
-	/** Génère pour ce mois les écritures de toutes les instances. */
+	/**
+	 * Génère pour ce mois les écritures de toutes les instances.
+	 */
 	public static void createAllEcritures(Month month) {
 		Permanent cursor = null;
 		try {
@@ -55,7 +60,7 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 
 				// Mémoriser l'écriture à ajouter
 				generated.add(e);
-			}// for permanent
+			}
 			
 			// Ajouter au modèle en mettant à jour les données de suivi
 			EcritureController.add(generated);
@@ -70,34 +75,51 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 					? "Impossible de générer une des écritures"
 					: "Impossible de générer l'écriture "+cursor,
 					e1);
-		}// try
-	}// createAllEcritures
+		}
+	}
 
-	/** L'identifiant de l'opération permanente. */
+	/**
+	 * L'identifiant de l'opération permanente.
+	 */
 	public final Integer id;
 	
-	/** Le nom de l'opération permanente. */
+	/**
+	 * Le nom de l'opération permanente.
+	 */
 	public final String nom;
 	
-	/** Les dates (quantièmes) des écritures à générer en fonction du mois. */
+	/**
+	 * Les dates (quantièmes) des écritures à générer en fonction du mois.
+	 */
 	public final Map<Month, Integer> jours;
 	
-	/** Le compte à débiter par les écritures générées. */
+	/**
+	 * Le compte à débiter par les écritures générées.
+	 */
 	public final Compte debit;
 	
-	/** Le compte à créditer par les écritures générées. */
+	/**
+	 * Le compte à créditer par les écritures générées.
+	 */
 	public final Compte credit;
 	
-	/** Le nom du tiers dans les écritures à générer. */
+	/**
+	 * Le nom du tiers dans les écritures à générer.
+	 */
 	public final String tiers;
 	
-	/** Le libellé des écritures à générer. */
+	/**
+	 * Le libellé des écritures à générer.
+	 */
 	public final String libelle;
 
-	/** Détermine si l'écriture doit être pointée automatiquement. */
+	/**
+	 * Détermine si l'écriture doit être pointée automatiquement.
+	 */
 	public final boolean pointer;
 
-	/** Construit une opération permanente.
+	/**
+	 * Construit une opération permanente.
 	 * 
 	 * @param id		L'identifiant de l'opération.
 	 * @param nom		Le nom de l'opération.
@@ -117,7 +139,7 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 				|| credit == null				// Il faut un compte de crédit
 				|| jours == null) {				//Il faut un planning, même vide
 			throw new IllegalArgumentException();
-		}// if
+		}
 		
 		this.id = id;
 		this.nom = (nom == null) ? "" : nom;	// Nom non null pour compareTo()
@@ -127,9 +149,10 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 		this.tiers = tiers;
 		this.pointer = pointer;
 		this.jours = jours;
-	}// constructeur privé
+	}
 
-	/** Génère une écriture au titre du mois donné.
+	/**
+	 * Génère une écriture au titre du mois donné.
 	 * <p>
 	 * La méthode purge aussi les occurrences de jours et de montants obsolètes
 	 * de plus de 12 mois.
@@ -162,16 +185,16 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 
 					maxMonth = m; // m est le nouveau max
 
-				}// if maxMonth
-			}// if month
-		}// for m
+				}
+			}
+		}
 
 		// Si pas de date antérieure définie, lever une exception
 		if (maxMonth == null) {
 			throw new InconsistentArgumentsException(
 					"Opération permanente  " + nom
 					+ ": pas de date trouvée avant le mois spécifié");
-		}// if mois
+		}
 
 		// Déterminer la date
 		Calendar cal = Calendar.getInstance();	// Calendrier
@@ -190,8 +213,8 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 			Month m2 = it.next().getTranslated(12);
 			if (m2.before(maxMonth) && m2.before(today)) {
 				it.remove();					// Supprimer
-			}// if obsolète
-		}// for
+			}
+		}
 
 		// Créer l'écriture
 		EcritureDraft draft = new EcritureDraft();
@@ -205,9 +228,10 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 			draft.pointage = date;
 		
 		return draft.createEcriture();
-	}// createEcriture
+	}
 	
-	/** Renvoie le montant de l'écriture à générer (dépend de l'implémentation
+	/**
+	 * Renvoie le montant de l'écriture à générer (dépend de l'implémentation
 	 * concrète).
 	 * 
 	 * @param month	Le mois au titre duquel générer l'écriture.
@@ -239,18 +263,22 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 
 		// Égaux si impossible à départager par compareTo
 		return compareTo((Permanent) obj) == 0;
-	}// equals
+	}
 	
-	/** Renvoie le nom du Permanent. */
+	/**
+	 * Renvoie le nom du Permanent.
+	 */
 	public String toString() {
 		if (nom == null || nom.equals("")) {
 			return "(Sans nom)";
 		} else {
 			return nom;
 		}
-	}// toString
+	}
 
-	/** Compare selon les noms, puis les identifiants. */
+	/**
+	 * Compare selon les noms, puis les identifiants.
+	 */
 	@Override
 	public int compareTo(Permanent p) {
 		int result = nom.compareTo(p.nom);	// Comparer selon les noms
@@ -259,7 +287,7 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 			result = new Integer(hashCode()).compareTo(p.hashCode());
 		}
 		return result;
-	}// compareTo
+	}
 	
 	@Override
 	public int hashCode() {
@@ -268,16 +296,6 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 		
 		res = mul*res + (id == null ? 0 : id.hashCode());
 		res = mul*res + (nom == null ? 0 : nom.hashCode());
-//		res = mul*res + (debit == null ? 0 : debit.hashCode());
-//		res = mul*res + (credit == null ? 0 : credit.hashCode());
-//		res = mul*res + (jours == null ? 0 : jours.hashCode());
-//		res = mul*res + (libelle == null ? 0 : libelle.hashCode());
-//		res = mul*res + (tiers == null ? 0 : tiers.hashCode());
-//		res = mul*res + (pointer ? 1 : 0);
-//		res = mul*res + (montants == null ? 0 : montants.hashCode());
-//		res = mul*res + (compteASolder == null ? 0 : compteASolder.hashCode());
-//		res = mul*res + (dependance == null ? 0 : dependance.hashCode());
-//		res = mul*res + (taux == null ? 0 : taux.hashCode());
 		return res;
-	}// hashCode
-}// class
+	}
+}

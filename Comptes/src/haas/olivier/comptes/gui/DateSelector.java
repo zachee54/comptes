@@ -286,7 +286,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		sliderMois.setValue(month.getNumInYear());			// Régler le mois
 		sliderJour.setValue(sliderJour.getMaximum());		// Régler au 31
 		ignoreEvent = false;			// Rétablir la gestion des événements
-	}// monthChanged
+	}
 
 	@Override
 	public void dateChanged(Date date) {
