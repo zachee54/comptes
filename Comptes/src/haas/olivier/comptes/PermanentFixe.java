@@ -78,7 +78,7 @@ public class PermanentFixe extends Permanent {
 		}// if
 
 		// Purger la liste des mois
-		Month today = new Month();
+		Month today = Month.getInstance();
 		for (Iterator<Month> it2 = montants.keySet().iterator();
 				it2.hasNext();) {
 

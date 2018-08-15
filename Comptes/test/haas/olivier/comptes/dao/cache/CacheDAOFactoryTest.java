@@ -50,7 +50,7 @@ public class CacheDAOFactoryTest {
 	private static final Permanent PERMANENT =
 			new PermanentFixe(1, "permanent", COMPTE1, COMPTE2, "permanent", "tiers", false, new HashMap<Month, Integer>(), new HashMap<Month, BigDecimal>());
 	
-	private static final Month MONTH = new Month();
+	private static final Month MONTH = Month.getInstance();
 	
 	private static final Solde HISTO = new Solde(
 			MONTH.getPrevious(), COMPTE2, BigDecimal.TEN);

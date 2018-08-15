@@ -54,7 +54,7 @@ public class SituationCritique {
 	 * @throws IOException
 	 */
 	public SituationCritique(Compte compte, Date today) throws IOException {
-		Month month = new Month(today);
+		Month month = Month.getInstance(today);
 		Date start = getMidnight(today);
 		
 		// Étudier le mois actuel et le mois suivant

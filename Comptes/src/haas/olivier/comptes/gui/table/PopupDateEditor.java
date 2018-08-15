@@ -340,8 +340,8 @@ MouseMotionListener, MouseWheelListener {
 
 		// Remplir les données du calendrier
 		monthDisplayed = (editorDate == null)
-				? new Month()						// Mois d'aujourd'hui
-				: new Month(editorDate);			// ou mois sélectionné
+				? Month.getInstance()				// Mois d'aujourd'hui
+				: Month.getInstance(editorDate);	// ou mois sélectionné
 		updateCalendar();							// Remplir les données
 		
 		// Gérer l'annulation de l'édition par la touche Echap
@@ -453,7 +453,8 @@ MouseMotionListener, MouseWheelListener {
 		} else {
 			return;						// Rien du tout: pas de mise à jour !
 		}
-		monthDisplayed = new Month(cal.getTime());	// Redéfinir le mois affiché
+		monthDisplayed =
+				Month.getInstance(cal.getTime());	// Redéfinir le mois affiché
 		updateCalendar();							// Mettre à jour
 	}
 

@@ -92,7 +92,7 @@ public class EcritureController {
 			
 			// Trouver le mois le plus ancien
 			if (month == null || month.after(e.date))
-				month = new Month(e.date);
+				month = Month.getInstance(e.date);
 			
 			// Ajouter l'écriture au modèle de données
 			eDAO.add(e);
@@ -112,7 +112,7 @@ public class EcritureController {
 	 */
 	private static void add(Ecriture e) throws IOException {
 		DAOFactory.getFactory().getEcritureDAO().add(e);// Ajouter l'écriture
-		updateSuivis(new Month(e.date));				// Mettre à jour suivis
+		updateSuivis(Month.getInstance(e.date));		// Mettre à jour suivis
 	}
 	
 	/**
@@ -127,8 +127,8 @@ public class EcritureController {
 	private static void update(Ecriture e) throws IOException {
 		
 		// Le mois de l'écriture existante et de la nouvelle
-		Month monthNew = new Month(e.date);				// Nouvelle écriture
-		Month monthOld = new Month(						// Ancienne écriture
+		Month monthNew = Month.getInstance(e.date);		// Nouvelle écriture
+		Month monthOld = Month.getInstance(				// Ancienne écriture
 				DAOFactory.getFactory().getEcritureDAO().get(e.id).date);
 		
 		// Mettre à jour l'écriture
@@ -154,7 +154,7 @@ public class EcritureController {
 		// Effectuer les modifications
 		Ecriture e = eDAO.get(id);						// L'écriture à effacer
 		eDAO.remove(id);								// Supprimer du modèle
-		updateSuivis(new Month(e.date));				// Mettre à jour suivis
+		updateSuivis(Month.getInstance(e.date));		// Mettre à jour suivis
 	}
 
 	/**
@@ -202,7 +202,7 @@ public class EcritureController {
 			EcritureDAO ecritureDAO) throws IOException {
 		Iterable<Ecriture> journal = ecritureDAO.getAllSince(debut);
 		for (Ecriture e : journal) {
-			Month mois = new Month(e.date);
+			Month mois = Month.getInstance(e.date);
 
 			// Mettre à jour les soldes des comptes
 			e.debit.addHistorique(mois, e.montant.negate());// Montant opposé
@@ -246,7 +246,7 @@ public class EcritureController {
 		for (Ecriture e : journalPointages) {
 			if (e.pointage != null) {
 				// Pointée: mettre à jour les soldes à vue à la date de pointage
-				Month mois = new Month(e.pointage);
+				Month mois = Month.getInstance(e.pointage);
 				e.debit.addPointages(mois, e.montant.negate());
 				e.credit.addPointages(mois, e.montant);
 			}
@@ -271,7 +271,7 @@ public class EcritureController {
 
 		// Trouver la période influencée par le mois cible
 		Month premierMois = debut.getTranslated(-DUREE + 1);
-		Month today = new Month();
+		Month today = Month.getInstance();
 
 		// File PEPS de montants monétaires sur 12 mois
 		Deque<BigDecimal> queue = new LinkedList<>();

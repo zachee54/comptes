@@ -34,7 +34,7 @@ public class DAOFactoryTest {
 	/**
 	 * Des mois.
 	 */
-	private Month month1 = new Month(), month2 = month1.getNext();
+	private Month month1 = Month.getInstance(), month2 = month1.getNext();
 	
 	/**
 	 * Des montants.

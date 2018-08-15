@@ -175,7 +175,7 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 		
 		// Si le mois est inconnu (début de ligne), on le lit
 		if (mois == null)
-			mois = new Month(dateFormat.parse(reader.get(colMois)));
+			mois = Month.getInstance(dateFormat.parse(reader.get(colMois)));
 		
 		// Renvoyer le solde trouvé, avec son mois et le compte correspondants
 		return new Solde(

@@ -151,7 +151,7 @@ implements DataObserver {
 		}
 
 		Month month = MonthObservable.getMonth();	// Le mois sélectionné
-		Month today = new Month();					// Le mois actuel
+		Month today = Month.getInstance();			// Le mois actuel
 
 		try {
 			// Créer les modèles des lignes d'écritures à afficher

@@ -30,7 +30,7 @@ public class PermanentTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		df = new SimpleDateFormat("dd/MM/yy");
-		avril = new Month(df.parse("01/04/12"));
+		avril = Month.getInstance(df.parse("01/04/12"));
 		mai = avril.getNext();
 		juin = mai.getNext();
 		juillet = juin.getNext();

@@ -68,10 +68,10 @@ public class EcritureControllerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		parser = new SimpleDateFormat("dd/MM/yy");
-		septembre2011 = new Month(parser.parse("01/09/11"));
-		octobre2011 = new Month(parser.parse("01/10/11"));
-		fevrier2012 = new Month(parser.parse("01/02/12"));
-		aout2012 = new Month(parser.parse("01/08/12"));
+		septembre2011 = Month.getInstance(parser.parse("01/09/11"));
+		octobre2011 = Month.getInstance(parser.parse("01/10/11"));
+		fevrier2012 = Month.getInstance(parser.parse("01/02/12"));
+		aout2012 = Month.getInstance(parser.parse("01/08/12"));
 	}
 
 	@AfterClass

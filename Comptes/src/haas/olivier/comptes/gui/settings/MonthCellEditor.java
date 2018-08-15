@@ -37,7 +37,7 @@ class MonthCellEditor extends DefaultCellEditor {
 						table, value, isSelected, row, column);
 		
 		Month reference =						// Mois de référence (ou actuel)
-				(value instanceof Month) ? (Month) value : new Month();
+				(value instanceof Month) ? (Month) value : Month.getInstance();
 		
 		// Re-remplir, de -12 mois à +12 mois
 		comboBox.removeAllItems();

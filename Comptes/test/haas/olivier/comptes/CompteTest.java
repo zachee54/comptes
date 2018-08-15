@@ -57,7 +57,8 @@ public class CompteTest {
 		when(factory.getSoldeAVueDAO()).thenReturn(sDAO);
 		when(factory.getMoyenneDAO()).thenReturn(mDAO);
 		
-		when(factory.getDebut()).thenReturn(new Month(DF.parse("01/01/05")));
+		when(factory.getDebut()).thenReturn(
+				Month.getInstance(DF.parse("01/01/05")));
 		
 		DAOFactory.setFactory(factory, false);
 	}
@@ -88,7 +89,7 @@ public class CompteTest {
 
 	@Test
 	public void testRemoveSuiviFrom() throws IOException {
-		Month month = new Month();
+		Month month = Month.getInstance();
 		
 		Compte.removeSuiviFrom(month);
 		verify(hDAO).removeFrom(month);
@@ -98,7 +99,7 @@ public class CompteTest {
 
 	@Test
 	public void testCompte() {
-		Month month = new Month();
+		Month month = Month.getInstance();
 		when(factory.getDebut()).thenReturn(month);
 		
 		Compte c = new Compte(0, TypeCompte.ENFANTS);
@@ -193,7 +194,7 @@ public class CompteTest {
 	@Test
 	public void testGetHistoriqueBancaire() {
 		Compte c = new Compte(0, TypeCompte.COMPTE_EPARGNE);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		Month past = month.getTranslated(-3);		// 3 mois plus tôt
 		
 		when(hDAO.get(c, past)).thenReturn(BigDecimal.TEN);
@@ -206,7 +207,7 @@ public class CompteTest {
 	@Test
 	public void testGetHistoriqueBudget() {
 		Compte c = new Compte(0, TypeCompte.DEPENSES);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		
 		when(hDAO.get(c, month)).thenReturn(BigDecimal.ONE);
 		assertEquals(0, BigDecimal.ONE.compareTo(c.getHistorique(month)));
@@ -217,7 +218,7 @@ public class CompteTest {
 	@Test
 	public void testGetHistoriqueIn() throws ParseException, EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
-		Month month = new Month(DF.parse("01/02/2016"));	// Février 2016
+		Month month = Month.getInstance(DF.parse("01/02/2016"));// Février 2016
 		
 		// Solde en fin de mois
 		BigDecimal histo3 = new BigDecimal("415.2");
@@ -254,7 +255,7 @@ public class CompteTest {
 	@Test
 	public void testGetSoldeAVue() {
 		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		
 		when(sDAO.get(c, month)).thenReturn(BigDecimal.ONE);
 		assertEquals(0,
@@ -268,7 +269,7 @@ public class CompteTest {
 	@Test
 	public void testGetSoldeAVueIn() throws ParseException, IOException, EcritureMissingArgumentException, InconsistentArgumentsException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
-		Month month = new Month(DF.parse("01/02/2016"));	// Février 2016
+		Month month = Month.getInstance(DF.parse("01/02/2016"));// Février 2016
 		
 		// Solde en fin de mois
 		BigDecimal histo3 = new BigDecimal("415.2");
@@ -306,7 +307,7 @@ public class CompteTest {
 	@Test
 	public void testGetMoyenne() {
 		Compte c = new Compte(0, TypeCompte.RECETTES);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		when(mDAO.get(c, month)).thenReturn(BigDecimal.TEN);
 		assertEquals(0, BigDecimal.TEN.compareTo(c.getMoyenne(month)));
 	}
@@ -318,7 +319,7 @@ public class CompteTest {
 	@Test
 	public void testAddHistoriqueBancaireFromNone() throws IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_EPARGNE);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		
 		c.addHistorique(month, BigDecimal.ONE);
 		verify(hDAO).set(c, month, BigDecimal.ONE);
@@ -334,7 +335,7 @@ public class CompteTest {
 		// Objet testé
 		Compte c = new Compte(0, TypeCompte.ENFANTS);
 		
-		Month month = new Month();
+		Month month = Month.getInstance();
 		when(hDAO.get(c, month)).thenReturn(new BigDecimal("15"));
 		
 		// Méthode testée
@@ -361,7 +362,7 @@ public class CompteTest {
 		// Objet testé
 		Compte c = new Compte(0, TypeCompte.RECETTES_EN_EPARGNE);
 		
-		Month month = new Month();
+		Month month = Month.getInstance();
 		when(hDAO.get(c, month)).thenReturn(new BigDecimal("15"));
 		
 		// Méthode testée
@@ -379,7 +380,7 @@ public class CompteTest {
 	@Test
 	public void testAddHistoriqueNull() throws IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		c.addHistorique(month, null);
 		verifyZeroInteractions(hDAO);
 	}
@@ -387,7 +388,7 @@ public class CompteTest {
 	@Test
 	public void testAddHistoriqueZero() throws IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		c.addHistorique(month, BigDecimal.ZERO);
 		verifyZeroInteractions(hDAO);
 	}
@@ -395,7 +396,7 @@ public class CompteTest {
 	@Test
 	public void testAddPointagesBancaire() throws IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		when(sDAO.get(c, month)).thenReturn(new BigDecimal("15"));
 		
 		c.addPointages(month, new BigDecimal("-25"));
@@ -410,14 +411,14 @@ public class CompteTest {
 	@Test
 	public void testAddPointagesBudget() throws IOException {
 		new Compte(0, TypeCompte.DEPENSES_EN_EPARGNE).addPointages(
-				new Month(), BigDecimal.ONE);
+				Month.getInstance(), BigDecimal.ONE);
 		verifyZeroInteractions(sDAO);
 	}
 	
 	@Test
 	public void testAddPointagesNull() throws IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_CARTE);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		c.addPointages(month, null);
 		verifyZeroInteractions(sDAO);
 	}
@@ -425,7 +426,7 @@ public class CompteTest {
 	@Test
 	public void testAddPointagesZero() throws IOException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
-		Month month = new Month();
+		Month month = Month.getInstance();
 		c.addPointages(month, BigDecimal.ZERO);
 		verifyZeroInteractions(sDAO);
 	}

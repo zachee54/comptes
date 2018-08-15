@@ -21,7 +21,7 @@ public class CompteBudgetStateTest {
 	/**
 	 * Un mois quelconque.
 	 */
-	private static final Month month = new Month();
+	private static final Month month = Month.getInstance();
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

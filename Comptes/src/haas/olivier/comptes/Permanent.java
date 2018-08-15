@@ -182,7 +182,7 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 		Date date = cal.getTime();				// Date définitive
 
 		// Purger la liste des dates
-		Month today = new Month();
+		Month today = Month.getInstance();
 		Iterator<Month> it = jours.keySet().iterator();
 		while (it.hasNext()) {
 

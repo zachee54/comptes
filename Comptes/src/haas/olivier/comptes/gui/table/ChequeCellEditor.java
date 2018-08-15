@@ -36,7 +36,7 @@ implements DataObserver {
 	/**
 	 * Le mois le plus ancien pour rechercher les numéros de chèques.
 	 */
-	private static Month limit = new Month().getTranslated(-6);
+	private static Month limit = Month.getInstance().getTranslated(-6);
 	
 	/**
 	 * Un vérificateur de validité de la valeur actuelle de l'éditeur.

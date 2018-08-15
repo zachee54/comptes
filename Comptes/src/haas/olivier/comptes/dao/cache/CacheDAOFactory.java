@@ -191,7 +191,7 @@ public class CacheDAOFactory extends DAOFactory {
 	@Override
 	public Month getDebut() {
 		Month debut = eDAO.getDebut();
-		return debut == null ? new Month() : debut;
+		return debut == null ? Month.getInstance() : debut;
 	}
 
 	@Override

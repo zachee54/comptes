@@ -60,7 +60,7 @@ public class CsvSuiviDAOTest {
 		COMPTES.put(5, compte5);
 		
 		// Des données quelconques pour plusieurs mois
-		Month month = new Month();
+		Month month = Month.getInstance();
 		when(CACHE.get(compte1, month)).thenReturn(BigDecimal.ONE);
 		when(CACHE.get(compte3, month)).thenReturn(BigDecimal.TEN);
 		when(CACHE.get(compteSpecial, month))
