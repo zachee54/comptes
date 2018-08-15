@@ -50,6 +50,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -98,21 +100,39 @@ public class SetupCompte {
 		 */
 		private DataMediator() {
 			
-			// La codification EventHandler pour obtenir le texte de la source
-			String eventText = "source.text";
+			// La codification EventHandler pour obtenir le document source
+			String eventDocument = "document";
 			
 			nom.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setNom", eventText));
+					DocumentListener.class, this, "setNom", eventDocument));
 			numero.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setNumero", eventText));
+					DocumentListener.class, this, "setNumero", eventDocument));
 			ouverture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setOuverture", eventText));
+					DocumentListener.class, this, "setOuverture", eventDocument));
 			cloture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setCloture", eventText));
+					DocumentListener.class, this, "setCloture", eventDocument));
 			typeComboBox.addItemListener(EventHandler.create(ItemListener.class,
 					this, "setTypeCompte", "source.selectedItem"));
 			colorButton.addActionListener(EventHandler.create(
 					ActionListener.class, DataMediator.this, "chooseColor"));
+		}
+		
+		/**
+		 * Renvoie le texte contenu dans un champ de saisie.
+		 * 
+		 * @param document	Le document du champ de saisie.
+		 * 
+		 * @return			Le texte du document.
+		 */
+		private String getDocumentText(Document document) {
+			try {
+				return document.getText(0, document.getLength());
+			} catch (BadLocationException e) {
+				LOGGER.log(Level.SEVERE,
+						"Erreur lors de la récupération du texte dans une zone de saisie",
+						e);
+				return "";
+			}
 		}
 		
 		/**
@@ -174,19 +194,19 @@ public class SetupCompte {
 		/**
 		 * Modifie le nom du compte dans le contrôleur actuel.
 		 * 
-		 * @param nom	Le nouveau nom.
+		 * @param document	Le document contenant le nouveau nom.
 		 */
-		public void setNom(String nom) {
-			controller.setNom(nom);
+		public void setNom(Document document) {
+			controller.setNom(getDocumentText(document));
 		}
 		
 		/**
 		 * Modifie le numéro du compte dans le contrôleur actuel.
 		 * 
-		 * @param numeroText	Le nouveau numéro de compte.
+		 * @param document	Le document contenant le nouveau numéro de compte.
 		 */
-		public void setNumero(String numeroText) {
-			controller.setNumero(numeroText);
+		public void setNumero(Document document) {
+			controller.setNumero(getDocumentText(document));
 		}
 		
 		/**
@@ -213,13 +233,12 @@ public class SetupCompte {
 		/**
 		 * Modifie la date d'ouverture du contrôleur actuel.
 		 * 
-		 * @param dateText	La date d'ouverture, au format texte.
-		 * 
-		 * @throws ParseException
+		 * @param document	Le document contenant la date d'ouverture.
 		 */
-		public void setOuverture(String dateText) {
+		public void setOuverture(Document document) {
 			try {
-				controller.setOuverture(format.parse(dateText));
+				controller.setOuverture(
+						format.parse(getDocumentText(document)));
 			} catch (ParseException e) {
 				LOGGER.log(Level.FINEST, "Date d'ouverture illisible", e);
 			}
@@ -228,13 +247,11 @@ public class SetupCompte {
 		/**
 		 * Modifie la date de clôture du contrôleur actuel.
 		 * 
-		 * @param dateText	La date de clôture, au format texte.
-		 * 
-		 * @throws ParseException
+		 * @param document	Le document contenant la date de clôture.
 		 */
-		public void setCloture(String dateText) {
+		public void setCloture(Document document) {
 			try {
-				controller.setCloture(format.parse(dateText));
+				controller.setCloture(format.parse(getDocumentText(document)));
 			} catch (ParseException e) {
 				LOGGER.log(Level.FINEST, "Date de clôture illisible", e);
 			}
