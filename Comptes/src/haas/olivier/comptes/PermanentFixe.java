@@ -6,17 +6,21 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 
-/** Une opération permanente dont les montants sont fixés à l'avance.
+/**
+ * Une opération permanente dont les montants sont fixés à l'avance.
  * 
  * @author Olivier HAAS
  */
 public class PermanentFixe extends Permanent {
 	private static final long serialVersionUID = 64066058680125938L;
 
-	/** Montants prédéfinis par mois. */
+	/**
+	 * Montants prédéfinis par mois.
+	 */
 	public final Map<Month, BigDecimal> montants;
 
-	/** Construit une opération permanente dont les montants sont fixés à
+	/**
+	 * Construit une opération permanente dont les montants sont fixés à
 	 * l'avance.
 	 * 
 	 * @param id		L'identifiant de l'opération.
@@ -37,9 +41,10 @@ public class PermanentFixe extends Permanent {
 			Map<Month, Integer> jours, Map<Month, BigDecimal> montants) {
 		super(id, nom, debit, credit, libelle, tiers, pointer, jours);
 		this.montants = montants;
-	}// constructeur
+	}
 
-	/** Renvoie le montant prédéfini pour le mois spécifié.<br>
+	/**
+	 * Renvoie le montant prédéfini pour le mois spécifié.<br>
 	 * S'il n'y a aucun montant prédéfini pour ce mois, la méthode renvoie le
 	 * montant prédéfini pour le mois le plus proche avant le mois spécifié.
 	 * 
@@ -66,16 +71,16 @@ public class PermanentFixe extends Permanent {
 
 					maxMonthAmount = m;		// m est le nouveau max
 
-				}// if maxMonthAmount
-			}// if month
-		}// for m
+				}
+			}
+		}
 
 		// Si pas de date antérieure définie, lever une exception
 		if (maxMonthAmount == null) {
 			throw new InconsistentArgumentsException(
 					"Opération permanente " + nom
 					+ ": pas de montant trouvé avant le mois spécifié");
-		}// if
+		}
 
 		// Purger la liste des mois
 		Month today = Month.getInstance();
@@ -86,10 +91,10 @@ public class PermanentFixe extends Permanent {
 			Month m2 = it2.next().getTranslated(12);
 			if (m2.before(maxMonthAmount) && m2.before(today)) {
 				it2.remove();
-			}// if obsolète
-		}// for mois
+			}
+		}
 		
 		// Montant à retenir
 		return montants.get(maxMonthAmount);
-	}// getMontant
+	}
 }

@@ -35,11 +35,6 @@ public class EcrituresTableModelTest {
 	private static CompteObservable compteObservable = mock(CompteObservable.class);
 	private static MonthObservable monthObservable = new MonthObservable();
 	private static SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
-//	private static Integer[] disposition = { EcrituresTableModel.IDENTIFIANT,
-//			EcrituresTableModel.DATE, EcrituresTableModel.DATE_POINTAGE,
-//			EcrituresTableModel.POINTAGE, EcrituresTableModel.TIERS,
-//			EcrituresTableModel.LIBELLE, EcrituresTableModel.CHEQUE,
-//			EcrituresTableModel.MONTANT, EcrituresTableModel.COMPTE };
 
 	private DAOFactory dao = mock(DAOFactory.class);
 	private EcritureDAO eDAO = mock(EcritureDAO.class);
