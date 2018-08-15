@@ -114,7 +114,7 @@ public class SetupPermanent {
 			montants.addTableModelListener(EventHandler.create(
 					TableModelListener.class, this, "montantsChanged"));
 			taux.addChangeListener(EventHandler.create(
-					ChangeListener.class, this, "tauxChanged"));
+					ChangeListener.class, this, "tauxChanged", ""));
 			debit.addItemListener(EventHandler.create(
 					ItemListener.class, this, "debitChanged"));
 			credit.addItemListener(EventHandler.create(
@@ -612,7 +612,7 @@ public class SetupPermanent {
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(EventHandler.create(
 				ListSelectionListener.class, dataMediator, "setController",
-				"selectedValue"));
+				"source.selectedValue"));
 		return list;
 	}
 	
