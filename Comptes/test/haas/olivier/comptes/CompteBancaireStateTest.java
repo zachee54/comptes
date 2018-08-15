@@ -37,7 +37,7 @@ public class CompteBancaireStateTest {
 	/**
 	 * Un mois quelconque (celui en cours).
 	 */
-	private final Month month = new Month();
+	private final Month month = Month.getInstance();
 	
 	/**
 	 * Un compte mocké.

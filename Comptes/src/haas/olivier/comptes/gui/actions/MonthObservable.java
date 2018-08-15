@@ -23,7 +23,7 @@ public class MonthObservable extends Observable<MonthObserver> {
 	 * Le mois sélectionné. Par défaut, le mois en cours. Ce mois est le même
 	 * pour toute l'application.
 	 */
-	private static Month month = new Month();
+	private static Month month = Month.getInstance();
 
 	/**
 	 * La date sélectionnée. Par défaut, aucune date (juste un mois). Cette date
@@ -98,8 +98,8 @@ public class MonthObservable extends Observable<MonthObserver> {
 	 * Modifie la date sélectionnée et notifie les observateurs.
 	 */
 	public void setDate(Date newDate) {
-		date = newDate;				// Nouvelle date
-		month = new Month(newDate); // Ça paraît bête, mais certaines gens...
-		notifyDate();				// Notifier les observateurs
+		date = newDate;						// Nouvelle date
+		month = Month.getInstance(newDate); // Ça paraît bête, mais certains...
+		notifyDate();						// Notifier les observateurs
 	}
 }

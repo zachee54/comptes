@@ -29,7 +29,7 @@ public class SituationCritiqueTest {
 	/**
 	 * Le mois en cours.
 	 */
-	private static final Month MONTH = new Month();
+	private static final Month MONTH = Month.getInstance();
 	
 	/**
 	 * Le mois prochain.
@@ -85,7 +85,8 @@ public class SituationCritiqueTest {
 		DAOFactory.setFactory(factory);
 		when(factory.getEcritureDAO()).thenReturn(eDAO);
 		when(factory.getHistoriqueDAO()).thenReturn(hDAO);
-		when(factory.getDebut()).thenReturn(new Month(2000, 1));	// 01/2000
+		when(factory.getDebut()).thenReturn(
+				Month.getInstance(2000, 1));				// 01/2000
 		
 		// Créer la date du jour sans heures/minutes/secondes
 		Calendar cal = Calendar.getInstance();

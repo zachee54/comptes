@@ -54,7 +54,7 @@ public class ComptesComboBoxRenderer implements ListCellRenderer<Compte> {
 	/**
 	 * Le mois actuel.
 	 */
-	private Month month = new Month();
+	private Month month = Month.getInstance();
 	
 	@Override
 	public Component getListCellRendererComponent(

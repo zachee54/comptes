@@ -101,7 +101,7 @@ public class ComptesDiagramFactory {
 	 */
 	private static DiagramModel newChronoModel() {
 		Month debut = DAOFactory.getFactory().getDebut();
-		Month today = new Month();
+		Month today = Month.getInstance();
 		List<Month> months = new ArrayList<Month>();
 		for (Month month = debut; !month.after(today); month = month.getNext())
 			months.add(month);
@@ -124,7 +124,7 @@ public class ComptesDiagramFactory {
 	private static Map<Object, Number> getSuivi(Compte compte,
 			BiFunction<Compte, Month, BigDecimal> montantProvider) {
 		Month debut = DAOFactory.getFactory().getDebut();
-		Month today = new Month();
+		Month today = Month.getInstance();
 		
 		Map<Object, Number> suivi = new HashMap<>();
 		for (Month month = debut; !month.after(today); month = month.getNext())

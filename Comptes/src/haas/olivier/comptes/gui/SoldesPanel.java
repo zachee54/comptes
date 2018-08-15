@@ -260,7 +260,7 @@ class SoldesBancairesPanel extends SoldesPanel {
 
 	@Override
 	protected void setSoldesToDate(Date date) throws IOException {
-		Month month = new Month(date);
+		Month month = Month.getInstance(date);
 		theo.setText(NF.format(compte.getHistoriqueIn(month).getSoldeAt(date)));
 		aVue.setText(NF.format(compte.getSoldeAVueIn(month).getSoldeAt(date)));
 	}
@@ -370,7 +370,7 @@ class SoldesBudgetPanel extends SoldesPanel {
 
 	@Override
 	protected void setSoldesToDate(Date date) throws IOException {
-		Month month = new Month(date);
+		Month month = Month.getInstance(date);
 		theo.setText(NF.format(compte.getHistoriqueIn(month).getSoldeAt(date)));
 		moy.setText(NF.format(compte.getMoyenne(month)));
 	}

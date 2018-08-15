@@ -595,7 +595,7 @@ ActionListener, PropertiesController {
 
 			// Un tableau de mois, jusqu'à M+1
 			Month[] months = new Month[12];			// 12 mois (par convention)
-			Month month = new Month().getNext();	// M+1
+			Month month = Month.getInstance().getNext();// M+1
 			for (int i=0; i<months.length; i++) {
 				months[i] = month.getTranslated(-i);	// ième mois avant
 			}

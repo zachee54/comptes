@@ -43,7 +43,7 @@ class TimeSelector extends JSlider implements ChangeListener {
 		
 		// Créer la liste des mois possibles
 		Month startMonth = DAOFactory.getFactory().getDebut();
-		Month actual = new Month();
+		Month actual = Month.getInstance();
 		for (Month month = startMonth;
 				!month.after(actual);
 				month = month.getNext()) {

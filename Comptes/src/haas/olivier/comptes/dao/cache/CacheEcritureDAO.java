@@ -47,7 +47,7 @@ class CacheEcritureDAO implements EcritureDAO {
 			boolean pointages) {
 		
 		// Vérifier qu'une sous-collection existe pour le mois voulu
-		Month month = new Month(date);			// Le mois (ou mois en cours)
+		Month month = Month.getInstance(date);	// Le mois (ou mois en cours)
 		if (!map.containsKey(month)) {
 			map.put(month, pointages			// Collection par pointages...
 					? new TreeSet<Ecriture>(new Ecriture.SortPointages())
@@ -192,10 +192,10 @@ class CacheEcritureDAO implements EcritureDAO {
 		Ecriture e = nums.remove(id);
 		
 		// Supprimer de la collection triée par ordre naturel
-		ecritures.get(new Month(e.date)).remove(e);
+		ecritures.get(Month.getInstance(e.date)).remove(e);
 		
 		// Supprimer de la collection triée par ordre de pointage
-		pointages.get(new Month(e.pointage)).remove(e);
+		pointages.get(Month.getInstance(e.pointage)).remove(e);
 		
 		// Marquer qu'une sauvegarde est attendue
 		mustBeSaved = true;

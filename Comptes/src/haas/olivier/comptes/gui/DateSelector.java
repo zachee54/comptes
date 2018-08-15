@@ -125,7 +125,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 
 		// Définir les dates de début et de fin
 		int anneeDebut = debut.getYear();
-		int anneeFin = new Month().getYear() + 1;
+		int anneeFin = Month.getInstance().getYear() + 1;
 		int anneeInitial = initial.getYear();
 
 		// Définir un slider pour les années, du début à la fin
@@ -158,7 +158,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 				initial.getNumInYear());						// Mois en cours
 
 		// Partir d'un mois de décembre
-		Month unMois = new Month(2000, 12);
+		Month unMois = Month.getInstance(2000, 12);
 
 		// Définir un dictionnaire pour les étiquettes du slider mois
 		Dictionary<Integer, JLabel> tableMois = new Hashtable<>();
@@ -254,7 +254,7 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		Date actualDate = MonthObservable.getDate();
 
 		// Nouvelles valeurs
-		Month newMonth = new Month(cal.getTime());		// Nouveau mois
+		Month newMonth = Month.getInstance(cal.getTime());// Nouveau mois
 		Date newDate; // Nouvelle date
 		if (cal.get(Calendar.DAY_OF_MONTH) == cal
 				.getActualMaximum(Calendar.DAY_OF_MONTH)// dernier jour

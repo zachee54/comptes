@@ -66,8 +66,8 @@ public class EcrituresTableModelTest {
 		e4 = new Ecriture(4, df.parse("31/05/11"), null, compte2, compte, a,
 				null, null, null);
 
-		mai11 = new Month(df.parse("01/05/11"));
-		juin10 = new Month(df.parse("01/06/10"));
+		mai11 = Month.getInstance(df.parse("01/05/11"));
+		juin10 = Month.getInstance(df.parse("01/06/10"));
 
 		// Simuler en permanence la sélection du compte
 		when(compteObservable.getCompte()).thenReturn(compte);
