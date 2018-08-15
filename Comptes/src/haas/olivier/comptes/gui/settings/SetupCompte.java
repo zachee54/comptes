@@ -98,18 +98,17 @@ public class SetupCompte {
 		 */
 		private DataMediator() {
 			
-			// La codification EventHandler pour obtenir le document source
-			String eventDocument = "document";
+			// La codification EventHandler pour obtenir le texte de la source
+			String eventText = "source.text";
 			
 			nom.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setNom", eventDocument));
+					DocumentListener.class, this, "setNom", eventText));
 			numero.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setNumero", eventDocument));
+					DocumentListener.class, this, "setNumero", eventText));
 			ouverture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setOuverture",
-					eventDocument));
+					DocumentListener.class, this, "setOuverture", eventText));
 			cloture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setCloture", eventDocument));
+					DocumentListener.class, this, "setCloture", eventText));
 			typeComboBox.addItemListener(EventHandler.create(ItemListener.class,
 					this, "setTypeCompte", "source.selectedItem"));
 			colorButton.addActionListener(EventHandler.create(
