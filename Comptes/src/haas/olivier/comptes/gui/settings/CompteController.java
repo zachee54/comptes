@@ -133,7 +133,7 @@ class CompteController implements Comparable<CompteController> {
 	 * @param numeroText	Le numéro, au format texte.
 	 */
 	public void setNumero(String numeroText) {
-		this.numero = Long.parseLong(numeroText);
+		this.numero = numeroText.isEmpty() ? 0L : Long.parseLong(numeroText);
 		modified = true;
 	}
 	
