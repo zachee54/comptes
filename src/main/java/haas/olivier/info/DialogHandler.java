@@ -128,16 +128,14 @@ public class DialogHandler extends Handler {
 	 * 			sa cause.
 	 */
 	private Component createExceptionDescriptionArea(Throwable e) {
-		JTextArea area = new JTextArea(3, 40);
 		String description = String.format(
-				"%s: %s (%s)",
+				"%s: %s",
 				e.getClass().getSimpleName(),		// Nom de l'exception
 				(e.getMessage() == null)			// Message, s'il y en a un
 						? e.getStackTrace()[0]		// Sinon n° de ligne
-						: e.getMessage(),
-				(e.getCause() == null)				// Cause, s'il y en a une
-						? ""
-						: e.getCause().getMessage());
+						: e.getMessage());
+		
+		JTextArea area = new JTextArea(3, 40);
 		area.setText(description);
 		area.setEditable(false);
 		area.setLineWrap(true);
