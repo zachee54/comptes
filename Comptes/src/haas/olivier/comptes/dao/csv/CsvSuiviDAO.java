@@ -180,7 +180,25 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 		// Renvoyer le solde trouvé, avec son mois et le compte correspondants
 		return new Solde(
 				mois,
-				comptesById.get(Integer.parseInt(headers[col])),
+				getCompte(Integer.parseInt(headers[col])),
 				CsvDAO.parseAmount(text));
+	}
+	
+	/**
+	 * Récupère un compte à partir de son identifiant.
+	 * 
+	 * @param id	L'identifiant du compte souhaité.
+	 * @return		Le compte correspondant à l'identifiant <code>id</code> dans
+	 * 				{@link #comptesById}, à défaut le
+	 * 				{@link haas.olivier.comptes.Compte#COMPTE_EPARGNE compte virtuel d'épargne}
+	 * 				si son identifiant correspond, à défaut <code>null</code>.
+	 */
+	private Compte getCompte(int id) {
+		Compte compte = comptesById.get(id);
+		if (compte != null)
+			return compte;
+		if (id == Compte.COMPTE_EPARGNE.getId())
+			return Compte.COMPTE_EPARGNE;
+		return null;
 	}
 }
