@@ -3,7 +3,6 @@ package haas.olivier.comptes.dao.cache;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,7 @@ public class CacheSuiviDAO implements SuiviDAO {
 	/**
 	 * Les suivis des comptes.
 	 */
-	// FIXME Réécrire Compte.equals() en tenant compte des id et ne pas utiliser IdentityHashMap ici
-	private final Map<Month, IdentityHashMap<Compte, BigDecimal>> suivis =
-			new HashMap<>();
+	private final Map<Month, Map<Compte, BigDecimal>> suivis = new HashMap<>();
 
 	/**
 	 * Construit un objet d'accès aux données qui garde en cache tous les suivis
@@ -48,7 +45,7 @@ public class CacheSuiviDAO implements SuiviDAO {
 	@Override
 	public void set(Compte compte, Month month, BigDecimal montant) {
 		if (!suivis.containsKey(month))
-			suivis.put(month, new IdentityHashMap<>());
+			suivis.put(month, new HashMap<>());
 		suivis.get(month).put(compte, montant);
 	}
 	
@@ -79,8 +76,7 @@ public class CacheSuiviDAO implements SuiviDAO {
 		if (!suivis.containsKey(month))
 			return null;
 		
-		IdentityHashMap<Compte, BigDecimal> montantsByCompte =
-				suivis.get(month);
+		Map<Compte, BigDecimal> montantsByCompte = suivis.get(month);
 		if (!montantsByCompte.containsKey(compte))
 			return null;
 		
