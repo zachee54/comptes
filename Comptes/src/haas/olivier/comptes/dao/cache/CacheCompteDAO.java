@@ -46,8 +46,7 @@ class CacheCompteDAO implements CompteDAO {
 
 	@Override
 	public Collection<Compte> getAll() throws IOException {
-		List<Compte> list = new ArrayList<>(instances.size());
-		list.addAll(instances);
+		List<Compte> list = new ArrayList<>(instances);
 		Collections.sort(list);
 		return list;
 	}
