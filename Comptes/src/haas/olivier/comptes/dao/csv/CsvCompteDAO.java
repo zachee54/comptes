@@ -71,6 +71,27 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 	}
 
 	/**
+	 * Lit les comptes à partir d'un flux CSV et les renvoie classés par
+	 * identifiant.
+	 * 
+	 * @param reader	Le flux CSV contenant les informations des comptes.
+	 * @return			Les comptes, classés par identifiant.
+	 * 
+	 * @throws IOException
+	 */
+	static Map<Integer, Compte> loadComptes(CsvReader reader)
+			throws IOException {
+		Map<Integer, Compte> comptesById = new HashMap<>();
+		CsvCompteDAO compteDAO = new CsvCompteDAO(reader);
+		
+		compteDAO.forEachRemaining(
+				compte -> comptesById.put(compte.getId(), compte));
+		
+		compteDAO.close();
+		return comptesById;
+	}
+
+	/**
 	 * Sauvegarde les comptes.
 	 * 
 	 * @param comptes	Les comptes à sauvegarder
@@ -145,32 +166,6 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 		writer.endRecord();
 	}
 
-	/**
-	 * Le format de date.
-	 */
-	private final DateFormat dateFormat = CsvDAO.createDateFormat();
-	
-	/**
-	 * Lit les comptes à partir d'un flux CSV et les renvoie classés par
-	 * identifiant.
-	 * 
-	 * @param reader	Le flux CSV contenant les informations des comptes.
-	 * @return			Les comptes, classés par identifiant.
-	 * 
-	 * @throws IOException
-	 */
-	static Map<Integer, Compte> loadComptes(CsvReader reader)
-			throws IOException {
-		Map<Integer, Compte> comptesById = new HashMap<>();
-		CsvCompteDAO compteDAO = new CsvCompteDAO(reader);
-		
-		compteDAO.forEachRemaining(
-				compte -> comptesById.put(compte.getId(), compte));
-		
-		compteDAO.close();
-		return comptesById;
-	}
-
 	@Override
 	protected Compte readNext(CsvReader reader)
 			throws IOException, ParseException {
@@ -178,25 +173,19 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 
 		// Déterminer le type de compte
 		TypeCompte type = null;
-		try {
-			// TODO Compatibilité descendante à supprimer
-			int typeLu = Integer.parseInt(reader.get(HEADER_TYPE));
-			for (TypeCompte t : TypeCompte.values()) {
-				if (t.id == typeLu) {
-					type = t;
-					break;
-				}
+		int typeLu = Integer.parseInt(reader.get(HEADER_TYPE));
+		for (TypeCompte t : TypeCompte.values()) {
+			if (t.id == typeLu) {
+				type = t;
+				break;
 			}
-			if (type == null) {
-				throw new IOException(
-						"Type illisible : " + typeLu + " (compte "
-								+ reader.get(HEADER_NOM) + " n°" + id + ")");
-			}
-			
-		} catch (Exception e) {
-			
-			// Nouvelle implémentation à conserver
-			TypeCompte.valueOf(reader.get(HEADER_TYPE));
+		}
+		if (type == null) {
+			throw new IOException(String.format(
+					"Type illisible : %s (compte %s n°%s)",
+					typeLu,
+					reader.get(HEADER_NOM),
+					id));
 		}
 
 		// Instancier le compte
@@ -219,6 +208,8 @@ class CsvCompteDAO extends AbstractCsvLayer<Compte> {
 					(int) (color >> 24) & 0xFF));
 		}
 
+		DateFormat dateFormat = CsvDAO.createDateFormat();
+		
 		// Ajouter la date d'ouverture s'il y en a une
 		String textOuv = reader.get(HEADER_OUV);		// Texte de date
 		if (textOuv != "")								// Si non vide
