@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
-import java.util.NoSuchElementException;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -16,7 +15,6 @@ import haas.olivier.comptes.InconsistentArgumentsException;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.IdGenerator;
 import haas.olivier.util.Month;
-import haas.olivier.util.ReadOnlyIterator;
 
 /**
  * Un objet d'accès aux données qui garde en cache toutes les écritures.
@@ -261,121 +259,4 @@ class CacheEcritureDAO implements EcritureDAO {
 		mustBeSaved = false;
 	}
 
-}// class CacheEcritureDAO
-
-/**
- * Un <i>wrapper</i> pour utiliser des <code>EcrituresIterator</code> sous
- * l'interface d'un <code>Iterable</code>.
- *
- * @author Olivier HAAS
- */
-class EcrituresIterable implements Iterable<Ecriture> {
-
-	/**
-	 * La collection à faire parcourir par l'itérateur des écritures. Il s'agit
-	 * d'une collection à deux niveaux (une collection de collections).
-	 */
-	private final Iterable<NavigableSet<Ecriture>> coll;
-	
-	/**
-	 * Drapeau indiquant si les écritures doivent être parcourues dans l'ordre
-	 * naturel (<code>true</code>) ou dans l'ordre inverse (<code>false</code>).
-	 */
-	private final boolean ordre;
-	
-	/**
-	 * Renvoie un objet contenant des écritures et pouvant être parcouru avec
-	 * l'interface <code>Iterable</code>.
-	 * <p>
-	 * Les valeurs, tant au premier qu'au deuxième niveau, seront parcourues
-	 * dans l'ordre inverse.
-	 * 
-	 * @param map	Une <code>Map</code> dont les valeurs sont des collections
-	 * 				d'écritures.
-	 * 
-	 * @param ordre	<code>true</code> si les écritures et les valeurs de 1er
-	 * 				niveau (généralement des mois) doivent être triées dans leur
-	 * 				ordre naturel.
-	 */
-	public EcrituresIterable(NavigableMap<?, NavigableSet<Ecriture>> map,
-			boolean ordre) {
-		
-		// Trier les mois dans l'ordre chronologique, ou l'ordre inverse
-		coll = (ordre ? map : map.descendingMap()).values();
-		this.ordre = ordre;
-	}
-
-	@Override
-	public Iterator<Ecriture> iterator() {
-		return new EcrituresIterator(coll.iterator(), ordre);
-	}
-	
-}// EcrituresIterable
-
-/**
- * Un itérateur qui parcourt les écritures dans une collection à deux niveaux.
- * <p>
- * Cette classe est particulièrement utile pour parcourir les écritures, sachant
- * que <code>CacheEcritureDAO</code> stocke les écritures dans des collections à
- * deux niveaux.
- * 
- * @author Olivier HAAS
- */
-class EcrituresIterator extends ReadOnlyIterator<Ecriture> {
-	
-	/**
-	 * L'itérateur principal qui parcourt le premier niveau de la collection.
-	 */
-	private final Iterator<NavigableSet<Ecriture>> it1;
-	
-	/**
-	 * L'itérateur de second niveau actuel.
-	 */
-	private Iterator<Ecriture> it2;
-	
-	/**
-	 * Drapeau indiquant si les écritures doivent être parcourues dans l'ordre
-	 * naturel (<code>true</code>) ou dans l'ordre inverse (<code>false</code>).
-	 */
-	private final boolean ordre;
-	
-	/**
-	 * Construit un itérateur d'écritures à partir d'une collection à deux
-	 * niveaux.
-	 * <p>
-	 * Les collections de deuxième niveau seront chacune parcourue en ordre
-	 * inverse. Ainsi, 
-	 * 
-	 * @param it	Un <code>Iterator</code> dont les valeurs sont des
-	 * 				collections d'écritures.
-	 * 
-	 * @param ordre	<code>true</code> si les écritures doivent être parcourues
-	 * 				dans leur ordre naturel.
-	 */
-	public EcrituresIterator(Iterator<NavigableSet<Ecriture>> it,
-			boolean ordre) {
-		it1 = it;
-		this.ordre = ordre;
-	}
-
-	@Override
-	public boolean hasNext() {
-		while (it2 == null || !it2.hasNext()) {	// Pas d'écriture suivante ?
-			if (it1.hasNext()) {				// Essayer le lot suivant
-				it2 = ordre
-						? it1.next().iterator()				// Ordre naturel
-						: it1.next().descendingIterator();	// Ordre inverse
-			} else {
-				return false;					// Pas de lot suivant = fini
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public Ecriture next() {
-		if (!hasNext())					// Repositionner le curseur si besoin
-			throw new NoSuchElementException();
-		return it2.next();				// Écriture suivante
-	}
-}// class EcrituresIterator
+}
