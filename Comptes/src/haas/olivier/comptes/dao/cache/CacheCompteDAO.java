@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,9 +31,7 @@ class CacheCompteDAO implements CompteDAO {
 	/**
 	 * Les instances existantes, et leurs identifiants.
 	 */
-	// FIXME Utiliser les id dans equals() et ne pas utiliser HashSet au lieu de IdentityHashMap ici
-	private final IdentityHashMap<Compte, Void> instances =
-			new IdentityHashMap<>();
+	private final HashSet<Compte> instances = new HashSet<>();
 	
 	/**
 	 * Construit un objet d'accès aux comptes.
@@ -49,7 +47,7 @@ class CacheCompteDAO implements CompteDAO {
 	@Override
 	public Collection<Compte> getAll() throws IOException {
 		List<Compte> list = new ArrayList<>(instances.size());
-		list.addAll(instances.keySet());
+		list.addAll(instances);
 		Collections.sort(list);
 		return list;
 	}
@@ -67,8 +65,8 @@ class CacheCompteDAO implements CompteDAO {
 	 * @return	Le premier identifiant inutilisé.
 	 */
 	private int findFirstUnusedId() {
-		Set<Integer> ids = instances.keySet().stream()
-				.map(compte -> compte.getId())
+		Set<Integer> ids = instances.stream()
+				.map(Compte::getId)
 				.collect(Collectors.toSet());
 		return IntStream.range(0, Integer.MAX_VALUE)
 				.filter(i -> !ids.contains(i))
@@ -77,7 +75,7 @@ class CacheCompteDAO implements CompteDAO {
 
 	@Override
 	public void add(Compte compte) {
-		instances.put(compte, null);
+		instances.add(compte);
 		mustBeSaved = true;
 	}
 	
