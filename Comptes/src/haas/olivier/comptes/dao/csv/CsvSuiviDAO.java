@@ -43,7 +43,6 @@ class CsvSuiviDAO extends AbstractCsvLayer<Solde> {
 		// Écrire les en-têtes
 		String[] ids = comptes.stream()
 				.map(compte -> Integer.toString(compte.getId()))
-				.sorted()
 				.toArray(String[]::new);
 		writeHeaders(ids, writer);
 		
