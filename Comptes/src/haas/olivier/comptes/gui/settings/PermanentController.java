@@ -2,6 +2,7 @@ package haas.olivier.comptes.gui.settings;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -43,54 +44,54 @@ class PermanentController implements Comparable<PermanentController> {
 	/**
 	 * Le type de l'opération permanente.
 	 */
-	private String type = null;
+	private String type;
 	
 	/**
 	 * Le nom de l'opération permanente.
 	 */
-	private String nom = null;
+	private String nom;
 	
 	/**
 	 * Le compte débité par l'opération permanente.
 	 */
-	private Compte debit = null;
+	private Compte debit;
 	
 	/**
 	 * Le compte crédité par l'opération permanente.
 	 */
-	private Compte credit = null;
+	private Compte credit;
 	
 	/**
 	 * Le libellé de l'opération permanente.
 	 */
-	private String libelle = null;
+	private String libelle;
 	
 	/**
 	 * Le nom du tiers de l'opération permanente.
 	 */
-	private String tiers = null;
+	private String tiers;
 	
 	/**
 	 * Drapeau indiquant si l'opération permanente doit être pointée
 	 * automatiquement.
 	 */
-	private boolean pointer = false;
+	private boolean pointer;
 	
 	/**
 	 * Jours de l'opération permanente.
 	 */
-	private Map<Month,Integer> jours = null;
+	private Map<Month,Integer> jours;
 	
 	/**
 	 * Montants de l'opération permanente (pour les opérations à montant fixe).
 	 */
-	private Map<Month,BigDecimal> montants = null;
+	private Map<Month,BigDecimal> montants;
 	
 	/**
 	 * L'opération permanente dont dépend celle-ci (pour les opérations
 	 * dépendantes).
 	 */
-	private Permanent dependance = null;
+	private Permanent dependance;
 	
 	/**
 	 * Taux de l'opération permanente (pour les opérations dépendantes).
@@ -107,9 +108,27 @@ class PermanentController implements Comparable<PermanentController> {
 	 */
 	public PermanentController(Permanent permanent) {
 		this.permanent = permanent;
+		reset();
+	}
+	
+	/**
+	 * Initialise ou réinitialise le contrôleur à partir des données de
+	 * l'opération permanente.
+	 */
+	void reset() {
 		if (permanent == null) {
+			nom = null;
+			debit = null;
+			credit = null;
+			libelle = null;
+			tiers = null;
+			pointer = false;
+			jours = Collections.emptyMap();
+			montants = Collections.emptyMap();
 			type = SetupPermanent.FIXE;				// Type FIXE par défaut
+			dependance = null;
 			taux = new BigDecimal("2");				// Taux par défaut
+			
 		} else {
 			nom = permanent.nom;
 			debit = permanent.debit;
