@@ -809,7 +809,7 @@ public class SetupPermanent {
 		JButton supprimer	= new JButton("Supprimer");		// Bouton Supprimer
 		JButton quitter		= new JButton("Quitter");		// Bouton Quitter
 		valider.addActionListener(EventHandler.create(
-				ActionListener.class, this, "applyAndQuit"));
+				ActionListener.class, this, "applyAllAndQuit"));
 		appliquer.addActionListener(EventHandler.create(
 				ActionListener.class, this, "applyAllAndGetSelection"));
 		supprimer.addActionListener(EventHandler.create(
@@ -927,8 +927,11 @@ public class SetupPermanent {
 	
 	/**
 	 * Applique toutes les modifications.
+	 * <p>
+	 * Cette méthode est appelée dynamiquement par un <code>EventHandler</code>.
+	 * Elle doit être publique.
 	 */
-	private Permanent applyAllAndGetSelection() {
+	public Permanent applyAllAndGetSelection() {
 		PermanentController selected = dataMediator.getController();
 		Permanent selection = selected.getPermanent();	// Sélection actuelle
 		for (PermanentController pc : controllers) {
