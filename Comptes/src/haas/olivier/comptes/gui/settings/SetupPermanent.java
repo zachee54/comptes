@@ -141,8 +141,13 @@ public class SetupPermanent {
 				return;
 			
 			this.controller = controller;
-			
-			// Transcrire les données du nouveau contrôleur
+			updateFromController();
+		}
+		
+		/**
+		 * Met à jour l'interface graphique à partir des données du contrôleur.
+		 */
+		void updateFromController() {
 			updating = true;
 			typeController.changeVue(controller.getType());
 			nom.setText(controller.getNom());
@@ -804,10 +809,13 @@ public class SetupPermanent {
 				new BoxLayout(validationPanel, BoxLayout.LINE_AXIS));
 		
 		// Boutons de validation
-		JButton valider		= new JButton("Valider");		// Bouton Valider
-		JButton appliquer	= new JButton("Appliquer");		// Bouton Appliquer
-		JButton supprimer	= new JButton("Supprimer");		// Bouton Supprimer
-		JButton quitter		= new JButton("Quitter");		// Bouton Quitter
+		JButton reset		= new JButton("Réinitialiser");
+		JButton valider		= new JButton("Valider");
+		JButton appliquer	= new JButton("Appliquer");
+		JButton supprimer	= new JButton("Supprimer");
+		JButton quitter		= new JButton("Quitter");
+		reset.addActionListener(EventHandler.create(
+				ActionListener.class, this, "resetCurrent"));
 		valider.addActionListener(EventHandler.create(
 				ActionListener.class, this, "applyAllAndQuit"));
 		appliquer.addActionListener(EventHandler.create(
@@ -818,6 +826,7 @@ public class SetupPermanent {
 				ActionListener.class, this, "confirmAndQuit"));
 		validationPanel.add(supprimer);
 		validationPanel.add(Box.createHorizontalGlue());	// Pousser à droite
+		validationPanel.add(reset);
 		validationPanel.add(appliquer);
 		validationPanel.add(valider);
 		validationPanel.add(quitter);
@@ -904,6 +913,14 @@ public class SetupPermanent {
 			listModel.addElement(pc);
 		listPermanents.setModel(listModel);
 		listPermanents.setSelectedValue(selected, true);
+	}
+	
+	/**
+	 * Réinitialise le contrôleur actuel.
+	 */
+	public void resetCurrent() {
+		dataMediator.getController().reset();
+		dataMediator.updateFromController();
 	}
 	
 	/**
