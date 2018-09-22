@@ -108,7 +108,7 @@ public class SetupPermanent {
 			tiers.getDocument().addDocumentListener(EventHandler.create(
 					DocumentListener.class, this, "tiersChanged"));
 			pointer.addItemListener(EventHandler.create(
-					ItemListener.class, this, "setPointer", "itemChange"));
+					ItemListener.class, this, "setPointer", "stateChange"));
 			jours.addTableModelListener(EventHandler.create(
 					TableModelListener.class, this, "joursChanged"));
 			montants.addTableModelListener(EventHandler.create(
@@ -273,9 +273,10 @@ public class SetupPermanent {
 		 * 				{@link java.awt.event.ItemEvent#DESELECTED}.
 		 */
 		public void setPointer(int state) {
-			if (updating) {
+			if (updating)
 				return;
-			} else if (state == ItemEvent.SELECTED) {
+			
+			if (state == ItemEvent.SELECTED) {
 				controller.setPointer(true);
 			} else if (state == ItemEvent.DESELECTED) {
 				controller.setPointer(false);
