@@ -885,6 +885,10 @@ public class SetupPermanent {
 		
 		// Remplir la liste avec ces contrôleurs
 		fillPermanentListFromControllers(selected);
+		
+		// Les changements intervenus jusqu'ici sont des effets de bord
+		for (PermanentController controller : controllers)
+			controller.assumeUnmodified();
 	}
 	
 	/**

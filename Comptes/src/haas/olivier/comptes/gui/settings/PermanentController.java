@@ -373,6 +373,13 @@ class PermanentController implements Comparable<PermanentController> {
 	}
 	
 	/**
+	 * Force le contrôleur à se considérer comme non modifié.
+	 */
+	void assumeUnmodified() {
+		modified = false;
+	}
+	
+	/**
 	 * Applique les modifications au Permanent et envoie la nouvelle version au
 	 * DAO.<br>
 	 * Le contrat est que cette instance ne doit plus être utilisée après
