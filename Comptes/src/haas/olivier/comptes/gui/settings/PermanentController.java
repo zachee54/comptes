@@ -399,6 +399,36 @@ class PermanentController implements Comparable<PermanentController> {
 	}
 	
 	/**
+	 * Vérifie que les valeurs sont cohérentes pour l'instanciation d'un nouveau
+	 * <code>Permanent</code>.
+	 * 
+	 * @return	Un message indiquant l'erreur, ou <code>null</code> si toutes
+	 * 			les données sont cohérentes.
+	 */
+	String checkErrorMessage() {
+		if (nom.isEmpty()) {
+			return "L'opération n'a pas de nom.";
+		}
+		if (debit == null) {
+			return "L'opération n'a pas de compte au débit.";
+		}
+		if (credit == null) {
+			return "L'opération n'a pas de compte au crédit.";
+		}
+		if (jours.isEmpty()) {
+			return "L'opération n'a pas de planning.";
+		}
+		if (SetupPermanent.FIXE.equals(type) && montants.isEmpty()) {
+			return "L'opération n'a pas de montant.";
+		}
+		if (SetupPermanent.PROPORTIONNEL.equals(type) && dependance == null) {
+			return "Cette opération doit dépendre d'une autre.";
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Applique les modifications au Permanent et envoie la nouvelle version au
 	 * DAO.<br>
 	 * Le contrat est que cette instance ne doit plus être utilisée après
