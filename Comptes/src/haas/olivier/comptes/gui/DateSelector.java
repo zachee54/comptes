@@ -211,8 +211,12 @@ implements ChangeListener, MonthObserver, MouseWheelListener {
 		if (ignoreEvent)
 			return;
 
-		// Un calendrier
+		// Un calendrier, sans les heures
 		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
 
 		// Mettre au 1er du mois pour éviter les erreurs ensuite
 		cal.set(Calendar.DAY_OF_MONTH, 1);
