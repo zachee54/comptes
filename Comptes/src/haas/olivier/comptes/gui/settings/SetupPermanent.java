@@ -952,10 +952,16 @@ public class SetupPermanent {
 	 * <p>
 	 * Cette méthode est appelée dynamiquement par un <code>EventHandler</code>.
 	 * Elle doit être publique.
+	 * 
+	 * @return	Le <code>Permanent</code> à sélectionner après la mise à jour.
 	 */
 	public Permanent applyAllAndGetSelection() {
 		PermanentController selected = dataMediator.getController();
-		Permanent selection = selected.getPermanent();	// Sélection actuelle
+		Permanent selection = selected.getPermanent();
+		
+		if (!checkValuesConsistency())
+			return selection;
+		
 		for (PermanentController pc : controllers) {
 
 			// Appliquer les modifications
@@ -967,6 +973,36 @@ public class SetupPermanent {
 			}
 		}
 		return selection;
+	}
+	
+	/**
+	 * Vérifie que toutes les valeurs sont cohérents pour permettre d'appliquer
+	 * les changements.
+	 * 
+	 * @return	<code>true</code> si les changements peuvent être appliqués sans
+	 * 			danger.
+	 */
+	private boolean checkValuesConsistency() {
+		for (PermanentController controller : controllers) {
+			String errorMessage = controller.checkErrorMessage();
+			
+			if (!errorMessage.isEmpty()) {
+				int discardChanges = JOptionPane.showConfirmDialog(
+						dialog,
+						String.format(
+								"L'opération %s ne peut pas être enregistrée :%n%s%nVoulez-vous abandonner ses modifications ?",
+								controller, errorMessage),
+						"Opération incomplète",
+						JOptionPane.YES_NO_OPTION);
+				
+				if (discardChanges == JOptionPane.YES_OPTION) {
+					controller.reset();
+				} else {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 	
 	/**
