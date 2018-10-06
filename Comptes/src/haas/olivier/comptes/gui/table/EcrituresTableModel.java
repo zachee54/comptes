@@ -362,8 +362,8 @@ class EcritureRowModel {
 			draft.credit = visu;
 		
 		// Arrivé ici, les comptes sont bien définis dans draft
-		inverse = (visu == draft.debit);				// Sens de lecture
-		visuBudget = visu.getType().isBudgetaire();		// Compte budgétaire ?
+		inverse = (visu == draft.debit);
+		visuBudget = (visu != null) && visu.getType().isBudgetaire();
 	}
 	
 	/**
