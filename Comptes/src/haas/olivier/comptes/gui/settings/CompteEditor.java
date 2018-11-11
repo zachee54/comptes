@@ -287,7 +287,8 @@ class CompteEditor {
 	/**
 	 * Renvoie le numéro saisi pour le compte.
 	 * 
-	 * @return	Le numéro saisi pour le compte.
+	 * @return	Le numéro saisi pour le compte, ou <code>null</code> si le
+	 * 			numéro saisi est invalide.
 	 */
 	Long getNumero() {
 		try {
