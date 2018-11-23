@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -184,21 +183,6 @@ public class SetupCompte {
 		list.addListSelectionListener(EventHandler.create(
 				ListSelectionListener.class, this, "setCompte",
 				"source.selectedValue"));
-		
-		// TODO Remplacer par un pattern Null ?
-		list.setCellRenderer(new DefaultListCellRenderer() {
-			private static final long serialVersionUID = 7135223926816896152L;
-
-			@Override
-			public Component getListCellRendererComponent(
-					JList<?> list, Object value, int index,
-					boolean isSelected, boolean cellHasFocus) {
-				return super.getListCellRendererComponent(
-						list, (value == null ? "Nouveau..." : value),
-						index, isSelected, cellHasFocus);
-			}
-			
-		});
 		return list;
 	}
 
@@ -209,7 +193,6 @@ public class SetupCompte {
 		
 		// Tout insérer dans le modèle
 		DefaultListModel<Compte> listModel = new DefaultListModel<>();
-		listModel.addElement(null);
 		for (Compte compte : getSortedComptes())
 			listModel.addElement(compte);
 		listComptes.setModel(listModel);
@@ -224,10 +207,17 @@ public class SetupCompte {
 	 * @return	Un nouveau panneau défilable contenant la liste des comptes.
 	 */
 	private Component createListComptesPanel() {
+		JButton nouveauButton = new JButton("Nouveau");
+		nouveauButton.addActionListener(e -> listComptes.clearSelection());
+		
 		JScrollPane scrollList = new JScrollPane(listComptes);
 		scrollList.setPreferredSize(					// Largeur préférée
 				new Dimension(150, scrollList.getPreferredSize().height));
-		return scrollList;
+		
+		Box listBox = Box.createVerticalBox();
+		listBox.add(nouveauButton);
+		listBox.add(scrollList);
+		return listBox;
 	}
 	
 	/**
@@ -308,7 +298,7 @@ public class SetupCompte {
 		if (compte == controller.getCompte())
 			return;
 		
-		if (controller.isModified()) {;
+		if (controller.isModified()) {
 			switch (askSaveActualCompte()) {
 			
 			case JOptionPane.CANCEL_OPTION:
