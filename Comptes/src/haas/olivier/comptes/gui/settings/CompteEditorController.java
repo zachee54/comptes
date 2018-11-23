@@ -41,6 +41,16 @@ class CompteEditorController {
 	}
 	
 	/**
+	 * Renvoie le compte actuellement affiché dans l'éditeur.
+	 * 
+	 * @return	Le compte actuellement affiché dans l'éditeur, ou
+	 * 			<code>null</code> si aucun compte n'a été défini.
+	 */
+	Compte getCompte() {
+		return compte;
+	}
+	
+	/**
 	 * Définit un nouveau compte à éditer.
 	 * 
 	 * @param compte	Le nouveau compte à éditer, ou <code>null</code> si on
@@ -93,7 +103,7 @@ class CompteEditorController {
 		
 		// Si la date d'ouverture est saisie ET valide, c'est une modif
 		try {
-			return editor.getOuverture() == null;
+			return editor.getOuverture() != null;
 		} catch (ParseException e) {
 			return false;			// Date d'ouverture seule et invalide
 		}
@@ -182,7 +192,7 @@ class CompteEditorController {
 	 * Assure l'existence et le type du compte.
 	 * <p>
 	 * Si le compte n'existe pas, il est créé dans le modèle avec le type
-	 * spécifié.<br>
+	 * spécifié et est affecté à {@link #compte}.<br>
 	 * Si le compte existe, son type est modifié pour correspondre au type
 	 * spécifié.
 	 * 
