@@ -55,7 +55,7 @@ public class SetupCompte {
 	 * Action pour quitter.
 	 */
 	private final ActionListener quitActionListener =
-			EventHandler.create(ActionListener.class, this, "quit");
+			EventHandler.create(ActionListener.class, this, "askAndQuit");
 	
 	/**
 	 * Le GUI principal.
@@ -190,6 +190,7 @@ public class SetupCompte {
 	 * Re-remplit la liste graphique des comptes.
 	 */
 	private void fillComptesList() {
+		Compte selection = controller.getCompte();
 		
 		// Tout insérer dans le modèle
 		DefaultListModel<Compte> listModel = new DefaultListModel<>();
@@ -198,7 +199,7 @@ public class SetupCompte {
 		listComptes.setModel(listModel);
 		
 		// Sélectionner le bon item
-		listComptes.setSelectedValue(controller.getCompte(), true);
+		listComptes.setSelectedValue(selection, true);
 	}
 
 	/**
@@ -208,7 +209,8 @@ public class SetupCompte {
 	 */
 	private Component createListComptesPanel() {
 		JButton nouveauButton = new JButton("Nouveau");
-		nouveauButton.addActionListener(e -> listComptes.clearSelection());
+		nouveauButton.addActionListener(EventHandler.create(
+				ActionListener.class, listComptes, "clearSelection"));
 		
 		JScrollPane scrollList = new JScrollPane(listComptes);
 		scrollList.setPreferredSize(					// Largeur préférée
@@ -229,9 +231,9 @@ public class SetupCompte {
 	 * @return	Un nouveau panneau graphique.
 	 */
 	private Component createEditionPanel(CompteEditor editor) {
-		JButton validateButton = new JButton("Valider");
+		JButton validateButton = new JButton("Appliquer");
 		validateButton.addActionListener(EventHandler.create(
-				ActionListener.class, this, "validate"));
+				ActionListener.class, this, "apply"));
 		
 		JButton deleteButton = new JButton("Supprimer");
 		deleteButton.addActionListener(EventHandler.create(
@@ -257,7 +259,7 @@ public class SetupCompte {
 		JButton appliquer = new JButton("OK");
 		JButton quitter = new JButton("Quitter");
 		appliquer.addActionListener(
-				EventHandler.create(ActionListener.class, this, "apply"));
+				EventHandler.create(ActionListener.class, this, "applyAndQuit"));
 		quitter.addActionListener(quitActionListener);
 
 		// Barre contenant les boutons
@@ -319,58 +321,6 @@ public class SetupCompte {
 	}
 	
 	/**
-	 * Ferme la boîte de dialogue.<br>
-	 * S'il y a des changements non enregistrés, l'utilisateur est invité à
-	 * confirmer l'action.
-	 */
-	public void quit() {
-		
-		// Vérifier s'il y a des modifications non enregistrées
-		if (controller.isModified()) {
-			switch (askSaveActualCompte()) {
-			case JOptionPane.YES_OPTION:
-				apply();
-				break;
-				
-			case JOptionPane.CANCEL_OPTION:
-				return;	// Annuler = ne pas quitter
-				
-			default:	// Abandonner les modifications = faire comme si de rien
-			}
-		}
-		
-		dialog.dispose();							// Fermer le dialogue
-		gui.createTabs();							// Recréer les onglets
-		gui.dataModified();							// Prévenir du changement
-	
-		// Mettre à jour la liste des comptes dans le TableCellEditor
-		FinancialTable.updateComptesEditor();
-	}
-
-	/**
-	 * Ouvre une boîte de dialogue demandant à l'utilisateur s'il faut
-	 * sauvegarder les modifications du compte actuellement édité, les
-	 * abandonner ou ne rien faire.
-	 * 
-	 * @return	{@link JOptionPane#YES_OPTION} pour sauvegarder,
-	 * 			{@link JOptionPane#NO_OPTION} pour abandonner les modifications,
-	 * 			{@link JOptionPane#CANCEL_OPTION} pour ne rien faire.
-	 */
-	private int askSaveActualCompte() {
-		Compte actualCompte = controller.getCompte();
-		String nomActuel = 
-				actualCompte == null ? "en cours" : actualCompte.getNom();
-		
-		return JOptionPane.showConfirmDialog(
-				dialog,
-				String.format(
-						"Le compte %s a été modifié.%nVoulez-vous sauvegarder les changements ?",
-						nomActuel),
-				"Compte modifié",
-				JOptionPane.YES_NO_CANCEL_OPTION);
-	}
-	
-	/**
 	 * Demande confirmation à l'utilisateur avant de supprimer un compte. Si
 	 * l'utilisateur confirme, le compte est effectivement supprimé.
 	 */
@@ -406,11 +356,11 @@ public class SetupCompte {
 	 * Applique l'ensemble des modifications si nécessaire, et ferme la boîte de
 	 * dialogue.
 	 */
-	public void validate() {
-		if (controller.isModified() && apply())
+	public void applyAndQuit() {
+		if (!controller.isModified() || apply())
 			quit();
 	}
-	
+
 	/**
 	 * Valide les modifications du compte actuel et met à jour les suivis.
 	 * 
@@ -436,5 +386,63 @@ public class SetupCompte {
 		// Recharger la (nouvelle) liste des comptes
 		fillComptesList();
 		return true;
+	}
+
+	/**
+	 * Ferme la boîte de dialogue.<br>
+	 * S'il y a des changements non enregistrés, l'utilisateur est invité à
+	 * confirmer l'action.
+	 */
+	public void askAndQuit() {
+		if (controller.isModified()) {
+			switch (askSaveActualCompte()) {
+			case JOptionPane.YES_OPTION:
+				if (!apply())
+					return;		// Modifications échouées = arrêter tout
+				break;
+				
+			case JOptionPane.CANCEL_OPTION:
+				return;			// Annuler = arrêter tout
+				
+			default:			// Abandonner modifs = faire comme si de rien
+			}
+		}
+		
+		quit();
+	}
+	
+	/**
+	 * Ouvre une boîte de dialogue demandant à l'utilisateur s'il faut
+	 * sauvegarder les modifications du compte actuellement édité, les
+	 * abandonner ou ne rien faire.
+	 * 
+	 * @return	{@link JOptionPane#YES_OPTION} pour sauvegarder,
+	 * 			{@link JOptionPane#NO_OPTION} pour abandonner les modifications,
+	 * 			{@link JOptionPane#CANCEL_OPTION} pour ne rien faire.
+	 */
+	private int askSaveActualCompte() {
+		Compte actualCompte = controller.getCompte();
+		String nomActuel = 
+				actualCompte == null ? "en cours" : actualCompte.getNom();
+		
+		return JOptionPane.showConfirmDialog(
+				dialog,
+				String.format(
+						"Le compte %s a été modifié.%nVoulez-vous sauvegarder les changements ?",
+						nomActuel),
+				"Compte modifié",
+				JOptionPane.YES_NO_CANCEL_OPTION);
+	}
+	
+	/**
+	 * Ferme la boîte de dialogue.
+	 */
+	private void quit() {
+		dialog.dispose();
+		gui.createTabs();							// Recréer les onglets
+		gui.dataModified();							// Prévenir du changement
+	
+		// Mettre à jour la liste des comptes dans le TableCellEditor
+		FinancialTable.updateComptesEditor();
 	}
 }
