@@ -34,7 +34,7 @@ import haas.olivier.comptes.TypeCompte;
  *
  * @author Olivier Haas
  */
-class CompteEditor {
+public class CompteEditor {
 
 	/**
 	 * Le composant graphique principal.
