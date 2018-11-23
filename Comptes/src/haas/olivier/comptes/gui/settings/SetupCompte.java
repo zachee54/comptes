@@ -2,57 +2,42 @@ package haas.olivier.comptes.gui.settings;
 
 import haas.olivier.comptes.Compte;
 import haas.olivier.util.Month;
-import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.ctrl.EcritureController;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.gui.SimpleGUI;
 import haas.olivier.comptes.gui.table.FinancialTable;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.beans.EventHandler;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.Border;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
 
 /**
  * Une boîte de dialogue pour paramétrer les comptes.
@@ -66,198 +51,7 @@ public class SetupCompte {
 	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupCompte.class.getName());
-	
-	/**
-	 * Un médiateur entre les données de l'interface graphique et les données du
-	 * modèle.
-	 * 
-	 * @author Olivier HAAS
-	 */
-	public class DataMediator {
 		
-		/**
-		 * Le format de date.
-		 */
-		private final SimpleDateFormat format =
-				new SimpleDateFormat("dd/MM/yyyy");
-		
-		/**
-		 * Le contrôleur de données.<br>
-		 * Il gère l'objet <code>Compte</code> à éditer.
-		 */
-		private CompteController controller = null;
-		
-		/**
-		 * Drapeau indiquant si un changement de contrôleur est en cours. Auquel
-		 * cas, les changements de contenu sont dus au basculement de contrôleur
-		 * et non à une modification directe par l'utilisateur.
-		 */
-		private boolean updating = false;
-		
-		/**
-		 * Construit un médiateur de données écoutant et modifiant les champs de
-		 * saisie.
-		 */
-		private DataMediator() {
-			
-			// La codification EventHandler pour obtenir le document source
-			String eventDocument = "document";
-			
-			nom.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setNom", eventDocument));
-			numero.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setNumero", eventDocument));
-			ouverture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setOuverture", eventDocument));
-			cloture.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "setCloture", eventDocument));
-			typeComboBox.addItemListener(EventHandler.create(ItemListener.class,
-					this, "setTypeCompte", "source.selectedItem"));
-			colorButton.addActionListener(EventHandler.create(
-					ActionListener.class, DataMediator.this, "chooseColor"));
-		}
-		
-		/**
-		 * Renvoie le texte contenu dans un champ de saisie.
-		 * 
-		 * @param document	Le document du champ de saisie.
-		 * 
-		 * @return			Le texte du document.
-		 */
-		private String getDocumentText(Document document) {
-			try {
-				return document.getText(0, document.getLength());
-			} catch (BadLocationException e) {
-				LOGGER.log(Level.SEVERE,
-						"Erreur lors de la récupération du texte dans une zone de saisie",
-						e);
-				return "";
-			}
-		}
-		
-		/**
-		 * Permet à l'utilisateur de modifier la couleur.
-		 */
-		public void chooseColor() {
-			Color color = JColorChooser.showDialog(dialog,
-					"Choisissez une couleur", controller.getColor());
-			if (color == null)
-				return;
-			controller.setColor(color);					// Mémoriser
-			colorButton.setBackground(color);			// Afficher
-		}
-		
-		/**
-		 * Renvoie le contrôleur vers lequel pointe actuellement l'objet.
-		 */
-		private CompteController getController() {
-			return controller;
-		}
-	
-		/**
-		 * Remplace le contrôleur de référence. Les données du nouveau
-		 * contrôleur sont retranscrites dans l'interface graphique.
-		 */
-		public void setController(CompteController controller) {
-			if (controller == null)
-				return;
-			this.controller = controller;
-			
-			// Transcrire les données du nouveau contrôleur
-			updating = true;
-			if (controller.getType().isBancaire()) {
-				setVueBancaire();
-			} else {
-				setVueBudget();
-			}
-			nom.setText(controller.getNom());
-			numero.setText(controller.getNumero() + "");
-			colorButton.setBackground(controller.getColor());
-			typeComboBox.setSelectedItem(controller.getType());
-			ouverture.setText(getNotNullDateText(controller.getOuverture()));
-			cloture.setText(getNotNullDateText(controller.getCloture()));
-			updating = false;
-		}
-		
-		/**
-		 * Renvoie la date au format texte, ou une chaîne vide si la date est
-		 * <code>null</code>.
-		 * 
-		 * @param date	La date à formater.
-		 * @return		La date au format {@link #format}, ou une chaîne vide si
-		 * 				<code>date == null</code>.
-		 */
-		private String getNotNullDateText(Date date) {
-			return (date == null) ? "" : format.format(date);
-		}
-		
-		/**
-		 * Modifie le nom du compte dans le contrôleur actuel.
-		 * 
-		 * @param document	Le document contenant le nouveau nom.
-		 */
-		public void setNom(Document document) {
-			controller.setNom(getDocumentText(document));
-		}
-		
-		/**
-		 * Modifie le numéro du compte dans le contrôleur actuel.
-		 * 
-		 * @param document	Le document contenant le nouveau numéro de compte.
-		 */
-		public void setNumero(Document document) {
-			controller.setNumero(getDocumentText(document));
-		}
-		
-		/**
-		 * Modifie le type de compte.
-		 * <p>
-		 * Si l'interface est en cours de mise à jour, cette méthode ne fait
-		 * rien car il ne s'agit pas d'une demande de modification du type du
-		 * compte affiché.
-		 * 
-		 * @param typeCompte	Le nouveau type sélectionné. Toutefois, le
-		 * 						contexte ne permet pas de garantir qu'il
-		 * 						s'agisse d'une instance <code>TypeCompte</code>.
-		 */
-		public void setTypeCompte(Object typeCompte) {
-			
-			// Si l'interface est en cours de mise à jour, ignorer l'événement
-			if (updating)
-				return;
-			
-			if (typeCompte instanceof TypeCompte)
-				controller.setType((TypeCompte) typeCompte);
-		}
-		
-		/**
-		 * Modifie la date d'ouverture du contrôleur actuel.
-		 * 
-		 * @param document	Le document contenant la date d'ouverture.
-		 */
-		public void setOuverture(Document document) {
-			try {
-				controller.setOuverture(
-						format.parse(getDocumentText(document)));
-			} catch (ParseException e) {
-				LOGGER.log(Level.FINEST, "Date d'ouverture illisible", e);
-			}
-		}
-		
-		/**
-		 * Modifie la date de clôture du contrôleur actuel.
-		 * 
-		 * @param document	Le document contenant la date de clôture.
-		 */
-		public void setCloture(Document document) {
-			try {
-				controller.setCloture(format.parse(getDocumentText(document)));
-			} catch (ParseException e) {
-				LOGGER.log(Level.FINEST, "Date de clôture illisible", e);
-			}
-		}
-	}// inner class DataMediator	
-	
 	/**
 	 * Action pour quitter.
 	 */
@@ -268,31 +62,6 @@ public class SetupCompte {
 	 * Le GUI principal.
 	 */
 	private final SimpleGUI gui;
-
-	/**
-	 * Zone de saisie du nom.
-	 */
-	private final JTextComponent nom = new JTextField();
-	
-	/**
-	 * Zone de saisie du numéro de compte bancaire.
-	 */
-	private final JTextComponent numero = new JTextField();
-	
-	/**
-	 * Zone de saisie de la date d'ouverture.
-	 */
-	private final JTextComponent ouverture = new JTextField();
-	
-	/**
-	 * Zone de saisie de la date de clôture.
-	 */
-	private final JTextComponent cloture = new JTextField();
-	
-	/**
-	 * Bouton de choix de la couleur.
-	 */
-	private final JButton colorButton = new JButton(" ");
 	
 	/**
 	 * La boîte de dialogue.
@@ -300,41 +69,14 @@ public class SetupCompte {
 	private final JDialog dialog;
 
 	/**
-	 * Le médiateur de données.
+	 * Le contrôleur de l'éditeur de compte.
 	 */
-	private final DataMediator dataMediator;
-	
-	/**
-	 * Les contrôleurs de comptes.
-	 */
-	private ArrayList<CompteController> controllers;
+	private final CompteEditorController controller;
 	
 	/**
 	 * La liste graphique des comptes.
 	 */
-	private final JList<CompteController> listComptes;
-	
-	/**
-	 * Le bouton radio "Compte bancaire".
-	 */
-	private final JRadioButton radioBancaire =
-			new JRadioButton("Compte bancaire");
-	
-	/**
-	 * Le bouton radio "Compte budgétaire".
-	 */
-	private final JRadioButton radioBudget =
-			new JRadioButton("Compte budgétaire");
-	
-	/**
-	 * Liste déroulante des types.
-	 */
-	private final JComboBox<TypeCompte> typeComboBox = new JComboBox<>();
-	
-	/**
-	 * Les composants à activer uniquement pour les comptes de type bancaire.
-	 */
-	private final Collection<Component> bancaireComponents = new ArrayList<>(2);
+	private final JList<Compte> listComptes;
 	
 	/**
 	 * Construit une boîte de dialogue de gestion des comptes.
@@ -344,21 +86,20 @@ public class SetupCompte {
 	 */
 	public SetupCompte(SimpleGUI gui, JFrame owner) {
 		this.gui = gui;
-		dataMediator = new DataMediator();
+		
+		CompteEditor editor = new CompteEditor();
+		controller = new CompteEditorController(editor);
 		listComptes = createComptesList();
-		fillComptesList(null);
-		configureTypeRadioButtons();
+		fillComptesList();
 		UniversalAction actionQuitter = new UniversalAction(quitActionListener);
 		
 		// Panneau principal
 		JPanel main = new JPanel(new BorderLayout());
 		main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		main.add(createListComptesPanel(), BorderLayout.WEST);
-		main.add(createEditionPanel());
+		main.add(createEditionPanel(editor));
 		main.add(createValidationPanel(), BorderLayout.SOUTH);
-		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
-		main.getActionMap().put("quitter", actionQuitter);
+		setActionOnEscape(actionQuitter, main);
 		
 		// Fenêtre principale
 		dialog = new JDialog(owner, "Gestion des comptes");
@@ -370,6 +111,17 @@ public class SetupCompte {
 		dialog.setVisible(true);
 	}
 	
+	/**
+	 * Renvoie une liste des comptes triée.
+	 * 
+	 * @return	Une nouvelle liste des comptes triée.
+	 */
+	private static Iterable<Compte> getSortedComptes() {
+		List<Compte> comptes = new ArrayList<>(getAllComptes());
+		Collections.sort(comptes);
+		return comptes;
+	}
+
 	/**
 	 * Renvoie tous les comptes du modèle.
 	 * 
@@ -385,203 +137,124 @@ public class SetupCompte {
 			return Collections.emptyList();
 		}
 	}
+
+	/**
+	 * Met à jour les suivis à partir de la date la plus ancienne parmi celles
+	 * spécifiées.
+	 * 
+	 * @param dates	Des dates à partir desquelles mettre à jour les suivis.
+	 */
+	private static void updateSuivisFrom(Date... dates) {
+		Date first = getMinDate(dates);
+		if (first != null) {
+			try {
+				EcritureController.updateSuivis(Month.getInstance(first));
+			} catch (IOException e) {
+				LOGGER.log(Level.WARNING, "Échec de mise à jour des suivis", e);
+			}
+		}
+	}
 	
 	/**
-	 * Crée une liste de comptes et écoute les changements de sélection.
-	 * <p>
-	 * Attention : {@link #dataMediator} doit être préalablement instancié.
+	 * Renvoie la date la plus ancienne parmi les dates spécifiées.
 	 * 
-	 * @param dataMediator	Le médiateur de données auquel notifier les
-	 * 						changements de sélection.
+	 * @param dates	Des dates. Peuvent être <code>null</code>.
 	 * 
-	 * @return				Une nouvelle liste graphique des comptes.
+	 * @return		La date la plus ancienne, ou <code>null</code> si toutes les
+	 * 				dates spécifiées sont <code>null</code>.
 	 */
-	private JList<CompteController> createComptesList() {
-		JList<CompteController> list = new JList<>();
+	private static Date getMinDate(Date... dates) {
+		Date first = null;
+		for (Date date : dates) {
+			if (first == null || (date != null && first.after(date))) {
+				first = date;
+			}
+		}
+		return first;
+	}
+
+	/**
+	 * Crée une liste de comptes et écoute les changements de sélection.
+	 * 
+	 * @return	Une nouvelle liste graphique des comptes.
+	 */
+	private JList<Compte> createComptesList() {
+		JList<Compte> list = new JList<>();
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(EventHandler.create(
-				ListSelectionListener.class, dataMediator, "setController",
+				ListSelectionListener.class, this, "setCompte",
 				"source.selectedValue"));
+		
+		// TODO Remplacer par un pattern Null ?
+		list.setCellRenderer(new DefaultListCellRenderer() {
+			private static final long serialVersionUID = 7135223926816896152L;
+
+			@Override
+			public Component getListCellRendererComponent(
+					JList<?> list, Object value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				return super.getListCellRendererComponent(
+						list, (value == null ? "Nouveau..." : value),
+						index, isSelected, cellHasFocus);
+			}
+			
+		});
 		return list;
 	}
 
 	/**
 	 * Re-remplit la liste graphique des comptes.
-	 * 
-	 * @param selection	Le compte à sélectionner après la mise à jour. Utiliser
-	 * 					<code>null</code> pour un nouveau compte.
 	 */
-	private void fillComptesList(Compte selection) {
+	private void fillComptesList() {
 		
 		// Tout insérer dans le modèle
-		DefaultListModel<CompteController> listModel = new DefaultListModel<>();
-		for (CompteController controller : createControllers(selection))
-			listModel.addElement(controller);
+		DefaultListModel<Compte> listModel = new DefaultListModel<>();
+		listModel.addElement(null);
+		for (Compte compte : getSortedComptes())
+			listModel.addElement(compte);
 		listComptes.setModel(listModel);
 		
 		// Sélectionner le bon item
-		listComptes.setSelectedValue(dataMediator.getController(), true);
+		listComptes.setSelectedValue(controller.getCompte(), true);
 	}
 
-	/**
-	 * Crée les contrôleurs de comptes.
-	 * 
-	 * @param selection		Le compte à sélectionner, ou <code>null</code> pour
-	 * 						sélectionner le contrôleur qui permet de définir un
-	 * 						nouveau compte.
-	 * 
-	 * @param dataMediator	Le médiateur de données auquel notifier le
-	 * 						contrôleur du compte sélectionné.
-	 * 
-	 * @return				Les contrôleurs des comptes, triés selon leur ordre
-	 * 						naturel.
-	 */
-	private Iterable<CompteController> createControllers(Compte selection) {
-		Collection<Compte> comptes = new ArrayList<>(getAllComptes());
-		
-		// Ajouter un compte null qui servira pour le contrôleur "Nouveau..."
-		comptes.add(null);
-		
-		controllers = new ArrayList<>();
-		for (Compte compte : comptes) {
-			CompteController controller = new CompteController(compte); 
-			controllers.add(controller);
-			if (compte == selection) {					// Éventuellement null
-				dataMediator.setController(controller);
-			}
-		}
-		Collections.sort(controllers);
-		return controllers;
-	}
-
-	/**
-	 * Configure le comportement des boutons radio "Compte bancaire" et
-	 * "Compte budgétaire".
-	 */
-	private void configureTypeRadioButtons() {
-		ButtonGroup groupeClasse = new ButtonGroup();
-		groupeClasse.add(radioBancaire);
-		groupeClasse.add(radioBudget);
-		radioBancaire.addActionListener(EventHandler.create(
-				ActionListener.class, this, "setVueBancaire"));
-		radioBudget.addActionListener(EventHandler.create(
-				ActionListener.class, this, "setVueBudget"));
-	}
-	
 	/**
 	 * Crée un panneau défilable contenant la liste des comptes.
 	 * 
 	 * @return	Un nouveau panneau défilable contenant la liste des comptes.
 	 */
-	private JComponent createListComptesPanel() {
+	private Component createListComptesPanel() {
 		JScrollPane scrollList = new JScrollPane(listComptes);
 		scrollList.setPreferredSize(					// Largeur préférée
 				new Dimension(150, scrollList.getPreferredSize().height));
 		return scrollList;
 	}
-
+	
 	/**
-	 * Crée le panneau d'édition contenant les champs de saisie pour un compte.
+	 * Crée un panneau contenant l'éditeur de compte et des boutons de
+	 * validation/suppression.
 	 * 
-	 * @return	Un panneau contenant tous les champs de saisie pour un compte.
+	 * @param	L'éditeur de compte.
+	 * 
+	 * @return	Un nouveau panneau graphique.
 	 */
-	private JComponent createEditionPanel() {
+	private Component createEditionPanel(CompteEditor editor) {
+		JButton validateButton = new JButton("Valider");
+		validateButton.addActionListener(EventHandler.create(
+				ActionListener.class, this, "validate"));
 		
-		// Champs modifiables
-		JLabel labelNature		= new JLabel("Nature :");
-		JLabel labelCouleur		= new JLabel("Couleur :");
-		JLabel labelNom			= new JLabel("Nom :");
-		JLabel labelOuverture	= new JLabel("Ouverture :");
-		JLabel labelCloture		= new JLabel("Clôture :");
-		JLabel labelNumero		= new JLabel("Numéro :");
-		JLabel labelType		= new JLabel("Type :");
+		JButton deleteButton = new JButton("Supprimer");
+		deleteButton.addActionListener(EventHandler.create(
+				ActionListener.class, this, "confirmDeletion"));
 		
-		// Composants à n'activer que pour les comptes bancaires
-		bancaireComponents.add(labelNumero);
-		bancaireComponents.add(numero);
+		Box validationBox = Box.createHorizontalBox();
+		validationBox.add(Box.createHorizontalGlue());
+		validationBox.add(validateButton);
+		validationBox.add(deleteButton);
 		
-		// Panneau de sélection du type principal (bancaire ou budgétaire)
-		JPanel hautDroite = new JPanel();
-		hautDroite.setLayout(new BoxLayout(hautDroite, BoxLayout.PAGE_AXIS));
-		hautDroite.setBorder(BorderFactory.createTitledBorder((Border) null));
-		hautDroite.add(radioBancaire);
-		hautDroite.add(radioBudget);
-		
-		// Panneau de couleur pour les diagrammes
-		JPanel couleurPanel = new JPanel(new BorderLayout());
-		couleurPanel.add(colorButton);
-
-		// Assembler tout
-		JPanel editionPanel = new JPanel();
-		GroupLayout layout = new GroupLayout(editionPanel);
-		editionPanel.setLayout(layout);
-		layout.setAutoCreateGaps(true);					// Espaces automatiques
-		layout.setAutoCreateContainerGaps(true);
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.CENTER)
-						.addComponent(labelNature)
-						.addComponent(hautDroite))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.CENTER, false)
-						.addComponent(labelCouleur)
-						.addComponent(couleurPanel))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelNom)
-						.addComponent(nom))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelType)
-						.addComponent(typeComboBox))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelOuverture)
-						.addComponent(ouverture))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelCloture)
-						.addComponent(cloture))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.BASELINE)
-						.addComponent(labelNumero)
-						.addComponent(numero)));
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.TRAILING)
-						.addComponent(labelNature)
-						.addComponent(labelCouleur)
-						.addComponent(labelNom)
-						.addComponent(labelType)
-						.addComponent(labelOuverture)
-						.addComponent(labelCloture)
-						.addComponent(labelNumero))
-				.addGroup(layout.createParallelGroup(
-						GroupLayout.Alignment.LEADING)
-						.addComponent(hautDroite)
-						.addComponent(couleurPanel)
-						.addComponent(nom,
-								GroupLayout.DEFAULT_SIZE,
-								150,
-								GroupLayout.PREFERRED_SIZE)
-						.addComponent(typeComboBox,
-								GroupLayout.DEFAULT_SIZE,
-								150,
-								GroupLayout.PREFERRED_SIZE)
-						.addComponent(ouverture,
-								GroupLayout.DEFAULT_SIZE,
-								150,
-								GroupLayout.PREFERRED_SIZE)
-						.addComponent(cloture,
-								GroupLayout.DEFAULT_SIZE,
-								150,
-								GroupLayout.PREFERRED_SIZE)
-						.addComponent(numero,
-								GroupLayout.DEFAULT_SIZE,
-								150,
-								GroupLayout.PREFERRED_SIZE)));
+		JPanel editionPanel = new JPanel(new BorderLayout());
+		editionPanel.add(editor.getComponent());
+		editionPanel.add(validationBox, BorderLayout.SOUTH);
 		return editionPanel;
 	}
 	
@@ -590,167 +263,69 @@ public class SetupCompte {
 	 * 
 	 * @return	Le composant graphique contenant tous les boutons.
 	 */
-	private JComponent createValidationPanel() {
-		
-		// Les boutons
-		JButton valider		= new JButton("Valider");
-		JButton appliquer	= new JButton("Appliquer");
-		JButton supprimer	= new JButton("Supprimer");
-		JButton quitter		= new JButton("Quitter");
-		valider.addActionListener(
-				EventHandler.create(ActionListener.class, this, "validate"));
+	private Component createValidationPanel() {
+		JButton appliquer = new JButton("OK");
+		JButton quitter = new JButton("Quitter");
 		appliquer.addActionListener(
 				EventHandler.create(ActionListener.class, this, "apply"));
-		supprimer.addActionListener(
-				EventHandler.create(ActionListener.class, this,
-						"confirmDeletion"));
 		quitter.addActionListener(quitActionListener);
 
 		// Barre contenant les boutons
-		JPanel bar = new JPanel();
-		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
+		Box bar = Box.createHorizontalBox();
 		bar.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-		bar.add(supprimer);
 		bar.add(Box.createHorizontalGlue());
 		bar.add(appliquer);
-		bar.add(valider);
 		bar.add(quitter);
 		return bar;
 	}
 	
 	/**
-	 * Adapte la vue pour les comptes bancaires.
-	 * <p>
-	 * Le bouton radio "Compte bancaire" est sélectionné.
-	 * Les composants spécifiques aux comptes bancaires (en l'occurrence le
-	 * champ "Numéro" et son étiquette) sont activés.<br>
-	 * La liste déroulante des types propose les différents types bancaires.
-	 */
-	// TODO L'ancienne implémentation prévoyait de notifier un changement de type principal (mais pas de TypeCompte) à CompteController. Non repris car apparemment inutile, mais à vérifier.
-	public void setVueBancaire() {
-		radioBancaire.setSelected(true);
-		setVueMainType(true);
-	}
-	
-	/**
-	 * Adapte la vue pour les comptes budgétaires.
-	 * <p>
-	 * Le bouton radio "Compte budgétaire" est sélectionné.
-	 * Les composants spécifiques aux comptes bancaires (en l'occurrence le
-	 * champ "Numéro" et son étiquette) sont désactivés.<br>
-	 * La liste déroulante des types propose les différents types budgétaires.
-	 */
-	public void setVueBudget() {
-		radioBudget.setSelected(true);
-		setVueMainType(false);
-	}
-	
-	/**
-	 * Adapte la vue, selon le cas, pour les comptes bancaires ou pour les
-	 * comptes budgétaires.
-	 * <p>
-	 * Les composants spécifiques aux comptes bancaires (en l'occurrence le
-	 * champ Numéro" et son étiquette) sont activés ou désactivés.<br>
-	 * La liste déroulante des types est modifiée pour ne contenir que les types
-	 * bancaires, ou que les types budgétaires.
+	 * Définit l'action à exécuter lorsque l'utilisateur appuie sur la touche
+	 * Echap.
 	 * 
-	 * @param bancaire	<code>true</code> pour adapter la vue pour les comptes
-	 * 					bancaires, <code>false</code> pour adapter la vue pour
-	 * 					les comptes budgétaires.
+	 * @param action	L'action à exécuter.
+	 * @param component	Le composant sur qui repose la détection de la touche.
 	 */
-	private void setVueMainType(boolean bancaire) {
-		for (Component component : bancaireComponents)
-			component.setEnabled(bancaire);
-		
-		typeComboBox.removeAll();
-		for (TypeCompte typeCompte : TypeCompte.values()) {
-			if (typeCompte.isBancaire() == bancaire)
-				typeComboBox.addItem(typeCompte);
-		}
+	private void setActionOnEscape(Action action, JComponent component) {
+		component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
+		component.getActionMap().put("quitter", action);
 	}
 	
 	/**
-	 * Valide l'ensemble des modifications.
+	 * Demande au contrôleur d'afficher dans l'éditeur les propriétés du compte
+	 * spécifié.
+	 * <p>
+	 * Si le compte actuellement édité a été modifié, l'utilisateur en est
+	 * averti et peut choisir de sauvegarder les modifications, de les
+	 * abandonner, ou d'annuler le changement de compte.
+	 * 
+	 * @param compte	Le compte à afficher.
 	 */
-	public void apply() {
+	public void setCompte(Compte compte) {
 		
-		// Mémoriser la sélection actuelle
-		CompteController selected = dataMediator.getController();
-		Compte selection = selected.getCompte();
+		// En cas de callback, on peut revenir ici sur le compte déjà édité
+		if (compte == controller.getCompte())
+			return;
 		
-		// Appliquer toutes les modifications
-		Month toUpdate = null;
-		for (CompteController controller : controllers) {
-			if (!controller.isModified())
-				continue;
+		if (controller.isModified()) {;
+			switch (askSaveActualCompte()) {
 			
-			// Dates du compte avant les changements
-			Compte compte = controller.getCompte();
-			Date oldOuverture = null;
-			Date oldCloture = null;
-			if (compte != null) {
-				oldOuverture = compte.getOuverture();
-				oldCloture = compte.getCloture();
-			}
+			case JOptionPane.CANCEL_OPTION:
+				
+				// Revenir sur le compte qui était en cours d'édition
+				listComptes.setSelectedValue(controller.getCompte(), true);
+				return;
 			
-			// Nouveau compte (même instance qu'avant, sauf s'il était null)
-			compte = controller.applyChanges();
-
-			// Noter de mettre à jour les bases en cas de changement
-			toUpdate = getOlderMonth(toUpdate, oldOuverture);
-			toUpdate = getOlderMonth(toUpdate, oldCloture);
-			toUpdate = getOlderMonth(toUpdate, compte.getOuverture());
-			toUpdate = getOlderMonth(toUpdate, compte.getCloture());
-
-			// Actualiser la sélection si besoin
-			if (controller == selected) {
-				selection = compte;
-			}
-		}
-
-		// Mettre à jour les suivis
-		if (toUpdate != null) {
-			try {
-				EcritureController.updateSuivis(toUpdate);
-			} catch (IOException e) {
-				LOGGER.log(Level.WARNING, "Échec de mise à jour des suivis", e);
+			case JOptionPane.YES_OPTION:
+				apply();
+				break;
+				
+			default:	// Abandonner les modifications = faire comme si de rien
 			}
 		}
 		
-		// Recharger la (nouvelle) liste des comptes
-		fillComptesList(selection);
-	}
-	
-	/**
-	 * Renvoie le mois le plus ancien : soit le mois spécifié, soit le mois de
-	 * la date spécifiée.
-	 * 
-	 * @param month	Un mois. Peut être <code>null</code>.
-	 * @param date	Une date. Peut être <code>null</code>.
-	 * 
-	 * @return		<code>null</code> si <code>month/code> et <code>date</code>
-	 * 				sont <code>null</code> ; si l'un des deux est
-	 * 				<code>null</code>, alors le mois de l'autre ; si
-	 * 				<code>month</code> est plus ancien que <code>date</code>,
-	 * 				alors <code>month</code> ; sinon, le mois de
-	 * 				<code>date</code>.
-	 */
-	private Month getOlderMonth(Month month, Date date) {
-		if (month == null) {
-			return (date == null) ? null : Month.getInstance(date);
-		} else if (date == null) {
-			return month;
-		} else {
-			return month.before(date) ? month : Month.getInstance(date);
-		}
-	}
-	
-	/**
-	 * Applique l'ensemble des modifications et ferme la boîte de dialogue.
-	 */
-	public void validate() {
-		apply();
-		quit();
+		controller.setCompte(compte);
 	}
 	
 	/**
@@ -761,65 +336,115 @@ public class SetupCompte {
 	public void quit() {
 		
 		// Vérifier s'il y a des modifications non enregistrées
-		if (isModified() && !confirm())
-			return;
+		if (controller.isModified()) {
+			switch (askSaveActualCompte()) {
+			case JOptionPane.YES_OPTION:
+				apply();
+				break;
+				
+			case JOptionPane.CANCEL_OPTION:
+				return;	// Annuler = ne pas quitter
+				
+			default:	// Abandonner les modifications = faire comme si de rien
+			}
+		}
 		
 		dialog.dispose();							// Fermer le dialogue
 		gui.createTabs();							// Recréer les onglets
 		gui.dataModified();							// Prévenir du changement
-
+	
 		// Mettre à jour la liste des comptes dans le TableCellEditor
 		FinancialTable.updateComptesEditor();
 	}
-	
+
 	/**
-	 * Indique s'il existe des changements non validés.
+	 * Ouvre une boîte de dialogue demandant à l'utilisateur s'il faut
+	 * sauvegarder les modifications du compte actuellement édité, les
+	 * abandonner ou ne rien faire.
 	 * 
-	 * @return	<code>true</code> s'il existe des changements non validés.
+	 * @return	{@link JOptionPane#YES_OPTION} pour sauvegarder,
+	 * 			{@link JOptionPane#NO_OPTION} pour abandonner les modifications,
+	 * 			{@link JOptionPane#CANCEL_OPTION} pour ne rien faire.
 	 */
-	private boolean isModified() {
-		for (CompteController controller : controllers) {
-			if (controller.isModified()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * Affiche une boîte de dialogue pour demander à l'utilisateur q'il souhaite
-	 * quitter malgré les changements non validés.
-	 * 
-	 * @return	<code>true</code> si l'utilisateur confirme.
-	 */
-	private boolean confirm() {
+	private int askSaveActualCompte() {
+		Compte actualCompte = controller.getCompte();
+		String nomActuel = 
+				actualCompte == null ? "en cours" : actualCompte.getNom();
+		
 		return JOptionPane.showConfirmDialog(
 				dialog,
-				"Il y a des changements non enregistrés.\nVoulez-vous les abandonner ?",
-				"Abandonner les changements",
-				JOptionPane.YES_NO_OPTION)
-			== JOptionPane.YES_OPTION;
+				String.format(
+						"Le compte %s a été modifié.%nVoulez-vous sauvegarder les changements ?",
+						nomActuel),
+				"Compte modifié",
+				JOptionPane.YES_NO_CANCEL_OPTION);
 	}
-
+	
 	/**
 	 * Demande confirmation à l'utilisateur avant de supprimer un compte. Si
 	 * l'utilisateur confirme, le compte est effectivement supprimé.
 	 */
 	public void confirmDeletion() {
-		CompteController selected = dataMediator.getController();
+		Compte compte = controller.getCompte();
 		int confirm = JOptionPane.showConfirmDialog(
 				dialog,
 				String.format("Voulez-vous vraiment supprimer le compte%n%s ?",
-						selected),
+						compte),
 				"Supprimer un compte",
 				JOptionPane.YES_NO_OPTION);
 		
-		if (confirm == JOptionPane.YES_OPTION) {
-			try {
-				selected.deleteCompte();
-			} catch (IOException e1) {
-				LOGGER.severe("Impossible de supprimer " + selected);
-			}
+		if (confirm == JOptionPane.YES_OPTION)
+			delete(compte);
+	}
+
+	/**
+	 * Supprime le compte spécifié du modèle.
+	 * 
+	 * @param compte	Le compte à supprimer.
+	 */
+	private void delete(Compte compte) {
+		try {
+			DAOFactory.getFactory().getCompteDAO().remove(compte);
+			controller.setCompte(null);
+			fillComptesList();
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, "Impossible de supprimer " + compte, e);
 		}
+	}
+
+	/**
+	 * Applique l'ensemble des modifications si nécessaire, et ferme la boîte de
+	 * dialogue.
+	 */
+	public void validate() {
+		if (controller.isModified() && apply())
+			quit();
+	}
+	
+	/**
+	 * Valide les modifications du compte actuel et met à jour les suivis.
+	 * 
+	 * @return	<code>true</code> si les modifications ont été appliquées avec
+	 * 			succès.
+	 */
+	public boolean apply() {
+		
+		// Date du compte avant les changements
+		Compte compte = controller.getCompte();
+		Date oldOuverture = (compte == null) ? null : compte.getOuverture();
+		
+		try {
+			controller.applyChanges();			// Modifie ou crée le compte
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, e.getMessage());
+			LOGGER.log(Level.FINE, "Impossible de mettre à jour le compte", e);
+			return false;
+		}
+		compte = controller.getCompte();		// compte non null ici
+		updateSuivisFrom(oldOuverture, compte.getOuverture());
+		
+		// Recharger la (nouvelle) liste des comptes
+		fillComptesList();
+		return true;
 	}
 }
