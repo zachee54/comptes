@@ -434,4 +434,13 @@ class CompteEditor {
 		}
 		typeComboBox.setSelectedItem(type);
 	}
+	
+	/**
+	 * Renvoie le composant graphique de l'éditeur.
+	 * 
+	 * @return	Le composant graphique de l'éditeur.
+	 */
+	Component getComponent() {
+		return mainComponent;
+	}
 }
