@@ -1,6 +1,7 @@
 package haas.olivier.comptes.gui.table;
 
 import haas.olivier.util.Month;
+import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.gui.actions.CompteObservable;
 import haas.olivier.comptes.gui.actions.MonthObservable;
 import haas.olivier.comptes.gui.actions.SoldesObservable;
@@ -85,6 +86,9 @@ implements SoldesObserver {
 		case HISTORIQUE:
 			return compte.getHistorique(month);
 		case AVUE:
+			if (compte == Compte.COMPTE_EPARGNE) {	// Exception compte virtuel
+				return compte.getMoyenne(month);
+			}
 			return compte.getSoldeAVue(month);
 		case MOYENNE:
 			return compte.getMoyenne(month);

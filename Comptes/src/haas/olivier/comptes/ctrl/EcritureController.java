@@ -38,6 +38,9 @@ public class EcritureController {
 	 */
 	private static final int DUREE = 12;
 
+	private EcritureController() {
+	}
+
 	/**
 	 * Insère une écriture dans le modèle de données en assurant la cohérence
 	 * des données liées.<br>
@@ -161,6 +164,8 @@ public class EcritureController {
 	 * Met à jour l'historique, les soldes à vue et les moyennes des comptes à
 	 * partir du mois spécifié.
 	 * 
+	 * @param debut	Le mois à partir duquel mettre à jour les suivis.
+	 * 
 	 * @throws IOException
 	 */
 	public static void updateSuivis(Month debut) throws IOException {
@@ -182,6 +187,7 @@ public class EcritureController {
 		// Mettre à jour les moyennes
 		for (Compte compte : DAOFactory.getFactory().getCompteDAO().getAll())
 			updateMoyennes(compte, debut);
+		updateMoyennes(Compte.COMPTE_EPARGNE, debut);	// Compte virtuel
 	}
 	
 	/**
@@ -312,8 +318,5 @@ public class EcritureController {
 			// Enlever le mois le plus ancien de la file
 			queue.remove();
 		}
-	}
-	
-	private EcritureController() {
 	}
 }
