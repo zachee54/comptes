@@ -1,3 +1,6 @@
+/*
+ * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ */
 package haas.olivier.comptes;
 
 /** Une exception indiquant qu'une donnée indispensable n'a pas été fournie lors
