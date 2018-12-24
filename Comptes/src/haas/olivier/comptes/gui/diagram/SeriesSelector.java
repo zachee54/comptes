@@ -1,3 +1,6 @@
+/*
+ * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ */
 package haas.olivier.comptes.gui.diagram;
 
 import haas.olivier.comptes.dao.DAOFactory;
