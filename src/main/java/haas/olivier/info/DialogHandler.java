@@ -43,6 +43,34 @@ public class DialogHandler extends Handler {
 		setFormatter(new DialogFormatter());
 	}
 	
+	/**
+	 * Concatène les messages de toutes les causes successives de l'exception.
+	 * <p>
+	 * Les messages déjà inclus dans le message "parent" ne sont pas repris.
+	 *
+	 * @param e	L'exception à décrire.
+	 * 
+	 * @return	Un texte comportant un message par ligne.
+	 */
+	private static String createExceptionDescription(Throwable e) {
+		String eol = System.getProperty("line.separator");
+		StringBuilder descriptionBuilder = new StringBuilder();
+		
+		String previousMessage = "";
+		for (Throwable cause = e.getCause();
+				cause != null;
+				cause = cause.getCause()) {
+			String message = cause.getMessage();
+			
+			// Éviter les messages vides ou répétitifs
+			if (message != null && !previousMessage.contains(message)) {
+				descriptionBuilder.append(eol);
+				descriptionBuilder.append(message);
+			}
+		}
+		return descriptionBuilder.toString();
+	}
+
 	@Override
 	public void publish(final LogRecord record) {
 		
@@ -128,15 +156,8 @@ public class DialogHandler extends Handler {
 	 * 			sa cause.
 	 */
 	private Component createExceptionDescriptionArea(Throwable e) {
-		String description = String.format(
-				"%s: %s",
-				e.getClass().getSimpleName(),		// Nom de l'exception
-				(e.getMessage() == null)			// Message, s'il y en a un
-						? e.getStackTrace()[0]		// Sinon n° de ligne
-						: e.getMessage());
-		
 		JTextArea area = new JTextArea(3, 40);
-		area.setText(description);
+		area.setText(createExceptionDescription(e));
 		area.setEditable(false);
 		area.setLineWrap(true);
 		area.setWrapStyleWord(true);
