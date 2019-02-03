@@ -18,6 +18,7 @@ import haas.olivier.util.Month;
  * <p>
  * Elle peut servir pour la table des jours ou la table des montants.
  */
+// FIXME Utiliser des generics pour éviter deux casts dans PermanentEditor
 @SuppressWarnings("serial")
 class PlannerTableModel extends AbstractTableModel {
 
@@ -175,10 +176,10 @@ class PlannerTableModel extends AbstractTableModel {
 	 * 				contenir comme valeurs que des objets de la	classe fournie
 	 * 				au constructeur. Sinon, le comportement est indéfini.
 	 */
-	public void setMap(Map<Month,? extends Object> jours) {
+	public void setMap(Map<Month,?> jours) {
 		map = (jours == null)
 				? new TreeMap<>()
 				: new TreeMap<>(jours);					// Nouvelles données
 		fireTableDataChanged();							// Avertir du changement
 	}
-}// class PlannerTableModel
+}

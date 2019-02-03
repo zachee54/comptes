@@ -5,20 +5,16 @@ package haas.olivier.comptes.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -26,6 +22,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -52,69 +49,23 @@ import haas.olivier.util.Month;
  */
 class PermanentEditor {
 	
-	// Constantes de commandes de types de Permanent
+	/**
+	 * Constante désignant le type des opérations permanentes à montant
+	 * prédéterminé.
+	 */
 	public static final String FIXE = "fixe";
+	
+	/**
+	 * Constante déisgnant le type des opérations permanentes à montant
+	 * proportionnel à une autre opération permanente.
+	 */
 	public static final String PROPORTIONNEL = "proportionnel";
+	
+	/**
+	 * Constante désignant le type des opérations permanentes dont le montant
+	 * correspond au solde d'un compte déterminé.
+	 */
 	public static final String SOLDER = "solder";
-
-	/**
-	 * Un <code>ActionListener</code> qui gère les changements de vues et de
-	 * boutons en fonction du type de <code>Permanent</code>. Il peut être
-	 * appelé par les objets Swing générant des <code>ActionEvent</code>, ou
-	 * directement par le programme. L'objet crée son propre <code>JPanel</code>
-	 * avec un <code>CardLayout</code> standard.
-	 * 
-	 * @author Olivier HAAS
-	 */
-	private class TypeController implements ActionListener {
-		
-		/**
-		 * <code>Map</code> associant les commandes aux boutons, pour permettre
-		 * la mise à jour du statut du bouton à l'invocation de la commande.
-		 */
-		private final Map<String, AbstractButton> buttonMap = new HashMap<>();
-		
-		/**
-		 * Le layout modifiable.
-		 */
-		private final CardLayout layout = new CardLayout();
-		
-		/**
-		 * Le panel à vues.
-		 */
-		private final JPanel panel = new JPanel(layout);
-		
-		/**
-		 * Modifie la vue pour adapter la fenêtre au type sélectionné, et
-		 * mémorise ce type dans le <code>dataMediator</code>.
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String command = e.getActionCommand();
-			changeVue(command);
-//			dataMediator.getController().setType(command);
-		}
-	
-		/**
-		 * Modifie la vue pour adapter la fenêtre au type sélectionné.
-		 */
-		public void changeVue(String command) {
-			AbstractButton bouton;					// Bouton à mettre à jour
-			if (!buttonMap.containsKey(command))
-				return;
-			bouton = buttonMap.get(command);
-			
-			if (!bouton.isSelected())
-				bouton.setSelected(true);
-			
-			layout.show(panel, command);			// Changer de vue
-		}
-	}// inner class TypeListener
-	
-	/**
-	 * Contrôleur de type.
-	 */
-	private final TypeController typeController = new TypeController();
 	
 	/**
 	 * Le bouton de sélection du type d'opérations permanentes à montants fixes.
@@ -157,12 +108,12 @@ class PermanentEditor {
 	/**
 	 * Liste déroulante pour choisir le compte débité.
 	 */
-	private final JComboBox<Compte> comboBoxDebit;
+	private final JComboBox<Compte> comboBoxDebit = createComptesComboBox();
 	
 	/**
 	 * Liste déroulante pour choisir le compte crédité.
 	 */
-	private final JComboBox<Compte> comboBoxCredit;
+	private final JComboBox<Compte> comboBoxCredit = createComptesComboBox();
 	
 	/**
 	 * Liste déroulante pour choisir l'opération dont dépend celle-ci.
@@ -174,8 +125,7 @@ class PermanentEditor {
 	 * <p>
 	 * Ce champ permet une saisie à la souris avec une précision d'une décimale.
 	 */
-	private final JSpinner spinnerTaux =
-			new JSpinner(new SpinnerNumberModel(0.0, 0.0, null, 0.1));
+	private final JSpinner spinnerTaux = createSpinnerTaux();
 	
 	/**
 	 * Planning des jours du mois.
@@ -188,6 +138,20 @@ class PermanentEditor {
 	 */
 	private final PlannerTableModel plannerMontants =
 			new PlannerTableModel(BigDecimal.class, "Montants");
+	
+	/**
+	 * Un layout pour les paramètres dépendant du type d'opération.
+	 * 
+	 * @see {@link #cardPane}
+	 */
+	private final CardLayout cardLayout = new CardLayout();
+	
+	/**
+	 * Le panneau des paramètres dépendant du type d'opération.
+	 * 
+	 * @see {@link PermanentEditor#cardLayout}
+	 */
+	private final JPanel cardPane = new JPanel(cardLayout);
 
 	/**
 	 * Construit un éditeur pour les paramètres d'une opération permanente.
@@ -196,21 +160,7 @@ class PermanentEditor {
 	 * 			En cas d'erreur lors de la récupération des comptes.
 	 */
 	PermanentEditor() throws IOException {
-		
-		// Configurer les composants de saisie
-		Compte[] comptes = getComptes();
-		comboBoxDebit = createComptesComboBox(comptes);
-		comboBoxCredit = createComptesComboBox(comptes);
-		initTypeButtons();
-		spinnerTaux.setEditor(new JSpinner.NumberEditor(spinnerTaux, "0.00 '%'"));
-		
-		// Sélection du type de Permanent (fixe, dépendant ou soldeur)
 		JPanel typePanel = createTypePanel();
-		typePanel.add(radioFixe);
-		typePanel.add(radioProport);
-		typePanel.add(radioSolder);
-		
-		// Les tables de jours et de montants
 		JTable tableJours = createPlannerTable(plannerJours);
 		JTable tableMontants = createPlannerTable(plannerMontants);
 		
@@ -299,7 +249,6 @@ class PermanentEditor {
 						.addComponent(comboBoxDependance)));
 		
 		// Les paramètres variables suivant le type d'instance
-		JPanel cardPane = typeController.panel;				// Panel à vues
 		cardPane.add(new JScrollPane(tableMontants), FIXE);	// Fixes
 		cardPane.add(propPanel, PROPORTIONNEL);				// Proportionnels
 		cardPane.add(new JPanel(), SOLDER);					// A solder
@@ -321,6 +270,22 @@ class PermanentEditor {
 	}
 	
 	/**
+	 * Crée une liste déroulante des comptes.
+	 * <p>
+	 * Les comptes sont insérés dans la liste déroulante, et l'affichage est
+	 * paramétré avec un Renderer approprié.<br>
+	 * Si la liste déroulante contient déjà quelque chose, son contenu est
+	 * supprimé.
+	 * @throws IOException 
+	 */
+	private static JComboBox<Compte> createComptesComboBox() throws IOException {
+		JComboBox<Compte> combo =
+				new JComboBox<>(new DefaultComboBoxModel<>(getComptes()));
+		combo.setRenderer(new ComptesComboBoxRenderer());
+		return combo;
+	}
+
+	/**
 	 * Renvoie tous les comptes dans un tableau trié.
 	 * 
 	 * @return	Un tableau contenant tous les comptes triés par ordre naturel.
@@ -330,69 +295,51 @@ class PermanentEditor {
 	private static Compte[] getComptes() throws IOException {
 		Collection<Compte> comptes =
 				DAOFactory.getFactory().getCompteDAO().getAll();
-		Compte[] arrayComptes = comptes.toArray(new Compte[comptes.size()]);
-		Arrays.sort(arrayComptes);
-		return arrayComptes;
+		return comptes.toArray(new Compte[comptes.size()]);
 	}
 	
 	/**
-	 * Crée une liste déroulante des comptes.
-	 * <p>
-	 * Les comptes sont insérés dans la liste déroulante, et l'affichage est
-	 * paramétré avec un Renderer approprié.<br>
-	 * Si la liste déroulante contient déjà quelque chose, son contenu est
-	 * supprimé.
+	 * Crée  un spinner permettant d'éditer un pourcentage.
 	 * 
-	 * @param comptes	Les comptes à insérer dans la liste déroulante.
+	 * @return	Un nouveau spinner.
 	 */
-	private static JComboBox<Compte> createComptesComboBox(Compte[] comptes) {
-		JComboBox<Compte> combo =
-				new JComboBox<>(new DefaultComboBoxModel<>(comptes));
-		combo.setRenderer(new ComptesComboBoxRenderer());
-		return combo;
+	private static JSpinner createSpinnerTaux() {
+		JSpinner spinner = 
+				new JSpinner(new SpinnerNumberModel(0.0, 0.0, null, 0.1));
+		spinner.setEditor(new JSpinner.NumberEditor(spinner, "0.00 '%'"));
+		return spinner;
 	}
 
 	/**
-	 * Configure les boutons radios de choix du type d'opération.
+	 * Affecte à un composant une bordure avec un titre en italique.
+	 * 
+	 * @param comp	Le composant.
+	 * @param title	Le texte du titre à mettre dans la bordure.
 	 */
-	private void initTypeButtons() {
-		ButtonGroup groupeType = new ButtonGroup();
-		radioFixe.setActionCommand(FIXE);
-		radioProport.setActionCommand(PROPORTIONNEL);
-		radioSolder.setActionCommand(SOLDER);
-		JRadioButton[] radios = {radioFixe, radioProport, radioSolder};
-		for (JRadioButton radio : radios) {			// Pour chaque bouton
-			radio.addActionListener(typeController);// Ajouter le Listener
-			typeController.buttonMap.put(			// Associer commande/bouton
-					radio.getActionCommand(), radio);
-			groupeType.add(radio);					// Ajouter au groupe
-		}
+	private static void createItalicTitle(JComponent comp, String title) {
+		TitledBorder titledBorder = BorderFactory.createTitledBorder(title);
+		setTitleInItalic(titledBorder, comp);
+		comp.setBorder(titledBorder);
 	}
 	
 	/**
-	 * Crée un panneau contenant les boutons de choix du type d'opération.
+	 * Met en italique la police d'un titre de bordure.
 	 * 
-	 * @return	Un panneau.
+	 * @param border	La bordure.
+	 * @param comp		Le composant entouré par la bordure. Il n'est utilisé
+	 * 					que pour récupérer la police au cas où elle ne soit pas
+	 * 					fournier par le <code>UIManager</code>.
 	 */
-	private static JPanel createTypePanel() {
-		JPanel typePanel = new JPanel();
-		typePanel.setLayout(new BoxLayout(typePanel, BoxLayout.PAGE_AXIS));
-		TitledBorder titre =
-				BorderFactory.createTitledBorder("Type d'opération");
-		
-		// Récupérer la police du titre (ou une autre) et la mettre en italique
-		Font font = titre.getTitleFont();
+	private static void setTitleInItalic(TitledBorder border, Component comp) {
+		Font font = border.getTitleFont();
 		if (font == null) {
 			font = UIManager.getFont("TitledBorder.font");
 		}
 		if (font == null) {
-			font = typePanel.getFont();
+			font = comp.getFont();
 		}
-		font = font.deriveFont(Font.ITALIC);		// Police italique(pas gras)
-		titre.setTitleFont(font);
-	
-		typePanel.setBorder(titre);					// Appliquer la bordure
-		return typePanel;
+		font = font.deriveFont(Font.ITALIC);
+		border.setTitleFont(font);
 	}
 	
 	/**
@@ -406,15 +353,46 @@ class PermanentEditor {
 	 */
 	private static JTable createPlannerTable(PlannerTableModel model) {
 		JTable table = new JTable(model);
-		
-		// Éditeur spécifique pour les mois
 		table.setDefaultEditor(Month.class, new MonthCellEditor());
-		
 		table.setDefaultRenderer(BigDecimal.class,
 				new FinancialTable.MontantTableCellRenderer());
 		return table;
 	}
 	
+	/**
+	 * Crée un panneau contenant les boutons de choix du type d'opération.
+	 * 
+	 * @return	Un nouveau panneau.
+	 */
+	private JPanel createTypePanel() {
+		initTypeButtons();
+		
+		JPanel typePanel = new JPanel();
+		typePanel.setLayout(new BoxLayout(typePanel, BoxLayout.PAGE_AXIS));
+		typePanel.add(radioFixe);
+		typePanel.add(radioProport);
+		typePanel.add(radioSolder);
+		
+		createItalicTitle(typePanel, "Type d'opération");
+		return typePanel;
+	}
+
+	/**
+	 * Configure les boutons radios de choix du type d'opération.
+	 */
+	private void initTypeButtons() {
+		ButtonGroup groupeType = new ButtonGroup();
+		radioFixe.setActionCommand(FIXE);
+		radioProport.setActionCommand(PROPORTIONNEL);
+		radioSolder.setActionCommand(SOLDER);
+		JRadioButton[] radios = {radioFixe, radioProport, radioSolder};
+		for (JRadioButton radio : radios) {
+			groupeType.add(radio);
+			radio.addActionListener(
+					e -> cardLayout.show(cardPane, e.getActionCommand()));
+		}
+	}
+
 	/**
 	 * Renvoie le nom saisi pour l'opération permanente.
 	 * 
@@ -609,5 +587,42 @@ class PermanentEditor {
 	 */
 	void setMontants(Map<Month, BigDecimal> montants) {
 		plannerMontants.setMap(montants);
+	}
+	
+	/**
+	 * Renvoie une chaîne correspondant au type saisi pour l'opération
+	 * permanente.
+	 * 
+	 * @return	{@link #FIXE}, {@link #PROPORTIONNEL}, {@link #SOLDER} ou
+	 * 			<code>null</code> si aucun des trois boutons n'est sélectionné.
+	 */
+	String getType() {
+		if (radioFixe.isSelected())
+			return FIXE;
+		if (radioProport.isSelected())
+			return PROPORTIONNEL;
+		if (radioSolder.isSelected())
+			return SOLDER;
+		return null;
+	}
+	
+	/**
+	 * Définit le type à afficher pour l'opération permanente.
+	 * 
+	 * @param type	{@link #FIXE}, {@link #PROPORTIONNEL} ou {@link #SOLDER}.
+	 */
+	void setType(String type) {
+		switch(type) {
+		case FIXE:
+			radioFixe.doClick();
+			break;
+		case PROPORTIONNEL:
+			radioProport.doClick();
+			break;
+		case SOLDER:
+			radioSolder.doClick();
+			break;
+		default:
+		}
 	}
 }
