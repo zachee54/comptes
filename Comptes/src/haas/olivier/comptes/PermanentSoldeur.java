@@ -6,43 +6,35 @@ package haas.olivier.comptes;
 import haas.olivier.util.Month;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 /**
- * Une opération permanente dont le montant correspond au solde d'un compte
- * bancaire.<br>
+ * L'état d'une opération permanente dont le montant correspond au solde d'un
+ * compte bancaire.<br>
  * Cette classe permet notamment de solder un compte.
  *
  * @author Olivier HAAS
  */
-public class PermanentSoldeur extends Permanent {
-	private static final long serialVersionUID = 4368594994048311019L;
+public class PermanentSoldeur implements PermanentState {
 
 	/**
-	 * Construit une opération permanente générant des écritures dont le
-	 * montant est égal au solde d'un compte bancaire prédéfini.
-	 * 
-	 * @param id			L'identifiant de l'opération.
-	 * @param nom			Le nom de l'opération.
-	 * @param compteASolder	Le compte bancaire à solder.
-	 * @param credit		Le compte à créditer.
-	 * @param libelle		Le libellé de l'écriture à générer.
-	 * @param tiers			Le nom du tiers dans l'écriture à générer.
-	 * @param pointer		<code>true</code> si les écritures générées doivent
-	 * 						être pointées par défaut.
-	 * @param jours			Le planning des jours de l'opération à générer,
-	 * 						selon les mois.
+	 * Le compte à solder.
 	 */
-	public PermanentSoldeur(Integer id, String nom,
-			Compte compteASolder, Compte credit,
-			String libelle, String tiers, boolean pointer,
-			Map<Month, Integer> jours) {
-		super(id, nom, compteASolder, credit, libelle, tiers, pointer, jours);
+	private final Compte compteASolder;
+	
+	/**
+	 * Construit un état d'opération permanente générant des écritures dont le
+	 * montant est égal au solde d'un compte prédéfini.
+	 * 
+	 * @param compteASolder	Le compte à solder. Il s'agit en principe d'un
+	 * 						compte bancaire, quoique ce ne soit pas obligatoire.
+	 */
+	public PermanentSoldeur(Compte compteASolder) {
+		this.compteASolder = compteASolder;
 	}
 
 	@Override
-	BigDecimal getMontant(Month month) {
-		return debit.getSoldeAVue(month.getPrevious());
+	public BigDecimal getMontant(Month month) {
+		return compteASolder.getSoldeAVue(month.getPrevious());
 	}
 
 }
