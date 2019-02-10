@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
  * 
  * @author Olivier Haas
  */
-public abstract class Permanent implements Comparable<Permanent>, Serializable {
+public class Permanent implements Comparable<Permanent>, Serializable {
 	private static final long serialVersionUID = 8897891019381288870L;
 	
 	/**
@@ -120,6 +121,11 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 	 * Détermine si l'écriture doit être pointée automatiquement.
 	 */
 	public final boolean pointer;
+	
+	/**
+	 * L'état déterminante le comportement de l'opération permanente.
+	 */
+	private PermanentState state = new PermanentFixe(Collections.emptyMap());
 
 	/**
 	 * Construit une opération permanente.
@@ -247,9 +253,31 @@ public abstract class Permanent implements Comparable<Permanent>, Serializable {
 	 * 				Si des informations manquent pour définir le montant au
 	 * 				titre de ce mois.
 	 */
-	abstract BigDecimal getMontant(Month month)
+	BigDecimal getMontant(Month month)
 			throws EcritureMissingArgumentException,
-			InconsistentArgumentsException;
+			InconsistentArgumentsException {
+		return state.getMontant(month);
+	}
+	
+	/**
+	 * Renvoie l'état actuel de l'opération permanente.
+	 * 
+	 * @return	L'état actuel de l'opération permanente.
+	 */
+	public PermanentState getState() {
+		return state;
+	}
+	
+	/**
+	 * Modifie l'état de l'opération permanente.
+	 * 
+	 * @param state	Le nouvel état de l'opération permanente.
+	 */
+	public void setState(PermanentState state) {
+		if (state == null)
+			throw new NullPointerException();
+		this.state = state;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
