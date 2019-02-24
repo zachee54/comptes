@@ -27,6 +27,7 @@ import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
+import haas.olivier.comptes.PermanentState;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.xml.jaxb.perm.Jours;
 import haas.olivier.comptes.dao.xml.jaxb.perm.Jours.Jour;
@@ -128,11 +129,14 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		result.setJours(prepareJours(p.jours));
 		
 		// Selon le type d'opération
-		if (p instanceof PermanentFixe) {
-			result.setMontants(prepareMontants(((PermanentFixe) p).montants));
+		PermanentState state = p.getState();
+		if (state instanceof PermanentFixe) {
+			result.setMontants(
+					prepareMontants(((PermanentFixe) state).montants));
 			
-		} else if (p instanceof PermanentProport) {
-			result.setDependance(prepareDependance(((PermanentProport) p)));
+		} else if (state instanceof PermanentProport) {
+			result.setDependance(
+					prepareDependance(((PermanentProport) state)));
 		}
 		
 		return result;
@@ -280,7 +284,6 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		// Récupérer l'objet JAXB
 		Permanent p = it.next();
 
-		// Caractéristiques de l'opération permanente
 		id = p.getId();
 		String nom = p.getNom();
 		String libelle = p.getLibelle();
@@ -290,25 +293,29 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		boolean pointer = p.isPointage();
 		Map<Month, Integer> jours = readJours(p.getJours());
 		Montants montants = p.getMontants();
-		
-		// Cas des opérations à montants prédéfinis
-		// TODO Refactoriser les constructeurs des permanents
-		if (montants != null) {
-			return new PermanentFixe(id, nom, debit, credit, libelle, tiers,
-					pointer, jours, readMontants(montants));
-		}
-			
-		// Cas des opérations dépendantes
 		Dependance dependance = p.getDependance();
-		if (dependance != null) {
-			return new PermanentProport(id, nom, debit, credit, libelle, tiers,
-					pointer, jours, cache.get(dependance.getId()),
+		
+		// Instancier le POJO
+		haas.olivier.comptes.Permanent result =
+				new haas.olivier.comptes.Permanent(id, nom, debit, credit,
+						libelle, tiers, pointer, jours);
+		
+		// Déterminer son état
+		PermanentState state = null;
+		if (montants != null) {		// Cas des opérations à montants prédéfinis
+			state = new PermanentFixe(readMontants(montants));
+			
+		} else if (dependance != null) {	// Cas des opérations dépendantes
+			state = new PermanentProport(
+					cache.get(dependance.getId()),
 					new BigDecimal(dependance.getTaux().toString()));
+			
+		} else {			// Cas des opérations qui soldent un compte bancaire
+			state = new PermanentSoldeur(debit);
 		}
 		
-		// Cas des opérations qui soldent un compte bancaire
-		return new PermanentSoldeur(
-				id, nom, debit, credit, libelle, tiers, pointer, jours);
+		result.setState(state);
+		return result;
 	}
 	
 	/**

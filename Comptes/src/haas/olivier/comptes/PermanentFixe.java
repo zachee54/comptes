@@ -10,12 +10,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Une opération permanente dont les montants sont fixés à l'avance.
+ * L'état d'une opération permanente dont les montants sont fixés à l'avance.
  * 
  * @author Olivier HAAS
  */
-public class PermanentFixe extends Permanent {
-	private static final long serialVersionUID = 64066058680125938L;
+public class PermanentFixe implements PermanentState {
 
 	/**
 	 * Montants prédéfinis par mois.
@@ -23,26 +22,13 @@ public class PermanentFixe extends Permanent {
 	public final Map<Month, BigDecimal> montants;
 
 	/**
-	 * Construit une opération permanente dont les montants sont fixés à
+	 * Construit un état d'opération permanente dont les montants sont fixés à
 	 * l'avance.
 	 * 
-	 * @param id		L'identifiant de l'opération.
-	 * @param nom		Le nom de l'opération.
-	 * @param debit		Le compte à débiter.
-	 * @param credit	Le compte à créditer.
-	 * @param libelle	Le libellé de l'écriture à générer.
-	 * @param tiers		Le nom du tiers dans l'écriture à générer.
-	 * @param pointer	<code>true</code> si les écritures générées doivent être
-	 * 					pointées par défaut.
-	 * @param jours		Le planning des jours de des écritures à générer, selon
-	 * 					les mois.
 	 * @param montants	Le planning des montants des écritures à générer, selon
 	 * 					les mois.
 	 */
-	public PermanentFixe(Integer id, String nom, Compte debit, Compte credit,
-			String libelle, String tiers, boolean pointer,
-			Map<Month, Integer> jours, Map<Month, BigDecimal> montants) {
-		super(id, nom, debit, credit, libelle, tiers, pointer, jours);
+	public PermanentFixe(Map<Month, BigDecimal> montants) {
 		this.montants = montants;
 	}
 
@@ -81,8 +67,7 @@ public class PermanentFixe extends Permanent {
 		// Si pas de date antérieure définie, lever une exception
 		if (maxMonthAmount == null) {
 			throw new InconsistentArgumentsException(
-					"Opération permanente " + nom
-					+ ": pas de montant trouvé avant le mois spécifié");
+					"Pas de montant trouvé avant le mois spécifié");
 		}
 
 		// Purger la liste des mois
