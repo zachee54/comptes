@@ -77,8 +77,10 @@ public class PermanentTest {
 		Ecriture e = new Ecriture(null, df.parse("02/07/12"), null, debit,
 				credit, new BigDecimal("23"), libelle, tiers, null);
 
-		Permanent perm = new PermanentFixe(7, "", debit, credit, libelle, tiers,
-				false, jours, montants);
+		Permanent perm = new Permanent(
+				7, "", debit, credit, libelle, tiers, false, jours);
+		perm.setState(new PermanentFixe(montants));
+		
 		assertEquals(e, perm.createEcriture(juin));
 	}
 
@@ -91,8 +93,10 @@ public class PermanentTest {
 		Ecriture e = new Ecriture(null, df.parse("18/09/12"), null,
 				compteASolder, credit, montant, libelle, tiers, null);
 
-		Permanent perm = new PermanentSoldeur(7, "", compteASolder, credit,
-				libelle, tiers, false, jours);
+		Permanent perm = new Permanent(
+				7, "", compteASolder, credit, libelle, tiers, false, jours);
+		perm.setState(new PermanentSoldeur(compteASolder));
+		
 		assertEquals(e, perm.createEcriture(aout.getNext()));
 	}
 
@@ -110,18 +114,23 @@ public class PermanentTest {
 				credit, new BigDecimal("302.14"), libelle, tiers, null);
 
 		// Créer une dépendance avec un taux de 2,01 %
-		Permanent perm = new PermanentProport(7, "", debit, credit, libelle,
-				tiers, false, jours, dependance, new BigDecimal("2.01"));
+		Permanent perm = new Permanent(7, "", debit, credit, libelle,
+				tiers, false, jours);
+		perm.setState(new PermanentProport(dependance, new BigDecimal("2.01")));
+		
 		assertEquals(e, perm.createEcriture(avril));
 	}
 
 	@Test
 	public void testCreateEcritureThrowException() {
-		PermanentFixe perm = new PermanentFixe(7, "", debit, credit, libelle,
-				tiers, false, jours, new HashMap<Month, BigDecimal>());
+		Permanent perm = new Permanent(
+				7, "", debit, credit, libelle, tiers, false, jours);
+		PermanentFixe state =
+				new PermanentFixe(new HashMap<Month, BigDecimal>());
+		perm.setState(state);
 
 		// Aucun montant
-		perm.montants.put(mai, new BigDecimal("5"));
+		state.montants.put(mai, new BigDecimal("5"));
 		try {
 			perm.createEcriture(avril);
 			fail("Doit lever une exception");

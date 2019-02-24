@@ -10,7 +10,6 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.diagram.DiagramMemento;
 import haas.olivier.util.Month;
@@ -51,7 +50,7 @@ public class CacheDAOFactoryTest {
 	private static Ecriture e;
 	
 	private static final Permanent PERMANENT =
-			new PermanentFixe(1, "permanent", COMPTE1, COMPTE2, "permanent", "tiers", false, new HashMap<Month, Integer>(), new HashMap<Month, BigDecimal>());
+			new Permanent(1, "permanent", COMPTE1, COMPTE2, "permanent", "tiers", false, new HashMap<Month, Integer>());
 	
 	private static final Month MONTH = Month.getInstance();
 	

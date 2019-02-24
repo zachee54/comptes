@@ -11,9 +11,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
-import haas.olivier.comptes.PermanentSoldeur;
+import haas.olivier.comptes.PermanentState;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.IdGenerator;
 import haas.olivier.comptes.dao.PermanentDAO;
@@ -97,10 +96,11 @@ public class CachePermanentDAO implements PermanentDAO {
 	 */
 	private void addWithDependances(Permanent permanent,
 			LinkedHashSet<Permanent> set) {
+		PermanentState state = permanent.getState();
 		
 		// Appel récursif pour s'assurer de l'insertion de la dépendance d'abord
-		if (permanent instanceof PermanentProport)
-			addWithDependances(((PermanentProport) permanent).dependance, set);
+		if (state instanceof PermanentProport)
+			addWithDependances(((PermanentProport) state).dependance, set);
 		
 		set.add(permanent);
 	}
@@ -115,23 +115,12 @@ public class CachePermanentDAO implements PermanentDAO {
 		
 		// Selon que l'opération à ajouter possède déjà un identifiant ou non
 		if (p.id == null) {
+			PermanentState state = p.getState();
 			
-			// Réinstancier avec un identifiant (selon le type d'opération)
-			if (p instanceof PermanentFixe) {
-				p = new PermanentFixe(idGen.getId(), p.nom, p.debit, p.credit,
-						p.libelle, p.tiers, p.pointer, p.jours,
-						((PermanentFixe) p).montants);
-				
-			} else if (p instanceof PermanentSoldeur) {
-				p = new PermanentSoldeur(idGen.getId(), p.nom, p.debit,
-						p.credit, p.libelle, p.tiers, p.pointer, p.jours);
-				
-			} else if (p instanceof PermanentProport) {
-				p = new PermanentProport(idGen.getId(), p.nom, p.debit,
-						p.credit, p.libelle, p.tiers, p.pointer, p.jours,
-						((PermanentProport) p).dependance,
-						((PermanentProport) p).taux);
-			}
+			// Réinstancier avec un identifiant
+			p = new Permanent(idGen.getId(), p.nom, p.debit, p.credit,
+					p.libelle, p.tiers, p.pointer, p.jours);
+			p.setState(state);
 			
 		} else if (permanents.containsKey(p.id)) {	// Identifiant existant
 			throw new IllegalArgumentException(
