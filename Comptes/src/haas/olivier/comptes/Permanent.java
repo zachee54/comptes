@@ -141,7 +141,8 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	 * @param jours		Le planning des jours de l'opération à générer, selon
 	 * 					les mois.
 	 */
-	Permanent(Integer id, String nom, Compte debit, Compte credit,
+	// TODO Simplifier le constructeur et prévoir des valeurs par défaut
+	public Permanent(Integer id, String nom, Compte debit, Compte credit,
 			String libelle, String tiers, boolean pointer,
 			Map<Month, Integer> jours) {
 		if (debit == null						// Il faut un compte de débit
