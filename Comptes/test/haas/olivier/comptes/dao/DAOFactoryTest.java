@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.Set;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
-import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.util.Month;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.TypeCompte;
@@ -86,9 +85,7 @@ public class DAOFactoryTest {
 	/**
 	 * Une opération permanente.
 	 */
-	private final Permanent permanent = new PermanentFixe(3, null, compte2,
-			compte1, "", "", false, Collections.<Month,Integer>emptyMap(),
-			Collections.<Month,BigDecimal>emptyMap());
+	private final Permanent permanent = new Permanent(3, null, compte2, compte1, "", "", false, Collections.<Month,Integer>emptyMap());
 	
 	@Before
 	public void setUp() throws Exception {

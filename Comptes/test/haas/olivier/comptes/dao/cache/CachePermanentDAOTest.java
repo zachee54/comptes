@@ -15,7 +15,6 @@ import java.util.Set;
 
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.PermanentFixe;
 import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
 import haas.olivier.comptes.dao.CompteDAO;
@@ -54,9 +53,11 @@ public class CachePermanentDAOTest {
 	public static void setUpBeforeClass() throws Exception {
 		
 		// Définir les opérations permanentes
-		p1 = new PermanentFixe(1, "permanent1", c1, c2, "libellé1", "tiers1", false, new HashMap<Month, Integer>(), new HashMap<Month, BigDecimal>());
-		p2 = new PermanentSoldeur(2, "permanent2", mock(Compte.class), c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
-		p3 = new PermanentProport(3, "permanent3", c2, c1, "libellé2", "tiers2", true, new HashMap<Month, Integer>(), p2, new BigDecimal("0.2"));
+		p1 = new Permanent(1, "permanent1", c1, c2, "libellé1", "tiers1", false, new HashMap<Month, Integer>());
+		p2 = new Permanent(2, "permanent2", mock(Compte.class), c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
+		p2.setState(new PermanentSoldeur(p2.debit));
+		p3 = new Permanent(3, "permanent3", c2, c1, "libellé2", "tiers2", true, new HashMap<Month, Integer>());
+				p3.setState(new PermanentProport(p2, new BigDecimal("0.2")));
 		
 		// Les ajouter à la collection
 		all.add(p1);
@@ -118,7 +119,7 @@ public class CachePermanentDAOTest {
 	public void testAdd() {
 		
 		// Nouvelle opération
-		Permanent p6 = new PermanentFixe(6, "permanent6", c2, c1, "libellé6", "tiers6", false, new HashMap<Month, Integer>(), new HashMap<Month, BigDecimal>());
+		Permanent p6 = new Permanent(6, "permanent6", c2, c1, "libellé6", "tiers6", false, new HashMap<Month, Integer>());
 		
 		// Méthode testée
 		dao.add(p6);
@@ -134,7 +135,8 @@ public class CachePermanentDAOTest {
 	public void testUpdate() {
 		
 		// Opération ayant un identifiant pré-existant
-		Permanent p2bis = new PermanentSoldeur(2, "permanent2bis", mock(Compte.class), c1, "libellé2bis", "tiers2bis", false, new HashMap<Month, Integer>());
+		Permanent p2bis = new Permanent(2, "permanent2bis", mock(Compte.class), c1, "libellé2bis", "tiers2bis", false, new HashMap<Month, Integer>());
+		p2bis.setState(new PermanentSoldeur(p2bis.debit));
 		
 		// Méthode testée
 		dao.update(p2bis);
