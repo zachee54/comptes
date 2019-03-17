@@ -8,16 +8,20 @@ import java.util.Collection;
 
 import haas.olivier.comptes.Permanent;
 
-/** L'interface d'accès aux données des opérations permanentes.
+/**
+ * L'interface d'accès aux données des opérations permanentes.
  * 
  * @author Olivier HAAS
  */
 public interface PermanentDAO {
 
-	/** Renvoie toutes les écritures permanentes. */
+	/**
+	 * Renvoie toutes les écritures permanentes.
+	 */
 	public Collection<Permanent> getAll() throws IOException;
 	
-	/** Renvoie une opération permanente.
+	/**
+	 * Renvoie une opération permanente.
 	 * 
 	 * @param id	L'identifiant de l'opération permanente à renvoyer.
 	 * 
@@ -26,22 +30,23 @@ public interface PermanentDAO {
 	 */
 	public Permanent get(int id);
 	
-	/** Ajoute une nouvelle opération permanente.
+	/**
+	 * Ajoute une nouvelle opération permanente.
+	 * <p>
+	 * Un nouvel identifiant est attribué à l'objet ajouté.
 	 * 
-	 * @param p	L'opération permanente à ajouter.
-	 * 
-	 * @return	Une nouvelle instance de l'opération permanente, comprenant en
-	 * 			plus un identifiant.
+	 * @param p	L'opération permanente à ajouter. Elle ne doit pas avoir encore
+	 * 			d'identifiant.
 	 */
-	public Permanent add(Permanent p);
+	public void add(Permanent p);
 	
-	/** Modifie une opération permanente existante.
-	 * 
-	 * @param p	La nouvelle opération permanente à mettre à jour.
+	/**
+	 * Modifie dans le modèle une opération permanente existante.
 	 */
 	public void update(Permanent p);
 	
-	/** Supprime une opération permanente.
+	/**
+	 * Supprime une opération permanente.
 	 * 
 	 * @param id	L'identifiant de l'opération permanente à supprimer.
 	 */
