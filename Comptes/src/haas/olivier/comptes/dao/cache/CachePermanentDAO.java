@@ -111,23 +111,11 @@ public class CachePermanentDAO implements PermanentDAO {
 	}
 
 	@Override
-	public Permanent add(Permanent p) {
+	public void add(Permanent p) {
 		
 		// Selon que l'opération à ajouter possède déjà un identifiant ou non
 		if (p.getId() == null) {
-			PermanentState state = p.getState();
-			
-			// Réinstancier avec un identifiant
-			p = new Permanent(	// FIXME Modifier plutôt que réinstancier
-					idGen.getId(),
-					p.getNom(),
-					p.getDebit(),
-					p.getCredit(),
-					p.getLibelle(),
-					p.getTiers(),
-					p.isPointee(),
-					p.getJours());
-			p.setState(state);
+			p.setId(idGen.getId());
 			
 		} else if (permanents.containsKey(p.getId())) {	// Identifiant existant
 			throw new IllegalArgumentException(String.format(
@@ -139,13 +127,16 @@ public class CachePermanentDAO implements PermanentDAO {
 		}
 		
 		mustBeSaved = true;							// Sauvegarde attendue
-		return p;
 	}
 
+	/**
+	 * Cette méthode marque seulement que le modèle a été modifié.
+	 * <p>
+	 * Le cache gardant les références vers les instances, l'objet est déjà
+	 * modifié dans le cache.
+	 */
 	@Override
 	public void update(Permanent p) {
-		remove(p.getId());							// Supprimer l'ancien
-		add(p);										// Ajouter le nouveau
 		mustBeSaved = true;
 	}
 
