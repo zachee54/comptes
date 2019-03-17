@@ -85,42 +85,42 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	/**
 	 * L'identifiant de l'opération permanente.
 	 */
-	public final Integer id;
+	private Integer id;
 	
 	/**
 	 * Le nom de l'opération permanente.
 	 */
-	public final String nom;
+	private String nom;
 	
 	/**
 	 * Les dates (quantièmes) des écritures à générer en fonction du mois.
 	 */
-	public final Map<Month, Integer> jours;
+	private final Map<Month, Integer> jours;
 	
 	/**
 	 * Le compte à débiter par les écritures générées.
 	 */
-	public final Compte debit;
+	private Compte debit;
 	
 	/**
 	 * Le compte à créditer par les écritures générées.
 	 */
-	public final Compte credit;
+	private Compte credit;
 	
 	/**
 	 * Le nom du tiers dans les écritures à générer.
 	 */
-	public final String tiers;
+	private String tiers;
 	
 	/**
 	 * Le libellé des écritures à générer.
 	 */
-	public final String libelle;
+	private String libelle;
 
 	/**
 	 * Détermine si l'écriture doit être pointée automatiquement.
 	 */
-	public final boolean pointer;
+	private boolean pointer;
 	
 	/**
 	 * L'état déterminante le comportement de l'opération permanente.
@@ -241,6 +241,32 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	}
 	
 	/**
+	 * Renvoie l'identifiant de l'opération permanente.
+	 * 
+	 * @return	L'identifiant de l'opération permanente. Peut être
+	 * 			<code>null</code>.
+	 */
+	public Integer getId() {
+		return id;
+	}
+	
+	/**
+	 * Définit l'identifiant de l'opération permanente.
+	 * <p>
+	 * L'identifiant peut être défini une seule fois.
+	 * 
+	 * @param id	L'identifiant de l'opération permanente.
+	 * 
+	 * @throws IllegaleStateException
+	 * 				Si l'identifiant a déjà été défini.
+	 */
+	public void setId(int id) {
+		if (this.id != null)
+			throw new IllegalStateException("Identifiant déjà défini : " + id);
+		this.id = id;
+	}
+	
+	/**
 	 * Renvoie le montant de l'écriture à générer (dépend de l'implémentation
 	 * concrète).
 	 * 
@@ -278,6 +304,126 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		if (state == null)
 			throw new NullPointerException();
 		this.state = state;
+	}
+	
+	/**
+	 * Renvoie le nom de l'opération permanente.
+	 * 
+	 * @return	Le nom de l'opération permanente.
+	 */
+	public String getNom() {
+		return nom;
+	}
+	
+	/**
+	 * Modifie le nom de l'opération permanente.
+	 * 
+	 * @param nom	Le nouveau nom de l'opération permanente.
+	 */
+	public void setNom(String nom) {
+		this.nom = nom;
+	}
+	
+	/**
+	 * Renvoie le compte debité.
+	 * 
+	 * @return	Le compte débité.
+	 */
+	public Compte getDebit() {
+		return debit;
+	}
+	
+	/**
+	 * Modifie le compte débité.
+	 * 
+	 * @param debit	Le nouveau compte débité.
+	 */
+	public void setDebit(Compte debit) {
+		this.debit = debit;
+	}
+	
+	/**
+	 * Renvoie le compte crédité.
+	 * 
+	 * @return	Le compte crédité.
+	 */
+	public Compte getCredit() {
+		return credit;
+	}
+	
+	/**
+	 * Modifie le compte crédité.
+	 * 
+	 * @param credit	Le nouveau compte crédité.
+	 */
+	public void setCredit(Compte credit) {
+		this.credit = credit;
+	}
+	
+	/**
+	 * Renvoie le nom du tiers.
+	 * 
+	 * @return	Le nom du tiers.
+	 */
+	public String getTiers() {
+		return tiers;
+	}
+	
+	/**
+	 * Modifie le nom du tiers.
+	 * 
+	 * @param tiers	Le nom du nouveau tiers.
+	 */
+	public void setTiers(String tiers) {
+		this.tiers = tiers;
+	}
+	
+	/**
+	 * Renvoie le libellé.
+	 * 
+	 * @return	Le libellé.
+	 */
+	public String getLibelle() {
+		return libelle;
+	}
+	
+	/**
+	 * Modifie le libellé.
+	 * 
+	 * @param libelle	Le nouveau libellé.
+	 */
+	public void setLibelle(String libelle) {
+		this.libelle = libelle;
+	}
+	
+	/**
+	 * Indique si les écritures générées sont pointées automatiquement.
+	 * 
+	 * @return	<code>true</code> si les écritures sont pointées
+	 * 			automatiquement.
+	 */
+	public boolean isPointee() {
+		return pointer;
+	}
+	
+	/**
+	 * Renvoie les dates (quantièmes) des écritures à générer en fonction des
+	 * mois.
+	 * 
+	 * @return	Les dates des écritures à générer en fonction des mois.
+	 */
+	public Map<Month, Integer> getJours() {
+		return jours;
+	}
+	
+	/**
+	 * Définit si les écritures doivent être pointées automatiquement.
+	 * 
+	 * @param pointer	<code>true</code> si les écritures doivent être pointées
+	 * 					automatiquement.
+	 */
+	public void setPointee(boolean pointer) {
+		this.pointer = pointer;
 	}
 
 	@Override
