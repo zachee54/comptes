@@ -62,8 +62,8 @@ public class CachePermanentDAO implements PermanentDAO {
 		Iterator<Permanent> perm = factory.getPermanents(this);
 		while (perm.hasNext()) {
 			Permanent p = perm.next();		// L'opération permanente
-			permanents.put(p.id, p);		// Ajouter l'opération permanente
-			idGen.addId(p.id);				// Mémoriser l'identifiant
+			permanents.put(p.getId(), p);	// Ajouter l'opération permanente
+			idGen.addId(p.getId());			// Mémoriser l'identifiant
 		}
 	}
 
@@ -114,21 +114,28 @@ public class CachePermanentDAO implements PermanentDAO {
 	public Permanent add(Permanent p) {
 		
 		// Selon que l'opération à ajouter possède déjà un identifiant ou non
-		if (p.id == null) {
+		if (p.getId() == null) {
 			PermanentState state = p.getState();
 			
 			// Réinstancier avec un identifiant
-			p = new Permanent(idGen.getId(), p.nom, p.debit, p.credit,
-					p.libelle, p.tiers, p.pointer, p.jours);
+			p = new Permanent(	// FIXME Modifier plutôt que réinstancier
+					idGen.getId(),
+					p.getNom(),
+					p.getDebit(),
+					p.getCredit(),
+					p.getLibelle(),
+					p.getTiers(),
+					p.isPointee(),
+					p.getJours());
 			p.setState(state);
 			
-		} else if (permanents.containsKey(p.id)) {	// Identifiant existant
-			throw new IllegalArgumentException(
-					"Impossible d'ajouter au modèle : L'opération n°" + p.id +
-					"existe déjà");
+		} else if (permanents.containsKey(p.getId())) {	// Identifiant existant
+			throw new IllegalArgumentException(String.format(
+					"Impossible d'ajouter au modèle : L'opération n°%s existe déjà",
+					p.getId()));
 			
 		} else {									// Identifiant inexistant
-			permanents.put(p.id, p);
+			permanents.put(p.getId(), p);
 		}
 		
 		mustBeSaved = true;							// Sauvegarde attendue
@@ -137,7 +144,7 @@ public class CachePermanentDAO implements PermanentDAO {
 
 	@Override
 	public void update(Permanent p) {
-		remove(p.id);								// Supprimer l'ancien
+		remove(p.getId());							// Supprimer l'ancien
 		add(p);										// Ajouter le nouveau
 		mustBeSaved = true;
 	}

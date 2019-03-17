@@ -83,7 +83,7 @@ public class JaxbPermanentDAOTest {
 		Permanent p2 = new Permanent(2, "permanent2", c2, c1, "libellé&2", "tiers2", true, new HashMap<Month, Integer>());
 		p2.setState(new PermanentProport(p1, new BigDecimal("0.2")));
 		Permanent p3 = new Permanent(3, "permanent3", c3, c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
-		p3.setState(new PermanentSoldeur(p3.debit));
+		p3.setState(new PermanentSoldeur(p3.getDebit()));
 		
 		// Ajouter dans la collection
 		permanents.add(p1);
@@ -91,14 +91,14 @@ public class JaxbPermanentDAOTest {
 		permanents.add(p3);
 		
 		// Définir des données plus précises
-		p1.jours.put(month, 15);
-		p1.jours.put(month2, 2);
-		p1.jours.put(month4, 0);
+		p1.getJours().put(month, 15);
+		p1.getJours().put(month2, 2);
+		p1.getJours().put(month4, 0);
 		p1State.montants.put(month0, new BigDecimal("514623.1"));
 		p1State.montants.put(month4, BigDecimal.TEN.negate());
-		p2.jours.put(month3, -15);
-		p3.jours.put(month, 7);
-		p3.jours.put(month4, 45);
+		p2.getJours().put(month3, -15);
+		p3.getJours().put(month, 7);
+		p3.getJours().put(month4, 45);
 	}
 	
 	@Test
@@ -127,7 +127,7 @@ public class JaxbPermanentDAOTest {
 				resultat.add(p);						// Stocker l'opération
 				
 				// Simuler son stockage dans le cache
-				when(cache.get(p.id)).thenReturn(p);
+				when(cache.get(p.getId())).thenReturn(p);
 			}
 			
 			assertFalse(dao.hasNext());					// Rien de plus

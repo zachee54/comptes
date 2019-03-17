@@ -55,7 +55,7 @@ public class CachePermanentDAOTest {
 		// Définir les opérations permanentes
 		p1 = new Permanent(1, "permanent1", c1, c2, "libellé1", "tiers1", false, new HashMap<Month, Integer>());
 		p2 = new Permanent(2, "permanent2", mock(Compte.class), c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
-		p2.setState(new PermanentSoldeur(p2.debit));
+		p2.setState(new PermanentSoldeur(p2.getDebit()));
 		p3 = new Permanent(3, "permanent3", c2, c1, "libellé2", "tiers2", true, new HashMap<Month, Integer>());
 				p3.setState(new PermanentProport(p2, new BigDecimal("0.2")));
 		
@@ -136,7 +136,7 @@ public class CachePermanentDAOTest {
 		
 		// Opération ayant un identifiant pré-existant
 		Permanent p2bis = new Permanent(2, "permanent2bis", mock(Compte.class), c1, "libellé2bis", "tiers2bis", false, new HashMap<Month, Integer>());
-		p2bis.setState(new PermanentSoldeur(p2bis.debit));
+		p2bis.setState(new PermanentSoldeur(p2bis.getDebit()));
 		
 		// Méthode testée
 		dao.update(p2bis);

@@ -119,14 +119,14 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		Permanent result = new Permanent();
 		
 		// Les caractéristiques générales de l'opération
-		result.setId(p.id);
-		result.setNom(p.nom);
-		result.setLibelle(p.libelle);
-		result.setTiers(p.tiers);
-		result.setCredit(p.credit.getId());
-		result.setDebit(p.debit.getId());
-		result.setPointage(p.pointer);
-		result.setJours(prepareJours(p.jours));
+		result.setId(p.getId());
+		result.setNom(p.getNom());
+		result.setLibelle(p.getLibelle());
+		result.setTiers(p.getTiers());
+		result.setCredit(p.getCredit().getId());
+		result.setDebit(p.getDebit().getId());
+		result.setPointage(p.isPointee());
+		result.setJours(prepareJours(p.getJours()));
 		
 		// Selon le type d'opération
 		PermanentState state = p.getState();
@@ -212,7 +212,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	 */
 	private static Dependance prepareDependance(PermanentProport p) {
 		Dependance result = new Dependance();
-		result.setId(p.dependance.id);
+		result.setId(p.dependance.getId());
 		result.setTaux(p.taux.doubleValue());
 		return result;
 	}
