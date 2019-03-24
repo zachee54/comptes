@@ -83,7 +83,7 @@ public class JaxbPermanentDAOTest {
 		Permanent p2 = new Permanent(2, "permanent2", c2, c1, "libellé&2", "tiers2", true, new HashMap<Month, Integer>());
 		p2.setState(new PermanentProport(p1, new BigDecimal("0.2")));
 		Permanent p3 = new Permanent(3, "permanent3", c3, c2, "libellé3", "tiers3", true, new HashMap<Month, Integer>());
-		p3.setState(new PermanentSoldeur(p3.getDebit()));
+		p3.setState(new PermanentSoldeur(p3));
 		
 		// Ajouter dans la collection
 		permanents.add(p1);

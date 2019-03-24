@@ -402,7 +402,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	 * @return	<code>true</code> si les écritures sont pointées
 	 * 			automatiquement.
 	 */
-	public boolean isPointee() {
+	public boolean isAutoPointee() {
 		return pointer;
 	}
 	

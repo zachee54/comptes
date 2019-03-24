@@ -68,6 +68,11 @@ class PermanentEditor {
 	public static final String SOLDER = "solder";
 	
 	/**
+	 * Le composant graphique principal.
+	 */
+	private final JPanel mainComponent;
+	
+	/**
 	 * Le bouton de sélection du type d'opérations permanentes à montants fixes.
 	 */
 	private final JRadioButton radioFixe = new JRadioButton("Fixe");
@@ -260,12 +265,11 @@ class PermanentEditor {
 		transversalPanel.add(cardPane);						//Panneau à la carte
 		
 		// Panneau d'édition
-		JPanel editionPane = new JPanel();
-		editionPane.setLayout(new BoxLayout(editionPane, BoxLayout.PAGE_AXIS));
-		editionPane.add(typePanel);							// Choix du type
-		editionPane.add(panelComptes);						// Choix du compte
-		editionPane.add(transversalPanel);
-//		editionPane.add(validationPanel);
+		mainComponent = new JPanel();
+		mainComponent.setLayout(new BoxLayout(mainComponent, BoxLayout.PAGE_AXIS));
+		mainComponent.add(typePanel);						// Choix du type
+		mainComponent.add(panelComptes);					// Choix du compte
+		mainComponent.add(transversalPanel);
 		
 	}
 	
@@ -391,6 +395,15 @@ class PermanentEditor {
 			radio.addActionListener(
 					e -> cardLayout.show(cardPane, e.getActionCommand()));
 		}
+	}
+	
+	/**
+	 * Renvoie le composant graphique de l'éditeur.
+	 * 
+	 * @return	Le composant graphique de l'éditeur.
+	 */
+	Component getComponent() {
+		return mainComponent;
 	}
 
 	/**

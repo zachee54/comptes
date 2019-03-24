@@ -17,24 +17,23 @@ import java.math.BigDecimal;
 public class PermanentSoldeur implements PermanentState {
 
 	/**
-	 * Le compte à solder.
+	 * L'opération permanente à laquelle appartient cet état.
 	 */
-	private final Compte compteASolder;
+	private final Permanent permanent;
 	
 	/**
 	 * Construit un état d'opération permanente générant des écritures dont le
-	 * montant est égal au solde d'un compte prédéfini.
+	 * montant est égal au solde du compte à débiter.
 	 * 
-	 * @param compteASolder	Le compte à solder. Il s'agit en principe d'un
-	 * 						compte bancaire, quoique ce ne soit pas obligatoire.
+	 * @param permanent	L'opération permanente à laquelle appartient cet état.
 	 */
-	public PermanentSoldeur(Compte compteASolder) {
-		this.compteASolder = compteASolder;
+	public PermanentSoldeur(Permanent permanent) {
+		this.permanent = permanent;
 	}
 
 	@Override
 	public BigDecimal getMontant(Month month) {
-		return compteASolder.getSoldeAVue(month.getPrevious());
+		return permanent.getDebit().getSoldeAVue(month.getPrevious());
 	}
 
 }
