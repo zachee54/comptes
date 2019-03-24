@@ -95,7 +95,7 @@ public class PermanentTest {
 
 		Permanent perm = new Permanent(
 				7, "", compteASolder, credit, libelle, tiers, false, jours);
-		perm.setState(new PermanentSoldeur(compteASolder));
+		perm.setState(new PermanentSoldeur(perm));
 		
 		assertEquals(e, perm.createEcriture(aout.getNext()));
 	}

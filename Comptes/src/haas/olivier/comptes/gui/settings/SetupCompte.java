@@ -193,7 +193,6 @@ public class SetupCompte {
 	 * Re-remplit la liste graphique des comptes.
 	 */
 	private void fillComptesList() {
-		Compte selection = controller.getCompte();
 		
 		// Tout insérer dans le modèle
 		DefaultListModel<Compte> listModel = new DefaultListModel<>();
@@ -202,7 +201,7 @@ public class SetupCompte {
 		listComptes.setModel(listModel);
 		
 		// Sélectionner le bon item
-		listComptes.setSelectedValue(selection, true);
+		listComptes.setSelectedValue(controller.getCompte(), true);
 	}
 
 	/**
@@ -261,8 +260,8 @@ public class SetupCompte {
 	private Component createValidationPanel() {
 		JButton appliquer = new JButton("OK");
 		JButton quitter = new JButton("Quitter");
-		appliquer.addActionListener(
-				EventHandler.create(ActionListener.class, this, "applyAndQuit"));
+		appliquer.addActionListener(EventHandler.create(
+				ActionListener.class, this, "applyAndQuit"));
 		quitter.addActionListener(quitActionListener);
 
 		// Barre contenant les boutons

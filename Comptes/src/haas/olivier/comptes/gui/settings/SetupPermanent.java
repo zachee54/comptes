@@ -3,72 +3,37 @@
  */
 package haas.olivier.comptes.gui.settings;
 
-import haas.olivier.comptes.Compte;
-import haas.olivier.util.Month;
 import haas.olivier.comptes.Permanent;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.gui.SimpleGUI;
-import haas.olivier.comptes.gui.table.ComptesComboBoxRenderer;
-import haas.olivier.comptes.gui.table.FinancialTable;
-
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.beans.EventHandler;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.UIManager;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelListener;
-import javax.swing.text.JTextComponent;
 
 /**
  * Une boîte de dialogue pour paramétrer les Permanents. 
@@ -78,279 +43,16 @@ import javax.swing.text.JTextComponent;
 public class SetupPermanent {
 	
 	/**
-	 * Un médiateur entre les données de l'interface et les données du modèle.
-	 */
-	public class DataMediator {
-		
-		/**
-		 * Le contrôleur de données. Il contrôle le <code>Permanent<code> à
-		 * éditer.
-		 */
-		private PermanentController controller;
-		
-		/**
-		 * Drapeau indiquant si l'interface est en cours de mise à jour du fait
-		 * du changement de contrôleur.<br>
-		 * Dans ce cas, la classe ne doit pas réagir aux événements générés par
-		 * les champs de saisie.
-		 */
-		private boolean updating = false;
-		
-		/**
-		 * Construit un médiateur de données entre l'interface graphique et les
-		 * données du modèle.
-		 * <p>
-		 * L'objet écoute les modifications de tous les champs de saisie et les
-		 * répercute sur le contrôleur en cours.
-		 */
-		private DataMediator() {
-			nom.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "nomChanged"));
-			libelle.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "libelleChanged"));
-			tiers.getDocument().addDocumentListener(EventHandler.create(
-					DocumentListener.class, this, "tiersChanged"));
-			pointer.addItemListener(EventHandler.create(
-					ItemListener.class, this, "setPointer", "stateChange"));
-			jours.addTableModelListener(EventHandler.create(
-					TableModelListener.class, this, "joursChanged"));
-			montants.addTableModelListener(EventHandler.create(
-					TableModelListener.class, this, "montantsChanged"));
-			taux.addChangeListener(EventHandler.create(
-					ChangeListener.class, this, "tauxChanged", ""));
-			debit.addItemListener(EventHandler.create(
-					ItemListener.class, this, "debitChanged"));
-			credit.addItemListener(EventHandler.create(
-					ItemListener.class, this, "creditChanged"));
-			dependance.addItemListener(EventHandler.create(
-					ItemListener.class, this, "dependanceChanged"));
-		}
-		
-		/**
-		 * Renvoie le contrôleur vers lequel pointe actuellement le médiateur.
-		 */
-		PermanentController getController() {
-			return controller;
-		}
-		
-		/**
-		 * Remplace le contrôleur de référence. Les données du nouveau
-		 * contrôleur sont retranscrites dans l'interface graphique.
-		 */
-		public void setController(PermanentController controller) {
-	
-			// Ignorer la valeur null
-			if (controller == null)
-				return;
-			
-			this.controller = controller;
-			updateFromController();
-		}
-		
-		/**
-		 * Met à jour l'interface graphique à partir des données du contrôleur.
-		 */
-		void updateFromController() {
-			updating = true;
-			typeController.changeVue(controller.getType());
-			nom.setText(controller.getNom());
-			libelle.setText(controller.getLibelle());
-			tiers.setText(controller.getTiers());
-			pointer.setSelected(controller.getPointer());
-			debit.setSelectedItem(controller.getDebit());
-			credit.setSelectedItem(controller.getCredit());
-			jours.setMap(controller.getJours());
-			montants.setMap(controller.getMontants());
-			
-			// Taux
-			BigDecimal decTaux = controller.getTaux();
-			if (decTaux != null)
-				taux.setValue(controller.getTaux());	// Taux non null
-			/*
-			 * Les ItemListener sont notifiés que lorsque la modification vient
-			 * de l'utilisateur, pas en cas de changement programmatique. On
-			 * peut donc renvoyer vers le contrôleur sans tester le drapeau
-			 * updating.
-			 */
-			
-			// Contenu de la combo box de dépendance
-			updateDependanceComboBox();
-			
-			updating = false;
-		}
-		
-		/**
-		 * Met à jour la combo box des opérations de dépendance.<br>
-		 * Elle supprime le contenu actuel et y insère tous les
-		 * <code>Permanent</code>s, sauf celui qui dépend du contrôleur
-		 * actuellement sélectionné.
-		 * <p>
-		 * À l'issue de la méthode, la dépendance actuelle est sélectionnée,
-		 * s'il y en a une.
-		 */
-		private void updateDependanceComboBox() {
-			dependance.removeAllItems();
-			
-			controllers.stream()
-			.filter(c -> c != controller)
-			.map(PermanentController::getPermanent)
-			.forEach(p -> dependance.addItem(p)); 
-			
-			dependance.setSelectedItem(controller.getDependance());
-		}
-		
-		/**
-		 * Met à jour le compte débité dans le contrôleur actuel.
-		 */
-		public void debitChanged() {
-			if (updating)
-				return;
-			
-			Object selectedDebit = debit.getSelectedItem();
-			controller.setDebit(
-					selectedDebit instanceof Compte
-					? (Compte) selectedDebit
-					: null);
-		}
-		
-		/**
-		 * Met à jour le compte crédité dans le contrôleur actuel.
-		 */
-		public void creditChanged() {
-			if (updating)
-				return;
-			
-			Object selectedCredit = credit.getSelectedItem();
-			controller.setCredit(
-					selectedCredit instanceof Compte
-					? (Compte) selectedCredit
-					: null);
-		}
-		
-		/**
-		 * Met à jour la dépendance dans le contrôleur actuel.
-		 */
-		public void dependanceChanged() {
-			if (updating)
-				return;
-			
-			Object selectedDependance = dependance.getSelectedItem();
-			controller.setDependance(
-					selectedDependance instanceof Permanent
-					? (Permanent) selectedDependance
-					: null);
-		}
-	
-		/**
-		 * Met à jour le nom de l'opération permanente dans le contrôleur
-		 * actuel.
-		 */
-		public void nomChanged() {
-			if (!updating)
-				controller.setNom(nom.getText());
-		}
-		
-		/**
-		 * Met à jour le libellé de l'opération permanente dans le contrôleur
-		 * actuel.
-		 */
-		public void libelleChanged() {
-			if (!updating)
-				controller.setLibelle(libelle.getText());
-		}
-		
-		/**
-		 * Met à jour le nom du tiers dans l'opération permanente dans le
-		 * contrôleur actuel.
-		 */
-		public void tiersChanged() {
-			if (!updating)
-				controller.setTiers(tiers.getText());
-		}
-		
-		/**
-		 * Active ou désactive le pointage de l'opération permanente dans le
-		 * contrôleur actuel.
-		 * 
-		 * @param state	{@link java.awt.event.ItemEvent#SELECTED} ou
-		 * 				{@link java.awt.event.ItemEvent#DESELECTED}.
-		 */
-		public void setPointer(int state) {
-			if (updating)
-				return;
-			
-			if (state == ItemEvent.SELECTED) {
-				controller.setPointer(true);
-			} else if (state == ItemEvent.DESELECTED) {
-				controller.setPointer(false);
-			}
-		}
-	
-		/**
-		 * Reçoit les notifications de changements sur le planning des jours et
-		 * les renvoie au contrôleur.
-		 * <p>
-		 * Pour les tables de jours et de montants, la classe
-		 * <code>PlannerTableModel</code> utilise une
-		 * <code>Map&lt;Month,Object&gt;</code> pour permettre l'héritage entre
-		 * les deux tables.<br>
-		 * Il faut transférer les entrées de cette Map vers une
-		 * <code>Map&lt;Month,Integer&gt;</code> ou
-		 * <code>Map&lt;Month,BigDecimal&gt;</code> avant de l'envoyer au
-		 * contrôleur de données.
-		 */
-		public void joursChanged() {
-			controller.setJours(
-					jours.getMap().entrySet().stream()
-					.collect(castValueAndCollect()));
-		}	
-			
-		/**
-		 * Reçoit les notifications de changements sur le planning des montants
-		 * et les renvoie au contrôleur.
-		 * <p>
-		 * Pour les tables de jours et de montants, la classe
-		 * <code>PlannerTableModel</code> utilise une
-		 * <code>Map&lt;Month,Object&gt;</code> pour permettre l'héritage entre
-		 * les deux tables.<br>
-		 * Il faut transférer les entrées de cette Map vers une
-		 * <code>Map&lt;Month,Integer&gt;</code> ou
-		 * <code>Map&lt;Month,BigDecimal&gt;</code> avant de l'envoyer au
-		 * contrôleur de données.
-		 */
-		public void montantsChanged() {		
-			controller.setMontants(
-					montants.getMap().entrySet().stream()
-					.collect(castValueAndCollect()));
-		}
-		
-		/**
-		 * Renvoie un collecteur qui caste les valeurs de chaque entrée.
-		 * 
-		 * @return	Un collecteur qui prend un flux de
-		 * 			<code>Entry&lt;Month, Object&gt;</code> et renvoie une
-		 * 			<code>Map&lt;Month, T&gt;</code>.
-		 */
-		@SuppressWarnings("unchecked")
-		private <T> Collector<Entry<Month, Object>, ?, Map<Month, T>>
-		castValueAndCollect() {
-			return Collectors.toMap(e -> e.getKey(), e -> (T) e.getValue());
-		}
-	
-		/**
-		 * Actualise le taux de l'opération permanente dans le contrôleur
-		 * actuel, à partir du montant figurant dans le spinner.
-		 */
-		public void tauxChanged(ChangeEvent e) {
-			controller.setTaux(new BigDecimal(taux.getValue().toString()));
-		}
-	}// inner class DataMediator
-
-	/**
 	 * Le Logger de cette classe.
 	 */
 	private static final Logger LOGGER =
 			Logger.getLogger(SetupPermanent.class.getName());
+
+	/**
+	 * Action pour quitter.
+	 */
+	private final ActionListener quitActionListener =
+			EventHandler.create(ActionListener.class, this, "askAndQuit");
 	
 	/**
 	 * Le GUI associé.
@@ -363,20 +65,14 @@ public class SetupPermanent {
 	private final JDialog dialog;
 	
 	/**
-	 * Médiateur entre les données de l'IHM et du modèle.
+	 * Le contrôleur qui gère l'éditeur graphique d'opération permanente.
 	 */
-	private final DataMediator dataMediator;
+	private final PermanentEditorController controller;
 	
 	/**
-	 * La collection ordonnée de contrôleurs de <code>Permanent</code>s.
+	 * Liste graphique des opérations permanentes.
 	 */
-	private ArrayList<PermanentController> controllers;
-	
-	/**
-	 * Liste graphique des Permanents. Elle contient en fait des instances de
-	 * <code>PermanentController</code>, transparents pour l'utilisateur.
-	 */
-	private final JList<PermanentController> listPermanents;
+	private final JList<Permanent> listPermanents;
 	
 	/**
 	 * Construit une boîte de dialogue de gestion des <code>Permanent</code>s.
@@ -390,60 +86,30 @@ public class SetupPermanent {
 	 */
 	public SetupPermanent(JFrame owner, SimpleGUI gui) throws IOException {
 		this.gui = gui;
+
+		PermanentEditor editor = new PermanentEditor();
+		controller = new PermanentEditorController(editor);
+		listPermanents = createPermanentList();
+		fillPermanentList();
+		UniversalAction actionQuitter = new UniversalAction(quitActionListener);
 		
-		/*
-		 * Le médiateur de données ne peut pas être instancié dans sa
-		 * déclaration parce que son constructeur a besoin des variables
-		 * d'instance de SetupPermanent, instanciées également lors de leurs
-		 * déclarations.
-		 * Je ne veux pas devoir gérer des priorités entre variables d'instance.
-		 */
-		dataMediator = new DataMediator();
+		// Panneau principal
+		JPanel main = new JPanel(new BorderLayout());
+		main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		main.add(createListPermanentsPanel(), BorderLayout.WEST);
+		main.add(createEditionPanel(editor));
+		main.add(createValidationPanel(), BorderLayout.SOUTH);
+		setActionOnEscape(actionQuitter, main);
 		
-		listPermanents = createPermanentList(dataMediator);
-		updatePermanentList(null);
-		
-		// Disposer tout ensemble
-		JPanel main = createContent();
-		
-		// Lier la touche ESC à l'action de quitter
-		UniversalAction actionQuitter = new UniversalAction(EventHandler.create(
-				ActionListener.class, this, "confirmAndQuit"));
-		main.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
-		main.getActionMap().put("quitter", actionQuitter);
-		
-		// Cadre principal
+		// Fenêtre principale
 		dialog = new JDialog(owner, "Gestion des opérations permanentes");
-		dialog.add(main);
-		
-		// Remplacer la fermeture par l'action personnalisée
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		dialog.addWindowListener(actionQuitter);
-		
+		dialog.add(main);
 		dialog.setPreferredSize(new Dimension(900,600));
 		dialog.pack();
-		dialog.setLocationRelativeTo(null);
+		dialog.setLocationRelativeTo(null);					// Centrer
 		dialog.setVisible(true);
-	}
-	
-	/**
-	 * Crée une liste graphique des contrôleurs d'opérations permanentes.
-	 * 
-	 * @param dataMediator	Le médiateur de données auquel notifier les
-	 * 						changements de sélection.
-	 * 
-	 * @return				Une nouvelle liste graphique des contrôleurs
-	 * 						d'opérations permanentes.
-	 */
-	private static JList<PermanentController> createPermanentList(
-			DataMediator dataMediator) {
-		JList<PermanentController> list = new JList<>();
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.addListSelectionListener(EventHandler.create(
-				ListSelectionListener.class, dataMediator, "setController",
-				"source.selectedValue"));
-		return list;
 	}
 	
 	/**
@@ -453,98 +119,44 @@ public class SetupPermanent {
 	 * 
 	 * @return	Une nouvelle collection des <code>Permanent</code>s et d'un
 	 * 			élément <code>null</code>.
-	 * 
-	 * @throws IOException
-	 * 			En cas d'erreur pendant la récupération des
-	 * 			<code>Permanent</code>s.
 	 */
-	private static Collection<Permanent> getAllPermanentsAndNull()
-			throws IOException {
-		Collection<Permanent> permanents = new ArrayList<>();
-		permanents.add(null);
-		permanents.addAll(DAOFactory.getFactory().getPermanentDAO().getAll());
+	private static Collection<Permanent> getAllPermanentsAndNull() {
+		List<Permanent> permanents = new ArrayList<>();
+		permanents.addAll(getAllPermanents());
+		Collections.sort(permanents);
+		permanents.add(0, null);
 		return permanents;
+	}
+	
+	/**
+	 * Renvoie une liste de l'ensemble des opérations permanentes.
+	 * 
+	 * @return	Une liste de l'ensemble des opérations permanentes, ou une liste
+	 * 			vide si une erreur survient pendant la lecture de données.
+	 */
+	private static Collection<Permanent> getAllPermanents() {
+		try {
+			return DAOFactory.getFactory().getPermanentDAO().getAll();
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE,
+					"Erreur lors de la récupération des opérations permanentes",
+					e);
+			return Collections.emptyList();
+		}
 	}
 
 	/**
-	 * Crée un panneau contenant tous les éléments graphiques.
-	 */
-	private JPanel createContent() {		
-		
-		// Liste des permanents dans un ScrollPane
-		JScrollPane scrollList = new JScrollPane(listPermanents);
-		scrollList.setPreferredSize(
-				new Dimension(150, scrollList.getPreferredSize().height));
-	
-		// Panneau des boutons de validation
-		JPanel validationPanel = new JPanel();
-		validationPanel.setLayout(
-				new BoxLayout(validationPanel, BoxLayout.LINE_AXIS));
-		
-		// Boutons de validation
-		JButton reset		= new JButton("Réinitialiser");
-		JButton valider		= new JButton("Valider");
-		JButton appliquer	= new JButton("Appliquer");
-		JButton supprimer	= new JButton("Supprimer");
-		JButton quitter		= new JButton("Quitter");
-		reset.addActionListener(EventHandler.create(
-				ActionListener.class, this, "resetCurrent"));
-		valider.addActionListener(EventHandler.create(
-				ActionListener.class, this, "applyAllAndQuit"));
-		appliquer.addActionListener(EventHandler.create(
-				ActionListener.class, this, "applyAllAndGetSelection"));
-		supprimer.addActionListener(EventHandler.create(
-				ActionListener.class, this, "confirmAndDelete"));
-		quitter.addActionListener(EventHandler.create(
-				ActionListener.class, this, "confirmAndQuit"));
-		validationPanel.add(supprimer);
-		validationPanel.add(Box.createHorizontalGlue());	// Pousser à droite
-		validationPanel.add(reset);
-		validationPanel.add(appliquer);
-		validationPanel.add(valider);
-		validationPanel.add(quitter);
-		// Panneau général
-		JPanel main = new JPanel(new BorderLayout());
-		main.setBorder(										// Créer une marge
-				BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		main.add(scrollList, BorderLayout.WEST);			// Liste Permanents
-		main.add(editionPane);								// Panneau d'édition
-		return main;
-	}
-	
-	/**
-	 * Crée de nouveaux contrôleurs et les affiche dans la liste graphique.
+	 * Crée une liste graphique des opérations permanentes.
 	 * 
-	 * @param selection	Le <code>Permanent</code> à sélectionner après la mise à
-	 * 					jour. Si <code>null</code>, sélectionne l'item
-	 * 					"Nouveau..."
-	 * 
-	 * @throws IOException
-	 * 					En cas d'erreur pendant la récupération des
-	 * 					<code>Permanent</code>s.
+	 * @return	Une nouvelle liste graphique des opérations permanentes.
 	 */
-	private void updatePermanentList(Permanent selection) throws IOException {
-		
-		// Liste des contrôleurs de Permanents
-		controllers = new ArrayList<>();
-		PermanentController selected = null;
-		for (Permanent p : getAllPermanentsAndNull()) {
-			PermanentController controller = new PermanentController(p);
-			controllers.add(controller);
-			if (p == selection) {			// p ET selection peuvent être null
-				selected = controller;		// Y compris le contrôleur Nouveau..
-			}
-		}
-		
-		// Trier
-		Collections.sort(controllers);
-		
-		// Remplir la liste avec ces contrôleurs
-		fillPermanentListFromControllers(selected);
-		
-		// Les changements intervenus jusqu'ici sont des effets de bord
-		for (PermanentController controller : controllers)
-			controller.assumeUnmodified();
+	private JList<Permanent> createPermanentList() {
+		JList<Permanent> list = new JList<>();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.addListSelectionListener(EventHandler.create(
+				ListSelectionListener.class, this, "setController",
+				"source.selectedValue"));
+		return list;
 	}
 	
 	/**
@@ -552,167 +164,245 @@ public class SetupPermanent {
 	 * 
 	 * @param selected	Le contrôleur
 	 */
-	private void fillPermanentListFromControllers(
-			PermanentController selected) {
-		DefaultListModel<PermanentController> listModel =
-				new DefaultListModel<>();
-		for (PermanentController pc : controllers)
-			listModel.addElement(pc);
+	private void fillPermanentList() {
+		DefaultListModel<Permanent> listModel = new DefaultListModel<>();
+		for (Permanent permanent : getAllPermanentsAndNull())
+			listModel.addElement(permanent);
 		listPermanents.setModel(listModel);
-		listPermanents.setSelectedValue(selected, true);
+		listPermanents.setSelectedValue(controller, true);
 	}
-	
+
 	/**
-	 * Réinitialise le contrôleur actuel.
-	 */
-	public void resetCurrent() {
-		dataMediator.getController().reset();
-		dataMediator.updateFromController();
-	}
-	
-	/**
-	 * Applique toutes les modifications et quitte la boîte de dialogue.
+	 * Crée un panneau défilable contenant la liste des opérations permanentes.
 	 * 
-	 * @throws IOException
-	 * 			En cas d'erreur pendant la récupération des
-	 * 			<code>Permanent</code>s.
+	 * @return	Un nouveau panneau défilable contenant la liste des opérations
+	 * 			permanentes.
 	 */
-	public void applyAllAndQuit() throws IOException {
-		applyAllAndGetSelection();
-		quit();
+	private Component createListPermanentsPanel() {
+		JButton nouveauButton = new JButton("Nouveau");
+		nouveauButton.addActionListener(EventHandler.create(
+				ActionListener.class, listPermanents, "clearSelection"));
+
+		JScrollPane scrollList = new JScrollPane(listPermanents);
+		scrollList.setPreferredSize(					// Largeur préférée
+				new Dimension(150, scrollList.getPreferredSize().height));
+
+		Box listBox = Box.createVerticalBox();
+		listBox.add(nouveauButton);
+		listBox.add(scrollList);
+		return listBox;
 	}
 	
 	/**
-	 * Applique toutes les modifications et recharge les données.
+	 * Crée la partie centrale de la fenêtre, qui contient l'éditeur et les
+	 * boutons de validation/suppression.
 	 * 
-	 * @throws IOException
-	 * 			En cas d'erreur pendant la récupération des
-	 * 			<code>Permanent</code>s.
+	 * @param editor	L'éditeur d'opération permanente.
+	 * 
+	 * @return			Un nouveau composant graphique.
 	 */
-	public void applyAllAndReload() throws IOException {
-		updatePermanentList(applyAllAndGetSelection());
+	private Component createEditionPanel(PermanentEditor editor) {
+		JButton validateButton = new JButton("Appliquer");
+		validateButton.addActionListener(EventHandler.create(
+				ActionListener.class, this, "apply"));
+		
+		JButton deleteButton = new JButton("Supprimer");
+		deleteButton.addActionListener(EventHandler.create(
+				ActionListener.class, this, "confirmDeletion"));
+		
+		Box validationBox = Box.createHorizontalBox();
+		validationBox.add(Box.createHorizontalGlue());
+		validationBox.add(validateButton);
+		validationBox.add(deleteButton);
+		
+		JPanel editionPanel = new JPanel(new BorderLayout());
+		editionPanel.add(editor.getComponent());
+		editionPanel.add(validationBox, BorderLayout.SOUTH);
+		return editionPanel;
 	}
 	
 	/**
-	 * Applique toutes les modifications.
+	 * Crée un panneau horizontal contenant les boutons d'action.
+	 * 
+	 * @return	Le composant graphique contenant tous les boutons.
+	 */
+	private Component createValidationPanel() {
+		JButton appliquer = new JButton("OK");
+		JButton quitter = new JButton("Quitter");
+		appliquer.addActionListener(EventHandler.create(
+				ActionListener.class, this, "applyAndQuit"));
+		quitter.addActionListener(quitActionListener);
+
+		// Barre contenant les boutons
+		Box bar = Box.createHorizontalBox();
+		bar.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+		bar.add(Box.createHorizontalGlue());
+		bar.add(appliquer);
+		bar.add(quitter);
+		return bar;
+	}
+	
+	/**
+	 * Définit l'action à exécuter lorsque l'utilisateur appuie sur la touche
+	 * Echap.
+	 * 
+	 * @param action	L'action à exécuter.
+	 * @param component	Le composant sur qui repose la détection de la touche.
+	 */
+	private void setActionOnEscape(Action action, JComponent component) {
+		component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
+		component.getActionMap().put("quitter", action);
+	}
+	
+	/**
+	 * Demande au contrôleur d'afficher dans l'éditeur les propriétés de
+	 * l'opération permanente spécifiée.
 	 * <p>
-	 * Cette méthode est appelée dynamiquement par un <code>EventHandler</code>.
-	 * Elle doit être publique.
+	 * Si l'opération permanente actuellement éditée a été modifiée,
+	 * l'utilisateur en est averti et peut choisir de sauvegarder les
+	 * modifications, de les abandonner, ou d'annuler le changement d'opération
+	 * permanente.
 	 * 
-	 * @return	Le <code>Permanent</code> à sélectionner après la mise à jour.
+	 * @param permanent	L'opération permanente à afficher.
 	 */
-	public Permanent applyAllAndGetSelection() {
-		PermanentController selected = dataMediator.getController();
-		Permanent selection = selected.getPermanent();
+	public void setCompte(Permanent permanent) {
 		
-		if (!checkValuesConsistency())
-			return selection;
+		// En cas de callback, on peut revenir ici sur l'opération déjà éditée
+		if (permanent == controller.getPermanent())
+			return;
 		
-		for (PermanentController pc : controllers) {
-
-			// Appliquer les modifications
-			Permanent p = pc.applyChanges();
-
-			// Actualiser la sélection si besoin
-			if (pc == selected) {
-				selection = p;
-			}
-		}
-		return selection;
-	}
-	
-	/**
-	 * Vérifie que toutes les valeurs sont cohérents pour permettre d'appliquer
-	 * les changements.
-	 * 
-	 * @return	<code>true</code> si les changements peuvent être appliqués sans
-	 * 			danger.
-	 */
-	private boolean checkValuesConsistency() {
-		for (PermanentController controller : controllers) {
-			String errorMessage = controller.checkErrorMessage();
+		if (controller.isModified()) {
+			switch (askSaveActualPermanent()) {
 			
-			if (!errorMessage.isEmpty()) {
-				int discardChanges = JOptionPane.showConfirmDialog(
-						dialog,
-						String.format(
-								"L'opération %s ne peut pas être enregistrée :%n%s%nVoulez-vous abandonner ses modifications ?",
-								controller, errorMessage),
-						"Opération incomplète",
-						JOptionPane.YES_NO_OPTION);
+			case JOptionPane.CANCEL_OPTION:
 				
-				if (discardChanges == JOptionPane.YES_OPTION) {
-					controller.reset();
-				} else {
-					return false;
-				}
+				// Revenir sur l'opération qui était en cours d'édition
+				listPermanents.setSelectedValue(controller.getPermanent(),true);
+				return;
+			
+			case JOptionPane.YES_OPTION:
+				apply();
+				break;
+				
+			default:	// Abandonner les modifications = faire comme si de rien
 			}
 		}
-		return true;
+		
+		controller.setPermanent(permanent);
 	}
 	
 	/**
-	 * Demande conformation à l'utilisateur puis supprime le contrôleur
-	 * actuellement sélectionné.
+	 * Demande confirmation à l'utilisateur avant de supprimer une opération
+	 * permanente. Si l'utilisateur confirme, l'opération est effectivement
+	 * supprimée.
 	 */
-	public void confirmAndDelete() {
-		PermanentController selected = dataMediator.getController();
-		
+	public void confirmDeletion() {
+		Permanent permanent = controller.getPermanent();
 		int confirm = JOptionPane.showConfirmDialog(
 				dialog,
 				String.format(
-						"Voulez-vous vraiment supprimer l'opération permanente %s ?",
-						selected),
+						"Voulez-vous vraiment supprimer l'opération permanente%n%s ?",
+						permanent),
 				"Supprimer une opération permanente",
 				JOptionPane.YES_NO_OPTION);
 		
-		if (confirm == JOptionPane.YES_OPTION) {
-			try {
-				selected.deletePermanent();
-			} catch (DeletionException e1) {
-				LOGGER.log(Level.SEVERE,
-						"Impossible de supprimer " + selected, e1);
-			}
-		}
+		if (confirm == JOptionPane.YES_OPTION)
+			delete(permanent);
 	}
-	
+
 	/**
-	 * Demande confirmation à l'utilisateur s'il y a des changements non
-	 * sauvegardés, puis quitte laboîte de dialogue.
+	 * Supprime l'opération permanente spécifiée du modèle.
+	 * 
+	 * @param permanent	L'opération permanente à supprimer.
 	 */
-	public void confirmAndQuit() {
-		if (!isModified()) {
-			int confirm = JOptionPane.showConfirmDialog(
-				dialog,
-				"Il y a des changements non enregistrés.\nVoulez-vous les abandonner ?",
-				"Abandonner les changements",
-				JOptionPane.YES_NO_OPTION);
-			
-			if (confirm != JOptionPane.YES_OPTION) {
-				return;
+	private void delete(Permanent permanent) {
+		DAOFactory.getFactory().getPermanentDAO().remove(permanent.getId());
+		controller.setPermanent(null);
+		fillPermanentList();
+	}
+
+	/**
+	 * Applique l'ensemble des modifications si nécessaire, et ferme la boîte de
+	 * dialogue.
+	 */
+	public void applyAndQuit() {
+		if (!controller.isModified() || apply())
+			quit();
+	}
+
+	/**
+	 * Valide les modifications de l'opération permanente actuelle.
+	 * 
+	 * @return	<code>true</code> si les modifications ont été appliquées avec
+	 * 			succès.
+	 */
+	public boolean apply() {
+		try {
+			controller.applyChanges();			// Modifie ou crée l'opération
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, e.getMessage());
+			LOGGER.log(Level.FINE,
+					"Impossible de mettre à jour l'opération permanente", e);
+			return false;
+		}
+		
+		// Recharger la (nouvelle) liste des comptes
+		fillPermanentList();
+		return true;
+	}
+
+	/**
+	 * Ferme la boîte de dialogue.<br>
+	 * S'il y a des changements non enregistrés, l'utilisateur est invité à
+	 * confirmer l'action.
+	 */
+	public void askAndQuit() {
+		if (controller.isModified()) {
+			switch (askSaveActualPermanent()) {
+			case JOptionPane.YES_OPTION:
+				if (!apply())
+					return;		// Modifications échouées = arrêter tout
+				break;
+				
+			case JOptionPane.CANCEL_OPTION:
+				return;			// Annuler = arrêter tout
+				
+			default:			// Abandonner modifs = faire comme si de rien
 			}
 		}
+		
 		quit();
 	}
 	
 	/**
-	 * Quitte la boîte de dialogue sans demander confirmation.
+	 * Ouvre une boîte de dialogue demandant à l'utilisateur s'il faut
+	 * sauvegarder les modifications de l'opération permanente actuellement
+	 * éditée, les abandonner ou ne rien faire.
+	 * 
+	 * @return	{@link JOptionPane#YES_OPTION} pour sauvegarder,
+	 * 			{@link JOptionPane#NO_OPTION} pour abandonner les modifications,
+	 * 			{@link JOptionPane#CANCEL_OPTION} pour ne rien faire.
+	 */
+	private int askSaveActualPermanent() {
+		Permanent actualPermanent = controller.getPermanent();
+		String nomActuel = 
+				actualPermanent == null ? "en cours" : actualPermanent.getNom();
+		
+		return JOptionPane.showConfirmDialog(
+				dialog,
+				String.format(
+						"L'opération permanente %s a été modifiée.%nVoulez-vous sauvegarder les changements ?",
+						nomActuel),
+				"Opération permanente modifiée",
+				JOptionPane.YES_NO_CANCEL_OPTION);
+	}
+	
+	/**
+	 * Ferme la boîte de dialogue.
 	 */
 	private void quit() {
 		dialog.dispose();
 		gui.dataModified();
-	}
-	
-	/**
-	 * Indique si l'un des contrôleurs a été modifié depuis la dernière
-	 * sauvegarde.
-	 */
-	private boolean isModified() {
-		for (PermanentController controller : controllers) {
-			if (controller.isModified()) {
-				return true;
-			}
-		}
-		return false;
 	}
 }
