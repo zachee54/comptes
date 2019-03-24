@@ -125,7 +125,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		result.setTiers(p.getTiers());
 		result.setCredit(p.getCredit().getId());
 		result.setDebit(p.getDebit().getId());
-		result.setPointage(p.isPointee());
+		result.setPointage(p.isAutoPointee());
 		result.setJours(prepareJours(p.getJours()));
 		
 		// Selon le type d'opération
@@ -311,7 +311,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 					new BigDecimal(dependance.getTaux().toString()));
 			
 		} else {			// Cas des opérations qui soldent un compte bancaire
-			state = new PermanentSoldeur(debit);
+			state = new PermanentSoldeur(result);
 		}
 		
 		result.setState(state);
