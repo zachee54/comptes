@@ -262,10 +262,12 @@ public class CompteEditor {
 		for (Component component : bancaireComponents)
 			component.setEnabled(bancaire);
 		
-		typeComboBox.removeAll();
+		typeComboBox.removeAllItems();
 		for (TypeCompte typeCompte : TypeCompte.values()) {
-			if (typeCompte.isBancaire() == bancaire)
+			if (typeCompte.isBancaire() == bancaire
+					&& typeCompte != TypeCompte.SUIVI_EPARGNE) {
 				typeComboBox.addItem(typeCompte);
+			}
 		}
 	}
 	
