@@ -77,7 +77,7 @@ public class CachePermanentDAOTest {
 		
 		// Des mocks pour la sous-couche
 		CacheableDAOFactory factory = mock(CacheableDAOFactory.class);
-		when(factory.getPermanents((CachePermanentDAO) any()))
+		when(factory.getPermanents(any(CachePermanentDAO.class)))
 		.thenReturn(all.iterator());
 		
 		// Objet testé
@@ -134,19 +134,15 @@ public class CachePermanentDAOTest {
 	@Test
 	public void testUpdate() {
 		
-		// Opération ayant un identifiant pré-existant
-		Permanent p2bis = new Permanent(2, "permanent2bis", mock(Compte.class), c1, "libellé2bis", "tiers2bis", false, new HashMap<Month, Integer>());
-		p2bis.setState(new PermanentSoldeur(p2bis));
-		
 		// Méthode testée
-		dao.update(p2bis);
-		assertSame(p2bis, dao.get(2));
+		dao.update(p2);
+		assertSame(p2, dao.get(2));
 
-		// Vérifier que cela n'a pas changé le reste
+		// Vérifier que cela n'a pas changé le reste non plus
 		assertSame(p1, dao.get(1));
 		assertSame(p3, dao.get(3));
 		
-		// Tester en même temps le statut de sauvegarde
+		// Tester le statut de sauvegarde
 		assertTrue(dao.mustBeSaved());
 		dao.setSaved();
 		assertFalse(dao.mustBeSaved());

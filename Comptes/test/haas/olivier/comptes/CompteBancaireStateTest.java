@@ -31,11 +31,15 @@ public class CompteBancaireStateTest {
 
 	@Before
 	public void setUp() throws Exception {
+		DAOFactory.setFactory(factory);
+		when(factory.getDebut()).thenReturn(month.getTranslated(-12));
 	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
+	
+	private final DAOFactory factory = mock(DAOFactory.class);
 	
 	/**
 	 * Un mois quelconque (celui en cours).
@@ -67,7 +71,7 @@ public class CompteBancaireStateTest {
 	
 	@Test
 	public void testCompteBancaireStateOldBudget() {
-		CompteState old = mock(CompteState.class);	// Numero == null
+		CompteState old = new CompteBudgetState(TypeCompte.DEPENSES);
 		
 		CompteBancaireState state =
 				new CompteBancaireState(TypeCompte.COMPTE_COURANT, old);
@@ -125,10 +129,7 @@ public class CompteBancaireStateTest {
 		SuiviDAO suivi = mock(SuiviDAO.class);
 		when(suivi.get(compte, month)).thenReturn(BigDecimal.TEN);
 		
-		DAOFactory factory = mock(DAOFactory.class);
 		when(factory.getHistoriqueDAO()).thenReturn(suivi);
-		
-		DAOFactory.setFactory(factory);
 		
 		CompteBancaireState state =
 				new CompteBancaireState(TypeCompte.COMPTE_EPARGNE, null);
@@ -145,10 +146,7 @@ public class CompteBancaireStateTest {
 		SuiviDAO suivi = mock(SuiviDAO.class);
 		when(suivi.get(compte, past)).thenReturn(BigDecimal.ONE);
 		
-		DAOFactory factory = mock(DAOFactory.class);
 		when(factory.getHistoriqueDAO()).thenReturn(suivi);
-		
-		DAOFactory.setFactory(factory);
 		
 		CompteBancaireState state =
 				new CompteBancaireState(TypeCompte.COMPTE_CARTE, null);
@@ -163,10 +161,7 @@ public class CompteBancaireStateTest {
 		SuiviDAO suivi = mock(SuiviDAO.class);
 		when(suivi.get(compte, month)).thenReturn(BigDecimal.TEN);
 		
-		DAOFactory factory = mock(DAOFactory.class);
 		when(factory.getSoldeAVueDAO()).thenReturn(suivi);
-		
-		DAOFactory.setFactory(factory);
 		
 		CompteBancaireState state =
 				new CompteBancaireState(TypeCompte.COMPTE_EPARGNE, null);
@@ -182,10 +177,7 @@ public class CompteBancaireStateTest {
 		SuiviDAO suivi = mock(SuiviDAO.class);
 		when(suivi.get(compte, past)).thenReturn(BigDecimal.ONE);
 		
-		DAOFactory factory = mock(DAOFactory.class);
 		when(factory.getSoldeAVueDAO()).thenReturn(suivi);
-		
-		DAOFactory.setFactory(factory);
 		
 		CompteBancaireState state =
 				new CompteBancaireState(TypeCompte.COMPTE_CARTE, null);
