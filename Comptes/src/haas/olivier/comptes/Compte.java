@@ -130,11 +130,8 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * des incidences de la période immédiatement antérieure au mois spécifié.
 	 * 
 	 * @param debut	Le mois à partir duquel supprimer les historiques
-	 *            
-	 * @throws IOException
-	 * 				Si la modification échoue dans la couche de données.
 	 */
-	public static void removeSuiviFrom(Month debut) throws IOException {
+	public static void removeSuiviFrom(Month debut) {
 		DAOFactory.getFactory().getHistoriqueDAO().removeFrom(debut);
 		DAOFactory.getFactory().getSoldeAVueDAO().removeFrom(debut);
 		DAOFactory.getFactory().getMoyenneDAO().removeFrom(debut);
@@ -334,8 +331,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * 
 	 * @throws IOException
 	 */
-	public void addHistorique(Month month, BigDecimal delta)
-			throws IOException {
+	public void addHistorique(Month month, BigDecimal delta) {
 		if (delta != null && delta.signum() != 0)
 			state.addHistorique(this, month, delta);
 	}
@@ -348,11 +344,8 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * 
 	 * @param delta	Le montant à ajouter (ou soustraire si négatif). S'il est
 	 * 				<code>null</code> ou égal à zéro, la méthode ne fait rien.
-	 * 
-	 * @throws IOException
 	 */
-	public void addPointages(Month month, BigDecimal delta)
-			throws IOException {
+	public void addPointages(Month month, BigDecimal delta) {
 		if (delta != null && delta.signum() != 0)
 			state.addPointage(this, month, delta);
 	}

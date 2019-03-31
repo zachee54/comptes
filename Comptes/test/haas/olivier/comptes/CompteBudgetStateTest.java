@@ -66,7 +66,7 @@ public class CompteBudgetStateTest {
 
 	@Test
 	public void testGetType() {
-		assertSame(TypeCompte.DEPENSES, state);
+		assertSame(TypeCompte.DEPENSES, state.getType());
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class CompteBudgetStateTest {
 		state.addPointage(compte, month, BigDecimal.TEN);
 		
 		/* Égalité ambigue entre BigDecimals */
-		verify(suivi).set(eq(compte), eq(month), eq(new BigDecimal("-10")));
+		verify(suivi, never()).set(eq(compte), eq(month), eq(new BigDecimal("-10")));
 	}
 	
 	@Test
@@ -127,7 +127,7 @@ public class CompteBudgetStateTest {
 		state.addPointage(compte, month, BigDecimal.TEN);
 		
 		/* Égalité ambigue entre BigDecimals */
-		verify(suivi).set(eq(compte), eq(month), eq(new BigDecimal("35")));
+		verify(suivi, never()).set(eq(compte), eq(month), eq(new BigDecimal("35")));
 	}
 
 	@Test
