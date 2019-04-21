@@ -154,7 +154,7 @@ public class SetupPermanent {
 		JList<Permanent> list = new JList<>();
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(EventHandler.create(
-				ListSelectionListener.class, this, "setController",
+				ListSelectionListener.class, this, "setPermanent",
 				"source.selectedValue"));
 		return list;
 	}
@@ -266,7 +266,7 @@ public class SetupPermanent {
 	 * 
 	 * @param permanent	L'opération permanente à afficher.
 	 */
-	public void setCompte(Permanent permanent) {
+	public void setPermanent(Permanent permanent) {
 		
 		// En cas de callback, on peut revenir ici sur l'opération déjà éditée
 		if (permanent == controller.getPermanent())
