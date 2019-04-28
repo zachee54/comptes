@@ -219,9 +219,9 @@ class PermanentEditorController {
 			permanentJours.putAll(jours);
 		}
 		
-		if (PermanentEditor.FIXE != type) {
+		if (PermanentEditor.FIXE == type) {
 			permanent.setState(new PermanentFixe(editor.getMontants()));
-		} else if (PermanentEditor.PROPORTIONNEL != type) {
+		} else if (PermanentEditor.PROPORTIONNEL == type) {
 			permanent.setState(new PermanentProport(
 					editor.getDependance(), editor.getTaux()));
 		} else {
