@@ -173,8 +173,7 @@ ActionListener, PropertiesController {
 		
 		// Action Enregistrer
 		actionSave = new AbstractAction("Enregistrer",
-				IconLoader.createImageIcon(
-						getClass(), "images/sc05502.png", null)) {
+				IconLoader.loadIcon("images/sc05502.png")) {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -194,8 +193,7 @@ ActionListener, PropertiesController {
 		
 		// Action affichant le diagramme des moyennes glissantes
 		diagMoyAction = new AbstractAction("Moyennes glissantes",
-				IconLoader.createImageIcon(
-						getClass(), "images/typepointline_16.png", null)) {
+				IconLoader.loadIcon("images/typepointline_16.png")) {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -213,8 +211,7 @@ ActionListener, PropertiesController {
 		
 		// Action affichant le diagramme de l'évolution du patrimoine
 		diagPatrimAction = new AbstractAction("Évolution du patrimoine",
-				IconLoader.createImageIcon(
-						getClass(), "images/typearea_16.png", null)) {
+				IconLoader.loadIcon("images/typearea_16.png")) {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -244,9 +241,7 @@ ActionListener, PropertiesController {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(this);				// Événement de fermeture
 		frame.setIconImage(							// Icône de la fenêtre
-				IconLoader.createImageIcon(
-						getClass(), "images/sx10707.png", null)
-				.getImage());
+				IconLoader.loadIcon("images/sx10707.png").getImage());
 		
 		// Insérer les éléments
 		Container contentPane = frame.getContentPane();
@@ -394,8 +389,8 @@ ActionListener, PropertiesController {
 		toolBar.addSeparator();								// Séparateur
 		
 		// Le bouton de tri
-		triButton = new JToggleButton(IconLoader.createImageIcon(
-				getClass(), "images/sc_dbqueryedit.png", "Tri par pointages"));
+		triButton = new JToggleButton(IconLoader.loadIcon(
+				"images/sc_dbqueryedit.png", "Tri par pointages"));
 		triButton.setActionCommand(POINTAGES);
 		triButton.addActionListener(this);
 		toolBar.add(triButton);
@@ -403,19 +398,17 @@ ActionListener, PropertiesController {
 		toolBar.addSeparator();								// Séparateur
 		
 		// Le bouton des permanents
-		JButton permanentsButton = new JButton(
-				IconLoader.createImageIcon(getClass(),
-						"images/8-innovation_icone.png",
-						"Générer les écritures permanentes"));
+		JButton permanentsButton = new JButton(IconLoader.loadIcon(
+				"images/8-innovation_icone.png",
+				"Générer les écritures permanentes"));
 		permanentsButton.setActionCommand(PERMANENTS);
 		permanentsButton.addActionListener(this);
 		toolBar.add(permanentsButton);
 		
 		// Le bouton pour effacer une écriture
-		deleteButton = new JButton(
-				IconLoader.createImageIcon(getClass(),
-						"images/exerror.png",
-						"Effacer cette écriture"));
+		deleteButton = new JButton(IconLoader.loadIcon(
+				"images/exerror.png",
+				"Effacer cette écriture"));
 		deleteButton.setActionCommand(DELETE);
 		deleteButton.addActionListener(this);
 		toolBar.add(deleteButton);
