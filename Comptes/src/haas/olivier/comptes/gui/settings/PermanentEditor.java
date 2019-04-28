@@ -567,7 +567,7 @@ class PermanentEditor {
 	 * @param taux	Le taux à afficher pour l'opération permanente.
 	 */
 	void setTaux(BigDecimal taux) {
-		spinnerTaux.setValue(taux);
+		spinnerTaux.setValue(taux == null ? BigDecimal.ZERO : taux);
 	}
 	
 	/**
