@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -546,6 +548,7 @@ class PermanentEditor {
 	 * 						de celle-ci.
 	 */
 	void setDependance(Permanent dependance) {
+		updateDependancesList();
 		comboBoxDependance.setSelectedItem(dependance);
 	}
 	
@@ -636,12 +639,30 @@ class PermanentEditor {
 			radioFixe.doClick();
 			break;
 		case PROPORTIONNEL:
+			updateDependancesList();
 			radioProport.doClick();
 			break;
 		case SOLDER:
 			radioSolder.doClick();
 			break;
 		default:
+		}
+	}
+
+	/**
+	 * Met à jour la liste des opérations permanentes dans la combo box des
+	 * dépendances.
+	 */
+	private void updateDependancesList() {
+		try {
+			Collection<Permanent> permanents =
+					DAOFactory.getFactory().getPermanentDAO().getAll();
+			comboBoxDependance.setModel(new DefaultComboBoxModel<>(
+					permanents.toArray(new Permanent[permanents.size()])));
+			
+		} catch (IOException e) {
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+					"Impossible de charger la liste des dépendances", e);
 		}
 	}
 }
