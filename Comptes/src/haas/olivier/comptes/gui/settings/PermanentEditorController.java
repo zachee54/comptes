@@ -157,7 +157,7 @@ class PermanentEditorController {
 		if (state instanceof PermanentFixe) {
 			if (editor.getType() != PermanentEditor.FIXE)
 				return true;
-			if (!((PermanentFixe) state).montants.equals(editor.getJours()))
+			if (!((PermanentFixe) state).montants.equals(editor.getMontants()))
 				return true;
 		} else if (state instanceof PermanentProport) {
 			if (editor.getType() != PermanentEditor.PROPORTIONNEL)
