@@ -10,7 +10,9 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -297,8 +299,12 @@ class PermanentEditor {
 	 * @throws IOException
 	 */
 	private static Compte[] getComptes() throws IOException {
-		Collection<Compte> comptes =
-				DAOFactory.getFactory().getCompteDAO().getAll();
+		List<Compte> comptes = new ArrayList<>(
+				DAOFactory.getFactory().getCompteDAO().getAll());
+		
+		// Item vide en début de liste (= pas de sélection)
+		comptes.add(0, null);
+		
 		return comptes.toArray(new Compte[comptes.size()]);
 	}
 	
