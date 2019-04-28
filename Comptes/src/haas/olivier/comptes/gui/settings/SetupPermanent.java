@@ -113,30 +113,19 @@ public class SetupPermanent {
 	}
 	
 	/**
-	 * Renvoie une collection de tous les <code>Permanent</code>, à laquelle est
-	 * ajouté un élément <code>null</code> pour permettre la saisie d'une
-	 * nouvelle opération.
-	 * 
-	 * @return	Une nouvelle collection des <code>Permanent</code>s et d'un
-	 * 			élément <code>null</code>.
-	 */
-	private static Collection<Permanent> getAllPermanentsAndNull() {
-		List<Permanent> permanents = new ArrayList<>();
-		permanents.addAll(getAllPermanents());
-		Collections.sort(permanents);
-		permanents.add(0, null);
-		return permanents;
-	}
-	
-	/**
-	 * Renvoie une liste de l'ensemble des opérations permanentes.
+	 * Renvoie une liste triée de l'ensemble des opérations permanentes.
 	 * 
 	 * @return	Une liste de l'ensemble des opérations permanentes, ou une liste
 	 * 			vide si une erreur survient pendant la lecture de données.
 	 */
 	private static Collection<Permanent> getAllPermanents() {
 		try {
-			return DAOFactory.getFactory().getPermanentDAO().getAll();
+			List<Permanent> permanents = new ArrayList<>();
+			permanents.addAll(
+					DAOFactory.getFactory().getPermanentDAO().getAll());
+			Collections.sort(permanents);
+			return permanents;
+			
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE,
 					"Erreur lors de la récupération des opérations permanentes",
@@ -166,7 +155,7 @@ public class SetupPermanent {
 	 */
 	private void fillPermanentList() {
 		DefaultListModel<Permanent> listModel = new DefaultListModel<>();
-		for (Permanent permanent : getAllPermanentsAndNull())
+		for (Permanent permanent : getAllPermanents())
 			listModel.addElement(permanent);
 		listPermanents.setModel(listModel);
 		listPermanents.setSelectedValue(controller, true);
