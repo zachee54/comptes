@@ -87,7 +87,8 @@ public class ComptesComboBoxRenderer implements ListCellRenderer<Compte> {
 				((JList<Compte>) list).getModel();		// Le modèle
 
 		// Mettre de la couleur en fonction du type dépenses/recettes
-		TypeCompte type = model.getElementAt(index).getType();
+		Compte compte = model.getElementAt(index);
+		TypeCompte type = (compte == null) ? null : compte.getType();
 		if (type == TypeCompte.DEPENSES					// Dépenses
 				|| type == TypeCompte.DEPENSES_EN_EPARGNE) {
 			component.setForeground(FinancialTable.DEPENSE);
@@ -101,7 +102,10 @@ public class ComptesComboBoxRenderer implements ListCellRenderer<Compte> {
 		panel.add(component);							// Ajouter composant
 		
 		// Pas le 1er item, et type différent du précédent ?
-		if (index > 0 && type != model.getElementAt(index - 1).getType()) {
+		Compte previous = model.getElementAt(index - 1);
+		TypeCompte previousType =
+				(previous == null) ? null : previous.getType();
+		if (index > 0 && type != previousType) {
 			panel.add(sep, BorderLayout.NORTH);			// Séparateur
 		} else {
 			panel.remove(sep);							// Pas de séparateur
