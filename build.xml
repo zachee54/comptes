@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+(c) 2017-2018 DGFiP, Olivier HAAS Tous droits réservés
+version Ant requise >=1.9.4 (testé avec 1.9.9)
+-->
+<project name="Comptes" basedir="." default="jar binaire"
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+	xmlns:rsel="antlib:org.apache.tools.ant.types.resources.selectors"
+	xmlns:rcmp="antlib:org.apache.tools.ant.types.resources.comparators">
+	
+	<!-- Répertoires de travail -->
+	<property name="src.dir" value="src/main/java" />
+	<property name="test.dir" value="src/test/java" />
+	<property name="resources.dir" value="src/main/resources" />
+	<property name="test.resources.dir" value="src/test/resources" />
+	<property name="uml.dir" value="src/main/uml" />
+	<property name="bin.dir" value="build" />
+	<property name="lib.dir" value="lib" />
+	<property name="jar.dir" value="jar" />
+	<property name="jar.file" value="finances.jar" />
+	<property name="dist.dir" value="dist" />
+	<property name="dist.lib.dir" value="lib" /><!-- Répertoire des dépendances dans l'artefact -->
+
+	<!-- Point d'entrée pour la compilation ou l'exécution -->
+	<property name="main.source" value="haas/olivier/comptes/Comptes.java" />
+	<property name="main.class" value="haas.olivier.comptes.Comptes" />
+
+	<!-- Les répertoires des sources, sous forme de path -->
+	<path id="src.path">
+		<pathelement location="${src.dir}" />
+		<pathelement location="${resources.dir}" />
+	</path>
+	<pathconvert property="src.dirs" refid="src.path" pathsep="," />
+	
+	<!-- Les répertoires de tests unitaires, sous forme de path -->
+	<path id="test.path">
+		<pathelement location="${test.dir}" />
+		<pathelement location="${test.resources.dir}" />
+	</path>
+	<pathconvert property="test.dirs" refid="test.path" pathsep="," />
+	
+	<!-- Ressources externes au JAR final -->
+	<filelist id="external.resources" dir="${basedir}">
+	</filelist>
+	
+	<!-- Autres ressources à sauvegarder dans les sources uniquement -->
+	<union id="src.resources">
+		<!-- Script Ant -->
+		<file name="build.xml" />
+		<!-- Fichier Ivy -->
+		<file name="ivy.xml" />
+	</union>
+
+
+	<!-- Tâches -->
+
+	<target name="clean" description="Supprimer tout">
+		<delete dir="${bin.dir}" />
+		<delete dir="${lib.dir}" />
+		<delete dir="${jar.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+	
+	<target name="resolve compile"
+			description="Résoudre les dépendances de compilation">
+		<ivy:resolve conf="compile" />
+		<ivy:cachepath pathid="lib.path" />
+	</target>
+
+	<target name="compile" depends="clean,resolve compile"
+			description="Compiler les classes utiles">
+		<mkdir dir="${bin.dir}" />
+		<javac includes="${main.source}"
+			srcdir="${src.dir}" destdir="${bin.dir}"
+			classpathref="lib.path" includeantruntime="false" debug="true">
+		</javac>
+	</target>
+
+	<target name="resolve tests"
+			description="Résoudre les dépendances pour les tests">
+		<ivy:resolve conf="test" />
+		<ivy:cachepath pathid="lib.path" />
+	</target>
+	
+	<target name="compile tests" depends="clean,resolve tests"
+			description="Compile les tests unitaires">
+		<mkdir dir="${bin.dir}" />
+		<javac destdir="${bin.dir}" includes="**/*Test.java"
+			classpathref="lib.path" includeantruntime="false" debug="true">
+			<src>
+				<path refid="src.path" />
+				<path refid="test.path" />
+			</src>
+		</javac>
+	</target>
+	
+	<target name="test" description="Exécute les tests unitaires"
+		depends="resolve tests">
+		
+		<!--
+			Copier junit[*].jar dans un emplacement fixe et sous le nom
+			générique "junit.jar".
+			Bizarrement, il ne suffit pas que le JAR soit inclus dans lib.path
+		-->
+		<ivy:resolve conf="junit" />
+		<ivy:retrieve pattern="${lib.dir}/[artifact].[ext]" sync="true" />
+		
+		<junit>
+			<classpath>
+				<pathelement location="${lib.dir}/junit.jar" />
+				<path id="lib.path" /> <!-- Dépendances Ivy pour les tests -->
+				<path id="src.path" />
+				<path id="test.path" />
+			</classpath>
+			<batchtest>
+				<fileset dir="${test.dir}" includes="**/*Test.java" />
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="copy resources"
+			description="Copier les ressources utiles (non Java)">
+		<copy todir="${bin.dir}">
+			<fileset dir="${resources.dir}" />
+		</copy>
+	</target>
+	
+	<target name="copy test resources" depends="copy resources"
+			description="Copie les ressources en incluant celles propres aux tests">
+		<copy todir="${bin.dir}">
+			<fileset dir="${test.resources.dir}" />
+		</copy>
+	</target>
+	
+	<target name="copy sources" depends="compile"
+			description="Copier les sources des classes compilées">
+
+		<!-- Copier les fichiers sources utiles -->
+		<copy todir="${bin.dir}">
+			<restrict>
+
+				<!-- Seulement ceux des répertoires de sources et tests... -->
+				<union>
+					<fileset dir="${src.dir}" />
+					<fileset dir="${test.dir}" />
+				</union>
+
+				<!-- ...qui correspondent à un... -->
+				<rsel:compare when="equal" against="any">
+					<control>
+
+						<!-- ...fichier classe du même nom, la seule -->
+						<!-- différence étant l'extension ".java" ou -->
+						<!-- "Test.java" au lieu de ".class" -->
+						<mappedresources enablemultiplemappings="true">
+							<fileset dir="${bin.dir}" includes="**/*.class" />
+							<compositemapper>
+								<globmapper from="*.class" to="*.java" />
+								<globmapper from="*.class" to="*Test.java" />
+							</compositemapper>
+						</mappedresources>
+					</control>
+
+					<!-- ...en les comparant d'après leurs noms -->
+					<rcmp:name />
+				</rsel:compare>
+			</restrict>
+		</copy>
+	</target>
+	
+	<target name="retrieve dependencies" depends="resolve compile"
+			description="Copie les dépendances dans /lib">
+		<ivy:retrieve pattern="${lib.dir}/[artifact]-[revision].[ext]"
+			sync="true" />
+	</target>
+
+	<target name="jar binaire" description="Crée un JAR exécutable"
+			depends="compile,copy resources,copy sources,retrieve dependencies">
+		<mkdir dir="${jar.dir}" />
+		<mkdir dir="${lib.dir}" />
+		
+		<!-- Chemin relatif des dépendances à l'intérieur du futur artefact -->
+		<pathconvert property="lib.jars" pathsep=" ">
+			<mappedresources>
+				<fileset dir="${lib.dir}" includes="*.jar" />
+				<globmapper from="*" to="${dist.lib.dir}/*" />
+			</mappedresources>
+		</pathconvert>
+			
+		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.file}">
+			<manifest>
+				<attribute name="Main-Class" value="${main.class}" />
+				<attribute name="Class-Path" value="${lib.jars}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="orphan classes" depends="compile"
+			description="Trouve les classes non utiles d'après leurs noms">
+		<pathconvert pathsep="&#xA;">
+			<restrict>
+				<!-- Classes sources -->
+				<fileset dir="${src.dir}"
+					includes="**/*.java" excludes="**/package-info.java" />
+
+				<!-- ...qui ne correspondent à aucune classe utile... -->
+				<rsel:compare when="equal" against="none">
+					<control>
+						<mappedresources enablemultiplemappings="true">
+							<fileset dir="${bin.dir}" includes="**/*.class" />
+							<globmapper from="*.class" to="*.java" />
+						</mappedresources>
+					</control>
+
+					<!-- ...en les comparant d'après leurs noms -->
+					<rcmp:name />
+				</rsel:compare>
+			</restrict>
+		</pathconvert>
+	</target>
+	
+	<target name="orphan tests" depends="compile"
+			description="Trouve les tests unitaires orphelins d'après leurs noms">
+		<pathconvert pathsep="&#xA;">
+			<restrict>
+				<!-- Fichiers de tests -->
+				<fileset dir="${test.dir}" includes="**/*Test.java" />
+
+				<!-- ...qui ne correspondent à aucune classe utile... -->
+				<rsel:compare when="equal" against="none">
+					<control>
+						<mappedresources enablemultiplemappings="true">
+							<fileset dir="${bin.dir}" includes="**/*.class" />
+							<globmapper from="*.class" to="*Test.java" />
+						</mappedresources>
+					</control>
+
+					<!-- ...en les comparant d'après leurs noms -->
+					<rcmp:name />
+				</rsel:compare>
+			</restrict>
+		</pathconvert>
+	</target>
+</project>
