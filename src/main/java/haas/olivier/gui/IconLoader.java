@@ -3,6 +3,7 @@
  */
 package haas.olivier.gui;
 
+import java.awt.Image;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,10 +20,21 @@ public class IconLoader {
 	}
 	
 	/**
+	 * Charge une image si elle est disponible.
+	 * 
+	 * @param path	Le chemin de l'image à charger.
+	 * @return		Une image, ou <code>null</code>.
+	 */
+	public static Image loadImage(String path) {
+		ImageIcon icon = loadIcon(path);
+		return icon == null ? null : icon.getImage();
+	}
+	
+	/**
 	 * Charge une icône si elle est disponible.
 	 * 
 	 * @param path	Le chemin de l'image à charger.
-	 * @return		Une icône.
+	 * @return		Une icône, ou <code>null</code>.
 	 */
 	public static ImageIcon loadIcon(String path) {
 		return loadIcon(path, null);
