@@ -70,7 +70,7 @@ version Ant requise >=1.9.4 (testé avec 1.9.9)
 	<target name="compile" depends="clean,resolve compile"
 			description="Compiler les classes utiles">
 		<mkdir dir="${bin.dir}" />
-		<javac includes="${main.source} **/ObjectFactory.java"
+		<javac includes="${main.source} **/ObjectFactory.java **/package-info.java"
 			srcdir="${src.dir}" destdir="${bin.dir}"
 			classpathref="lib.path" includeantruntime="false" debug="true">
 		</javac>
@@ -173,6 +173,30 @@ version Ant requise >=1.9.4 (testé avec 1.9.9)
 		<ivy:retrieve pattern="${jar.dir}/${dist.lib.dir}/[artifact]-[revision].[ext]"
 			sync="true" />
 	</target>
+  
+  <target name="copy package-info" depends="compile"
+    description="Copie les fichiers package-info.java des paquets compilés">
+    
+    <!-- Nom attendu du package-info de chaque répertoire compilé -->
+    <pathconvert property="package-info.java.expected" pathsep=",">
+      <mappedresources>
+        <dirset dir="${bin.dir}" />
+        <globmapper from="*" to="*${file.separator}package-info.java" />
+      </mappedresources>
+    </pathconvert>
+    
+    <!-- Copier vers bin ceux qui existent dans les sources -->
+    <copy todir="${bin.dir}">
+      <multirootfileset basedirs="${src.dirs}" type="file"
+        includes="${package-info.java.expected}" />
+    </copy>
+  </target>
+    
+  <target name="compile package-info" depends="copy package-info"
+    description="Compile les package-info sur place. Cela peut être nécessaire, par exemple, pour JAXB">
+    <javac srcdir="${bin.dir}" destdir="${bin.dir}"
+      includes="**/package-info.java" includeantruntime="false" />
+  </target>
 
 	<target name="jar binaire" description="Crée un JAR exécutable"
 			depends="compile,copy resources,copy sources,retrieve dependencies">
