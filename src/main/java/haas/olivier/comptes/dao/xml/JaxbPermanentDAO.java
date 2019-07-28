@@ -103,7 +103,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 				XMLConstants.W3C_XML_SCHEMA_NS_URI)
 				.newSchema(new StreamSource(
 						JaxbPermanentDAO.class
-						.getResourceAsStream("permanents.xsd")));
+						.getResourceAsStream("/xsd/permanents.xsd")));
 	}
 	
 	/**
