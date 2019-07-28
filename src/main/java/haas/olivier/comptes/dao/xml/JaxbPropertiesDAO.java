@@ -89,7 +89,7 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 				XMLConstants.W3C_XML_SCHEMA_NS_URI)
 				.newSchema(new StreamSource(
 						JaxbPropertiesDAO.class
-						.getResourceAsStream("properties.xsd")));
+						.getResourceAsStream("/xsd/properties.xsd")));
 	}
 	
 	/**

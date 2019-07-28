@@ -85,7 +85,7 @@ extends ReadOnlyIterator<haas.olivier.comptes.Banque> {
 				XMLConstants.W3C_XML_SCHEMA_NS_URI)
 				.newSchema(new StreamSource(
 						JaxbBanqueDAO.class
-						.getResourceAsStream("banques.xsd")));
+						.getResourceAsStream("/xsd/banques.xsd")));
 	}
 	
 	/**
