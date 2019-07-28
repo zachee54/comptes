@@ -70,7 +70,7 @@ version Ant requise >=1.9.4 (testé avec 1.9.9)
 	<target name="compile" depends="clean,resolve compile"
 			description="Compiler les classes utiles">
 		<mkdir dir="${bin.dir}" />
-		<javac includes="${main.source}"
+		<javac includes="${main.source} **/ObjectFactory.java"
 			srcdir="${src.dir}" destdir="${bin.dir}"
 			classpathref="lib.path" includeantruntime="false" debug="true">
 		</javac>
@@ -170,19 +170,19 @@ version Ant requise >=1.9.4 (testé avec 1.9.9)
 	
 	<target name="retrieve dependencies" depends="resolve compile"
 			description="Copie les dépendances dans /lib">
-		<ivy:retrieve pattern="${lib.dir}/[artifact]-[revision].[ext]"
+		<ivy:retrieve pattern="${jar.dir}/${dist.lib.dir}/[artifact]-[revision].[ext]"
 			sync="true" />
 	</target>
 
 	<target name="jar binaire" description="Crée un JAR exécutable"
 			depends="compile,copy resources,copy sources,retrieve dependencies">
 		<mkdir dir="${jar.dir}" />
-		<mkdir dir="${lib.dir}" />
+		<mkdir dir="${jar.dir}/${dist.lib.dir}" />
 		
 		<!-- Chemin relatif des dépendances à l'intérieur du futur artefact -->
 		<pathconvert property="lib.jars" pathsep=" ">
 			<mappedresources>
-				<fileset dir="${lib.dir}" includes="*.jar" />
+				<fileset dir="${jar.dir}/${dist.lib.dir}" includes="*.jar" />
 				<globmapper from="*" to="${dist.lib.dir}/*" />
 			</mappedresources>
 		</pathconvert>
