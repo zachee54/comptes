@@ -378,7 +378,7 @@ public class CsvDAO implements CacheableDAOFactory {
 		zipOut.closeEntry();
 
 		// Écrire le schéma XSD
-		saveSchema(JaxbBanqueDAO.class, "banques.xsd", zipOut);
+		saveSchema("/xsd/banques.xsd", zipOut);
 	}
 
 	/**
@@ -433,7 +433,7 @@ public class CsvDAO implements CacheableDAOFactory {
 		zipOut.closeEntry();
 		
 		// Enregistrer aussi le schéma XSD
-		saveSchema(JaxbPermanentDAO.class, "permanents.xsd", zipOut);
+		saveSchema("/xsd/permanents.xsd", zipOut);
 	}
 
 	/**
@@ -453,17 +453,13 @@ public class CsvDAO implements CacheableDAOFactory {
 		zipOut.closeEntry();
 
 		// Écrire le schéma XSD
-		saveSchema(JaxbPropertiesDAO.class, "properties.xsd", zipOut);
+		saveSchema("/xsd/properties.xsd", zipOut);
 	}
 	
 	/**
 	 * Sauvegarde un fichier dans l'archive ZIP.
 	 * <p>
 	 * Cette méthode est utilisée pour intégrer les schémas XSD dans l'archive.
-	 * 
-	 * @param classe	La classe à partir de laquelle rechercher la ressource.
-	 * 					C'est le <code>ClassLoader</code> de cette classe qui
-	 * 					sera utilisé pour trouver le fichier.
 	 * 
 	 * @param fileName	Le nom du fichier à sauvegarder. Ce fichier doit se
 	 * 					trouver dans le même répertoire que la classe actuelle.
@@ -472,15 +468,15 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @throws IOException
 	 */
-	private void saveSchema(Class<?> classe, String fileName,
-			ZipOutputStream zipOut) throws IOException {
+	private void saveSchema(String fileName, ZipOutputStream zipOut)
+			throws IOException {
 		
 		// Écrire le schéma XML des opérations permanentes
 		zipOut.putNextEntry(						// Créer l'entrée ZIP
 				new ZipEntry(fileName));
 		
 		try (InputStream schemaIn = new BufferedInputStream(
-					classe.getResourceAsStream(fileName))) {
+					getClass().getResourceAsStream(fileName))) {
 			int b;
 			while ((b = schemaIn.read()) != -1)		// Copier le contenu
 				zipOut.write(b);					// vers le fichier ZIP
