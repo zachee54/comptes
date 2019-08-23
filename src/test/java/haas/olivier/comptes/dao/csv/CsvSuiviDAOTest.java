@@ -108,7 +108,6 @@ public class CsvSuiviDAOTest {
 					DELIMITER);
 			
 			// Méthode testée n°2
-			@SuppressWarnings("resource")
 			CsvSuiviDAO dao = new CsvSuiviDAO(reader, COMPTES);
 			
 			// Vérifier le contenu
