@@ -110,7 +110,6 @@ public class CsvEcritureDAOTest {
 	public void testReaderNull() throws IOException {
 		
 		// Méthode testée
-		@SuppressWarnings("resource")
 		CsvEcritureDAO dao = new CsvEcritureDAO(null, null);
 		
 		// Vérifier le comportement
@@ -131,7 +130,6 @@ public class CsvEcritureDAOTest {
 		Reader reader = reRead();
 		
 		// Relire les données écrites
-		@SuppressWarnings("resource")
 		CsvEcritureDAO dao =
 				new CsvEcritureDAO(new CsvReader(reader, DELIMITER), COMPTES);
 		

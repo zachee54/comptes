@@ -102,7 +102,6 @@ public class CsvCompteDAOTest {
 	public void testReaderNull() throws IOException {
 		
 		// Méthode testée
-		@SuppressWarnings("resource")
 		CsvCompteDAO dao = new CsvCompteDAO(null);
 		
 		// Vérifier le comportement
@@ -124,7 +123,6 @@ public class CsvCompteDAOTest {
 		Reader reader = reRead();
 		
 		// Relire les données écrites
-		@SuppressWarnings("resource")
 		CsvCompteDAO dao = new CsvCompteDAO(				// Objet testé
 				new CsvReader(reader, DELIMITER));
 		
