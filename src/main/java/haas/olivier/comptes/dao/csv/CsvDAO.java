@@ -390,7 +390,7 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @throws IOException
 	 */
-	private void saveComptes(ZipOutputStream zipOut, CsvWriter csvOut,
+	private static void saveComptes(ZipOutputStream zipOut, CsvWriter csvOut,
 			CompteDAO compteDAO) throws IOException {
 		zipOut.putNextEntry(new ZipEntry(COMPTES));
 		CsvCompteDAO.save(compteDAO.getAll(), csvOut);
@@ -407,7 +407,7 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @throws IOException
 	 */
-	private void saveEcritures(ZipOutputStream zipOut, CsvWriter csvOut,
+	private static void saveEcritures(ZipOutputStream zipOut, CsvWriter csvOut,
 			EcritureDAO eDAO)
 					throws IOException {
 		zipOut.putNextEntry(new ZipEntry(ECRITURES));
@@ -504,7 +504,7 @@ public class CsvDAO implements CacheableDAOFactory {
 	 * 
 	 * @throws IOException 
 	 */
-	private void saveSuivis(CacheSuiviDAO suivis, String entryName,
+	private static void saveSuivis(CacheSuiviDAO suivis, String entryName,
 			ZipOutputStream zipOut, CsvWriter csvOut)
 					throws IOException {
 		zipOut.putNextEntry(new ZipEntry(entryName));

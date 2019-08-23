@@ -112,7 +112,7 @@ public class CacheEcritureDAOTest {
 	 * @param result	Le résultat.
 	 * @param expected	Les écritures attendues.
 	 */
-	private void check(Iterable<Ecriture> result, Ecriture... expected) {
+	private static void check(Iterable<Ecriture> result, Ecriture... expected) {
 		
 		// Itérateur du résultat
 		Iterator<Ecriture> it = result.iterator();

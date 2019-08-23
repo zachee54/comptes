@@ -131,6 +131,27 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 	}
 	
 	/**
+	 * Instancie un memento des propriétés d'un diagramme à partir de la classe
+	 * JAXB désérialisée.
+	 * 
+	 * @param diagramProps	La classe JAXB des propriétés d'un diagramme
+	 * 						désérialisée.
+	 * 
+	 * @return				Un POJO.
+	 */
+	private static DiagramMemento getMemento(Diagram diagramProps) {
+		List<Integer> ids = new ArrayList<>();
+		Set<Integer> hidden = new HashSet<>();
+		for (Serie serie : diagramProps.getSerie()) {
+			int id = serie.getValue();
+			ids.add(id);
+			if (serie.isHidden())
+				hidden.add(id);
+		}
+		return new DiagramMemento(diagramProps.getName(), ids, hidden);
+	}
+
+	/**
 	 * Les propriétés au format JAXB désérialisés.
 	 */
 	private final Properties properties;
@@ -170,26 +191,5 @@ public class JaxbPropertiesDAO implements CacheablePropertiesDAO {
 		for (Diagram diagramProps : properties.getDiagrams().getDiagram())
 			mementos.put(diagramProps.getName(), getMemento(diagramProps));
 		return mementos;
-	}
-	
-	/**
-	 * Instancie un memento des propriétés d'un diagramme à partir de la classe
-	 * JAXB désérialisée.
-	 * 
-	 * @param diagramProps	La classe JAXB des propriétés d'un diagramme
-	 * 						désérialisée.
-	 * 
-	 * @return				Un POJO.
-	 */
-	private DiagramMemento getMemento(Diagram diagramProps) {
-		List<Integer> ids = new ArrayList<>();
-		Set<Integer> hidden = new HashSet<>();
-		for (Serie serie : diagramProps.getSerie()) {
-			int id = serie.getValue();
-			ids.add(id);
-			if (serie.isHidden())
-				hidden.add(id);
-		}
-		return new DiagramMemento(diagramProps.getName(), ids, hidden);
 	}
 }

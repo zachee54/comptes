@@ -32,23 +32,23 @@ class XLabels extends JComponent {
 		reloadXValues();
 	}// constructeur
 	
+	/** Crée une nouvelle étiquette.
+	 * 
+	 * @param text	Le texte de la nouvelle étiquette.
+	 * @return		Une nouvelle étiquette.
+	 */
+	private static Component createLabel(String text) {
+		JLabel label = new JLabel(text);
+		label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+		return label;
+	}// createLabel
+
 	/** Crée de nouvelles étiquettes correspondant aux valeurs en abscisses. */
 	public void reloadXValues() {
 		removeAll();
 		for (Object xValue : model.getXValues())
 			add(createLabel(xValue.toString()));
 	}// reloadXValues
-	
-	/** Crée une nouvelle étiquette.
-	 * 
-	 * @param text	Le texte de la nouvelle étiquette.
-	 * @return		Une nouvelle étiquette.
-	 */
-	private Component createLabel(String text) {
-		JLabel label = new JLabel(text);
-		label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-		return label;
-	}// createLabel
 	
 	/** Renvoie la largeur dont dépasse la première étiquette par rapport au
 	 * bord gauche du diagramme.
