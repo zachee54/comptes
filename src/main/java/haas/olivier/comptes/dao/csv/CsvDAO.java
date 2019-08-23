@@ -172,9 +172,11 @@ public class CsvDAO implements CacheableDAOFactory {
 		CsvDAO csvDAO = new CsvDAO(file);
 		
 		// Si file n'est pas un ZIP valide, mettre la source en écriture seule
-		return csvDAO.zip == null
-				? new WriteOnlyCacheableDAOFactory(csvDAO)
-				: csvDAO;
+		if (csvDAO.zip == null) {
+			return new WriteOnlyCacheableDAOFactory(csvDAO);
+		} else {
+			return csvDAO;
+		}
 	}
 
 	/**
