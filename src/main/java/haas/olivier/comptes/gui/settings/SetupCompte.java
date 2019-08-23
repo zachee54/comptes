@@ -176,6 +176,19 @@ public class SetupCompte {
 	}
 
 	/**
+	 * Définit l'action à exécuter lorsque l'utilisateur appuie sur la touche
+	 * Echap.
+	 * 
+	 * @param action	L'action à exécuter.
+	 * @param component	Le composant sur qui repose la détection de la touche.
+	 */
+	private static void setActionOnEscape(Action action, JComponent component) {
+		component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
+		component.getActionMap().put("quitter", action);
+	}
+
+	/**
 	 * Crée une liste de comptes et écoute les changements de sélection.
 	 * 
 	 * @return	Une nouvelle liste graphique des comptes.
@@ -271,19 +284,6 @@ public class SetupCompte {
 		bar.add(appliquer);
 		bar.add(quitter);
 		return bar;
-	}
-	
-	/**
-	 * Définit l'action à exécuter lorsque l'utilisateur appuie sur la touche
-	 * Echap.
-	 * 
-	 * @param action	L'action à exécuter.
-	 * @param component	Le composant sur qui repose la détection de la touche.
-	 */
-	private void setActionOnEscape(Action action, JComponent component) {
-		component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "quitter");
-		component.getActionMap().put("quitter", action);
 	}
 	
 	/**

@@ -23,6 +23,19 @@ public class PainterAire extends AbstractPainter {
 		super(model, new Echelle(model.getAggregateView()));
 	}// constructeur
 	
+	/** Calcule l'abscisse dans la fenêtre graphique, à partir de l'index de
+	 * l'abscisse selon le modèle.
+	 * 
+	 * @param index	Index de l'abscisse selon le modèle.
+	 * @param count	Nombre total d'abscisses selon le modèle.
+	 * @param width	Largeur de la zone graphique.
+	 * 
+	 * @return		L'abscisse à utiliser dans la zone graphique.
+	 */
+	private static int getXCoordinate(int index, int count, int width) {
+		return index * width / (count - 1);
+	}// getXCoordinate
+
 	@Override
 	public void paintDiagram(Graphics2D g, Rectangle bounds) {
 		
@@ -93,19 +106,6 @@ public class PainterAire extends AbstractPainter {
 		g.fill(path);
 	}// paintSerie
 	
-	/** Calcule l'abscisse dans la fenêtre graphique, à partir de l'index de
-	 * l'abscisse selon le modèle.
-	 * 
-	 * @param index	Index de l'abscisse selon le modèle.
-	 * @param count	Nombre total d'abscisses selon le modèle.
-	 * @param width	Largeur de la zone graphique.
-	 * 
-	 * @return		L'abscisse à utiliser dans la zone graphique.
-	 */
-	private int getXCoordinate(int index, int count, int width) {
-		return index * width / (count - 1);
-	}// getXCoordinate
-
 	@Override
 	public void paintSample(Serie serie, Graphics2D g, Rectangle bounds) {
 		

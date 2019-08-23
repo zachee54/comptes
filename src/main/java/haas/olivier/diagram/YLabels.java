@@ -43,6 +43,17 @@ class YLabels extends JComponent {
 		reloadGraduations();
 	}// constructeur
 	
+	/** Crée une nouvelle étiquette.
+	 * 
+	 * @param text	Le texte de la nouvelle étiquette.
+	 * @return		Une nouvelle étiquette.
+	 */
+	private static Component createLabel(String text) {
+		JLabel label = new JLabel(text);
+		label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+		return label;
+	}// createLabel
+
 	@Override
 	public void setLayout(LayoutManager layout) {
 		if (layout instanceof YLabelsLayout) {
@@ -72,17 +83,6 @@ class YLabels extends JComponent {
 		return format.format(graduation);
 	}// getGraduationText
 	
-	/** Crée une nouvelle étiquette.
-	 * 
-	 * @param text	Le texte de la nouvelle étiquette.
-	 * @return		Une nouvelle étiquette.
-	 */
-	private Component createLabel(String text) {
-		JLabel label = new JLabel(text);
-		label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-		return label;
-	}// createLabel
-
 	/** Renvoie la hauteur dont les étiquettes dépassent par rapport aux bords
 	 * inférieur et supérieur du diagramme.
 	 * 

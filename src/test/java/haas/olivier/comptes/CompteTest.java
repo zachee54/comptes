@@ -628,7 +628,7 @@ public class CompteTest {
 	 * 
 	 * @throws ParseException
 	 */
-	private Compte createReference() throws ParseException {
+	private static Compte createReference() throws ParseException {
 		Compte c = new Compte(0, TypeCompte.COMPTE_COURANT);
 		c.setCloture(DF.parse("15/08/17"));
 		c.setNom("mon compte");

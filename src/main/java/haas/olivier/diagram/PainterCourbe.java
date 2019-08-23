@@ -22,6 +22,18 @@ public class PainterCourbe extends AbstractPainter {
 		super(model);
 	}// constructeur
 	
+	/** Dessine le chemin spécifié.
+	 * <p>
+	 * Si <code>path==null</code>, la méthode ne fait rien.
+	 * 
+	 * @param g		Le contexte graphique.
+	 * @param path	Le chemin à dessiner. Peut être <code>null</code>.
+	 */
+	private static void drawPath(Graphics2D g, Path2D path) {
+		if (path != null)
+			g.draw(path);
+	}// drawPath
+
 	@Override
 	public void paintDiagram(Graphics2D g, Rectangle bounds) {
 		Echelle echelle = getEchelle();
@@ -75,18 +87,6 @@ public class PainterCourbe extends AbstractPainter {
 		}// for série
 	}// paintDiagram
 	
-	/** Dessine le chemin spécifié.
-	 * <p>
-	 * Si <code>path==null</code>, la méthode ne fait rien.
-	 * 
-	 * @param g		Le contexte graphique.
-	 * @param path	Le chemin à dessiner. Peut être <code>null</code>.
-	 */
-	private void drawPath(Graphics2D g, Path2D path) {
-		if (path != null)
-			g.draw(path);
-	}// drawPath
-
 	@Override
 	public void paintSample(Serie serie, Graphics2D g, Rectangle bounds) {
 		GraphicHints.prepareGraphics(g);

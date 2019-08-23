@@ -218,6 +218,40 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 	}
 	
 	/**
+	 * Lit les jours JAXB et le splace dans une map.
+	 * 
+	 * @param jours	L'instance JAXB des jours
+	 * 
+	 * @return		Une Map.
+	 */
+	private static Map<Month, Integer> readJours(Jours jours) {
+		Map<Month, Integer> result = new HashMap<>();
+		for (Jour jour : jours.getJour()) {
+			result.put(
+					Month.getInstance(jour.getAnnee(), jour.getMois()),
+					jour.getValue());
+		}
+		return result;
+	}
+
+	/**
+	 * Lit les montants JAXB et les place dans une map.
+	 * 
+	 * @param montants	L'instance JAXB des montants.
+	 * 
+	 * @return			Une Map.
+	 */
+	private static Map<Month, BigDecimal> readMontants(Montants montants) {
+		Map<Month, BigDecimal> result = new HashMap<>();
+		for (Montant montant : montants.getMontant()) {
+			result.put(
+					Month.getInstance(montant.getAnnee(), montant.getMois()),
+					montant.getValue());
+		}
+		return result;
+	}
+
+	/**
 	 * L'itérateur parcourant les objets JAXB désérialisés.
 	 */
 	private final PermanentOrdener it;
@@ -315,40 +349,6 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		}
 		
 		result.setState(state);
-		return result;
-	}
-	
-	/**
-	 * Lit les jours JAXB et le splace dans une map.
-	 * 
-	 * @param jours	L'instance JAXB des jours
-	 * 
-	 * @return		Une Map.
-	 */
-	private Map<Month, Integer> readJours(Jours jours) {
-		Map<Month, Integer> result = new HashMap<>();
-		for (Jour jour : jours.getJour()) {
-			result.put(
-					Month.getInstance(jour.getAnnee(), jour.getMois()),
-					jour.getValue());
-		}
-		return result;
-	}
-
-	/**
-	 * Lit les montants JAXB et les place dans une map.
-	 * 
-	 * @param montants	L'instance JAXB des montants.
-	 * 
-	 * @return			Une Map.
-	 */
-	private Map<Month, BigDecimal> readMontants(Montants montants) {
-		Map<Month, BigDecimal> result = new HashMap<>();
-		for (Montant montant : montants.getMontant()) {
-			result.put(
-					Month.getInstance(montant.getAnnee(), montant.getMois()),
-					montant.getValue());
-		}
 		return result;
 	}
 }

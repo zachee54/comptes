@@ -75,25 +75,9 @@ class Echelle {
 	 * Ou encore : le plus grand entier <code>n</code> tel que
 	 * <code>10<sup>n</sup> <= d</code>.
 	 */
-	private int getPrecision(double d) {
+	private static int getPrecision(double d) {
 		return (int) floor(log10(d));
 	}// getPrecision
-	
-	/** Redéfinit les bornes de l'échelle.<br>
-	 * Cette méthode modifie {@link #inf} et {@link #sup}.
-	 * <p>
-	 * Les bornes sont obtenues en arrondissant les extrêmes vers l'extérieur de
-	 * l'intervalle, au dixième de la précision spécifiée. C'est-à-dire que les
-	 * bornes sont des multiples de <code>10<sup>precision-1</code>.
-	 * 
-	 * @param min		La valeur minimale du modèle de données.
-	 * @param max		La valeur maximale du modèle de données.
-	 * @param precision	La précision donnant l'ordre de grandeur de l'amplitude.
-	 */
-	private void updateRange(double min, double max, int precision) {
-		inf = new BigDecimal(min).setScale(-precision+1, RoundingMode.FLOOR);
-		sup = new BigDecimal(max).setScale(-precision+1, RoundingMode.CEILING);
-	}// createRange
 	
 	/** Renvoie un pas de graduation adapté.<br>
 	 * On calcule l'ordre de grandeur de l'amplitude. Si les extrêmes sont trop
@@ -104,7 +88,7 @@ class Echelle {
 	 * L'algorithme garantit en principe d'avoir 4 à 10 graduations sur
 	 * l'amplitude de l'échelle.
 	 */
-	private BigDecimal getStep(double range, int precision) {
+	private static BigDecimal getStep(double range, int precision) {
 		BigDecimal scale = BigDecimal.ONE.scaleByPowerOfTen(precision);
 		
 		// Selon le rapport entre l'amplitude et son ordre de grandeur
@@ -126,6 +110,22 @@ class Echelle {
 			return scale.movePointLeft(1);
 		}// if
 	}// getStep
+
+	/** Redéfinit les bornes de l'échelle.<br>
+	 * Cette méthode modifie {@link #inf} et {@link #sup}.
+	 * <p>
+	 * Les bornes sont obtenues en arrondissant les extrêmes vers l'extérieur de
+	 * l'intervalle, au dixième de la précision spécifiée. C'est-à-dire que les
+	 * bornes sont des multiples de <code>10<sup>precision-1</code>.
+	 * 
+	 * @param min		La valeur minimale du modèle de données.
+	 * @param max		La valeur maximale du modèle de données.
+	 * @param precision	La précision donnant l'ordre de grandeur de l'amplitude.
+	 */
+	private void updateRange(double min, double max, int precision) {
+		inf = new BigDecimal(min).setScale(-precision+1, RoundingMode.FLOOR);
+		sup = new BigDecimal(max).setScale(-precision+1, RoundingMode.CEILING);
+	}// createRange
 	
 	/** Renvoie la première graduation, calculée à partir de la borne inférieure
 	 * de l'échelle et le pas de graduation.

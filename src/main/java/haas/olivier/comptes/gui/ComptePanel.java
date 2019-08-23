@@ -158,7 +158,7 @@ public class ComptePanel extends JPanel {
 	 * 
 	 * @param filter	Le filtre pour sélectionner les comptes à proposer.
 	 */
-	private JComboBox<Compte> createComboBox(FilterCompte filter) {
+	private static JComboBox<Compte> createComboBox(FilterCompte filter) {
 
 		// Récupérer tous les comptes
 		Iterable<Compte> comptes;
@@ -249,6 +249,42 @@ public class ComptePanel extends JPanel {
 	}
 
 	/**
+	 * Crée un panel pour la barre supérieure. Je n'ai pas trouvé mieux qu'un
+	 * <code>GroupLayout</code> pour éviter que les composants ne reviennent à
+	 * la ligne (s'il n'y a pas assez de place) ou ne soient exagérément
+	 * agrandis (s'il y a trop de place).
+	 */
+	private static JPanel createTopPanel(Component c1, Component c2) {
+	
+		JPanel topPanel = new JPanel();
+		GroupLayout layout = new GroupLayout(topPanel);
+		topPanel.setLayout(layout);
+	
+		Component glue = Box.createHorizontalGlue();
+	
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+	
+		layout.setVerticalGroup(layout
+				.createParallelGroup(GroupLayout.Alignment.CENTER, false)
+				.addComponent(c1, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addComponent(glue)
+				.addComponent(c2, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+	
+		layout.setHorizontalGroup(layout
+				.createSequentialGroup()
+				.addComponent(c1, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addComponent(glue)
+				.addComponent(c2, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+	
+		return topPanel;
+	}
+
+	/**
 	 * Crée une table de données pour le compte et le mois en cours.
 	 */
 	private Component createTable(MonthObservable monthObservable) {
@@ -299,42 +335,6 @@ public class ComptePanel extends JPanel {
 		searchPanel.add(new JScrollPane(new FinancialTable(searchModel)));
 		
 		return containerVue;
-	}
-
-	/**
-	 * Crée un panel pour la barre supérieure. Je n'ai pas trouvé mieux qu'un
-	 * <code>GroupLayout</code> pour éviter que les composants ne reviennent à
-	 * la ligne (s'il n'y a pas assez de place) ou ne soient exagérément
-	 * agrandis (s'il y a trop de place).
-	 */
-	private JPanel createTopPanel(Component c1, Component c2) {
-
-		JPanel topPanel = new JPanel();
-		GroupLayout layout = new GroupLayout(topPanel);
-		topPanel.setLayout(layout);
-
-		Component glue = Box.createHorizontalGlue();
-
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-
-		layout.setVerticalGroup(layout
-				.createParallelGroup(GroupLayout.Alignment.CENTER, false)
-				.addComponent(c1, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addComponent(glue)
-				.addComponent(c2, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
-
-		layout.setHorizontalGroup(layout
-				.createSequentialGroup()
-				.addComponent(c1, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addComponent(glue)
-				.addComponent(c2, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
-
-		return topPanel;
 	}
 
 	/**
