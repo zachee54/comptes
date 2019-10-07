@@ -121,11 +121,9 @@ public class CachePermanentDAO implements PermanentDAO {
 			throw new IllegalArgumentException(String.format(
 					"Impossible d'ajouter au modèle : L'opération n°%s existe déjà",
 					p.getId()));
-			
-		} else {									// Identifiant inexistant
-			permanents.put(p.getId(), p);
 		}
 		
+		permanents.put(p.getId(), p);
 		mustBeSaved = true;							// Sauvegarde attendue
 	}
 
