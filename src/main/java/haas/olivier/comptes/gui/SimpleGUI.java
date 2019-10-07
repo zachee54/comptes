@@ -182,7 +182,7 @@ ActionListener, PropertiesController {
 					dataModified();					// Actualiser l'icône
 					
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					LOGGER.log(Level.SEVERE, "Échec de l'enregistrement", e1);
 				}
 			}
 			
