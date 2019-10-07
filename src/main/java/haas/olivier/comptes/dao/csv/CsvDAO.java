@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import javax.xml.stream.FactoryConfigurationError;
+
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
 
@@ -212,8 +214,13 @@ public class CsvDAO implements CacheableDAOFactory {
 	 */
 	private CsvDAO(File file) throws IOException {
 		this.file = file;
-		zip = file.exists() ? new ZipFile(file) : null;
-		comptesById = CsvCompteDAO.loadComptes(getReader(COMPTES));
+		if (file.exists()) {
+			zip = new ZipFile(file);
+			comptesById = CsvCompteDAO.loadComptes(getReader(COMPTES));
+		} else {
+			zip = null;
+			comptesById = new HashMap<>();
+		}
 	}
 	
 	/**
