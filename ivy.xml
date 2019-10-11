@@ -33,5 +33,6 @@
 		<dependency org="junit" name="junit" conf="junit->default" rev="4.11" />
 		<dependency org="org.mockito" name="mockito-core" conf="test->default" rev="2.21.0" />
 		<dependency org="org.glassfish.jaxb" name="jaxb-runtime" conf="compile->default" rev="2.4.0-b180830.0438" />
+		<dependency org="org.hibernate" name="hibernate-core" conf="compile->default" rev="5.4.6.Final" />
 	</dependencies>
 </ivy-module>
