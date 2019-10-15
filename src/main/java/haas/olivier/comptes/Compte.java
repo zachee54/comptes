@@ -16,11 +16,21 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Random;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.GenericGenerator;
+
 /**
  * Un compte.
  * 
  * @author Olivier HAAS
  */
+@Entity
 public class Compte implements Comparable<Compte>, Serializable {
 	private static final long serialVersionUID = 445986158370514520L;
 	
@@ -74,7 +84,10 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * 
 	 * @see {@link haas.olivier.comptes.gui.diagram.ComptesDiagramFactory#newModel()}
 	 */
-	private final int id;
+	@Id
+	@GeneratedValue(generator="increment")
+	@GenericGenerator(name="increment", strategy = "increment")
+	private Integer id;
 	
 	/**
 	 * Nom du compte.
@@ -83,22 +96,26 @@ public class Compte implements Comparable<Compte>, Serializable {
 	
 	/**
 	 * Date d'ouverture.
-	 * */
+	 */
+	@Temporal(TemporalType.DATE)
 	private Date ouverture;
 	
 	/**
 	 * Date de clôture.
 	 */
+	@Temporal(TemporalType.DATE)
 	private Date cloture;
 
 	/**
 	 * La couleur du compte dans les diagrammes.
 	 */
+	@Transient
 	private Color color;
 	
 	/**
 	 * L'état du compte.
 	 */
+	@Transient
 	private CompteState state;
 	
 	/**
