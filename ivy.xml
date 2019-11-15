@@ -33,7 +33,8 @@
 		<dependency org="junit" name="junit" conf="junit->default" rev="4.11" />
 		<dependency org="org.mockito" name="mockito-core" conf="test->default" rev="2.21.0" />
 		<dependency org="org.glassfish.jaxb" name="jaxb-runtime" conf="compile->default" rev="2.4.0-b180830.0438" />
-		<dependency org="org.hibernate" name="hibernate-core" conf="compile->default" rev="5.4.6.Final" />
+		<dependency org="org.hibernate" name="hibernate-core" conf="compile->default" rev="5.4.9.Final" />
+		<dependency org="org.dom4j" name="dom4j" conf="compile->compile" rev="2.1.1" /><!-- Dépendance manquante dans hibernate-core -->
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.5.0" />
 	</dependencies>
 </ivy-module>
