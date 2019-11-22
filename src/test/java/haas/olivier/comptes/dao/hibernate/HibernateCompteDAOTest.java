@@ -1,6 +1,10 @@
 package haas.olivier.comptes.dao.hibernate;
 
 import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.util.Collection;
+
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
@@ -49,9 +53,15 @@ public class HibernateCompteDAOTest {
 	}
 
 	@Test
-	public void testAdd() {
+	public void testAdd() throws IOException {
 		Compte compte = new Compte(0, TypeCompte.COMPTE_CARTE);
 		dao.add(compte);
+		
+		Collection<Compte> comptes = dao.getAll();
+		assertEquals(1, comptes.size());
+		for (Compte compteRead : comptes) {
+			assertSame(compte, compteRead);
+		}
 	}
 
 	@Test

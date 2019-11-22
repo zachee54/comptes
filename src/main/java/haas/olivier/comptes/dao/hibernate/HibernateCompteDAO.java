@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.TypeCompte;
@@ -31,14 +32,12 @@ class HibernateCompteDAO implements CompteDAO, Closeable {
 		this.entityManager = entityManager;
 	}
 	
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.CompteDAO#getAll()
-	 */
 	@Override
 	public Collection<Compte> getAll() throws IOException {
-		return null; // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return entityManager.createQuery(
+				"select c from Compte c",
+				Compte.class)
+				.getResultList();
 	}
 
 	@Override
