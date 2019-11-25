@@ -30,6 +30,7 @@ class HibernateCompteDAO implements CompteDAO, Closeable {
 	
 	HibernateCompteDAO(EntityManager entityManager) {
 		this.entityManager = entityManager;
+		entityManager.getTransaction().begin();
 	}
 	
 	@Override
@@ -43,6 +44,7 @@ class HibernateCompteDAO implements CompteDAO, Closeable {
 	@Override
 	public void add(Compte compte) {
 		entityManager.persist(compte);
+//		entityManager.getTransaction().commit();
 	}
 
 	/** 

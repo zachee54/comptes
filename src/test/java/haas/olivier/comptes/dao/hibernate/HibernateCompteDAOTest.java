@@ -57,7 +57,7 @@ public class HibernateCompteDAOTest {
 		Compte compte = new Compte(0, TypeCompte.COMPTE_CARTE);
 		dao.add(compte);
 		
-		Collection<Compte> comptes = dao.getAll();
+		Collection<Compte> comptes = factory.getCompteDAO().getAll();
 		assertEquals(1, comptes.size());
 		for (Compte compteRead : comptes) {
 			assertSame(compte, compteRead);
