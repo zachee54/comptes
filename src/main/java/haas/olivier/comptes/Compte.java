@@ -54,8 +54,9 @@ public class Compte implements Comparable<Compte>, Serializable {
 			.thenComparing(
 					Compte::getNom,
 					Comparator.nullsFirst(Comparator.naturalOrder()))
-			.thenComparingInt(
-					Compte::getId);
+			.thenComparing(
+					Compte::getId,
+					Comparator.nullsFirst(Comparator.naturalOrder()));
 	
 	/**
 	 * Le compte budgétaire virtuel permettant de retracer les versements en
@@ -116,7 +117,10 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * L'état du compte.
 	 */
 	@Transient
-	private CompteState state;
+	private CompteState state = new CompteBancaireState(TypeCompte.COMPTE_CARTE, null);
+	
+	protected Compte() {
+	}
 	
 	/**
 	 * Construit un compte.
@@ -124,7 +128,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * @param id	L'identifiant unique du compte.
 	 * @param type	Le type de compte.
 	 */
-	public Compte(int id, TypeCompte type) {
+	public Compte(Integer id, TypeCompte type) {
 		this.id = id;
 		setType(type);
 		
@@ -159,7 +163,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * 
 	 * @return	Un identifiant unique et persistant.
 	 */
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	
@@ -494,6 +498,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	/**
 	 * Renvoie le nom du compte, suivi de son numéro s'il en a un.
 	 */
+	@Override
 	public String toString() {
 		Long numero = getNumero();
 		return (numero == null) ? nom : String.format("%s %s", nom, numero);
