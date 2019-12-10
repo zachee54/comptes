@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
 
-/** L'interface des différents états d'un compte.
+/**
+ * L'interface des différents états d'un compte.
  * <p>
  * Les classes concrètes implémentent par exemple le comportement des comptes
  * bancaires, ou des comptes budgétaires.
@@ -18,17 +19,21 @@ import haas.olivier.util.Month;
  */
 interface CompteState extends Serializable {
 
-	/** Renvoie le type de compte */
+	/**
+	 * Renvoie le type de compte.
+	 */
 	TypeCompte getType();
 	
-	/** Renvoie le numéro du compte.
+	/**
+	 * Renvoie le numéro du compte.
 	 * 
 	 * @return	Le numéro de compte, ou <code>null</code> si le compte n'a pas
 	 * 			de numéro.
 	 */
 	Long getNumero();
 	
-	/** Définit le numéro du compte.
+	/**
+	 * Définit le numéro du compte.
 	 * 
 	 * @param numero	Le nouveau numéro. Peut être <code>null</code>.
 	 */
