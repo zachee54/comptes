@@ -110,7 +110,6 @@ public class Compte implements Comparable<Compte>, Serializable {
 	/**
 	 * La couleur du compte dans les diagrammes.
 	 */
-	@Transient
 	private Color color;
 	
 	/**
