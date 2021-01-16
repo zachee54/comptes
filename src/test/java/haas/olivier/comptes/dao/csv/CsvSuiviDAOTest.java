@@ -108,20 +108,21 @@ public class CsvSuiviDAOTest {
 					DELIMITER);
 			
 			// Méthode testée n°2
-			CsvSuiviDAO dao = new CsvSuiviDAO(reader, COMPTES);
-			
-			// Vérifier le contenu
-			int n = 0;									// Compteur
-			while (dao.hasNext()) {
-				Solde solde = dao.next();
-				assertEquals(0,
-						CACHE.get(solde.compte, solde.month)
-						.compareTo(solde.montant));
-				n++;
+			try (CsvSuiviDAO dao = new CsvSuiviDAO(reader, COMPTES)) {
+
+				// Vérifier le contenu
+				int n = 0;									// Compteur
+				while (dao.hasNext()) {
+					Solde solde = dao.next();
+					assertEquals(0,
+							CACHE.get(solde.compte, solde.month)
+							.compareTo(solde.montant));
+					n++;
+				}
+
+				// Vérifier qu'il n'y a rien de plus que ce qu'on y a mis
+				assertEquals(8, n);
 			}
-			
-			// Vérifier qu'il n'y a rien de plus que ce qu'on y a mis
-			assertEquals(8, n);
 			
 		} finally {
 			if (writer != null) writer.close();

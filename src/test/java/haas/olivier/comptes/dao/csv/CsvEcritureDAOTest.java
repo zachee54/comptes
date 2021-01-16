@@ -108,15 +108,16 @@ public class CsvEcritureDAOTest {
 	 */
 	@Test
 	public void testReaderNull() throws IOException {
-		
+
 		// Méthode testée
-		CsvEcritureDAO dao = new CsvEcritureDAO(null, null);
-		
-		// Vérifier le comportement
-		try {
-			dao.next();
-			fail("Aurait dû lever une NoSuchElementException");
-		} catch (NoSuchElementException e) {
+		try (CsvEcritureDAO dao = new CsvEcritureDAO(null, null)) {
+
+			// Vérifier le comportement
+			try {
+				dao.next();
+				fail("Aurait dû lever une NoSuchElementException");
+			} catch (NoSuchElementException e) {
+			}
 		}
 	}
 
@@ -130,24 +131,25 @@ public class CsvEcritureDAOTest {
 		Reader reader = reRead();
 		
 		// Relire les données écrites
-		CsvEcritureDAO dao =
-				new CsvEcritureDAO(new CsvReader(reader, DELIMITER), COMPTES);
-		
-		// Vérifier leur contenu
-		List<Ecriture> sol = new ArrayList<>(ECRITURES);	// La solution
-		// Tant qu'il reste des écritures à trouver...
-		while(!sol.isEmpty()) {
-			// ...l'objet testé affirme en avoir...
-			assertTrue(dao.hasNext());
-			// ...et ce qu'il renvoie fait partie de la solution
-			assertTrue(sol.remove(dao.next()));
+		try (CsvEcritureDAO dao =
+				new CsvEcritureDAO(new CsvReader(reader, DELIMITER), COMPTES)) {
+
+			// Vérifier leur contenu
+			List<Ecriture> sol = new ArrayList<>(ECRITURES);	// La solution
+			// Tant qu'il reste des écritures à trouver...
+			while(!sol.isEmpty()) {
+				// ...l'objet testé affirme en avoir...
+				assertTrue(dao.hasNext());
+				// ...et ce qu'il renvoie fait partie de la solution
+				assertTrue(sol.remove(dao.next()));
+			}
+
+			// Rien de plus que ce qu'il fallait
+			assertFalse(dao.hasNext());
+
+			// Vérifier que le flux a été fermé automatiquement
+			checkClosed(reader);
 		}
-		
-		// Rien de plus que ce qu'il fallait
-		assertFalse(dao.hasNext());
-		
-		// Vérifier que le flux a été fermé automatiquement
-		checkClosed(reader);
 	}
 
 	@Test
