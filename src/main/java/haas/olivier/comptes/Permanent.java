@@ -462,7 +462,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		int result = nom.compareTo(p.nom);	// Comparer selon les noms
 		if (result == 0) {
 			// Ou selon le hashcode
-			result = new Integer(hashCode()).compareTo(p.hashCode());
+			result = Integer.valueOf(hashCode()).compareTo(p.hashCode());
 		}
 		return result;
 	}

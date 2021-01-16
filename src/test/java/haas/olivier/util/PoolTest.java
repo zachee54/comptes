@@ -34,6 +34,7 @@ public class PoolTest {
 	public void tearDown() throws Exception {
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testGet() {
 		Object a = new Integer(12);
