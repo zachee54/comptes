@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -10,6 +10,11 @@ import haas.olivier.util.Month;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Transient;
 
 /**
  * L'état d'un compte bancaire.
@@ -24,7 +29,8 @@ import java.util.Date;
  * 
  * @author Olivier HAAS
  */
-class CompteBancaireState implements CompteState {
+@Entity
+class CompteBancaireState extends CompteState {
 	private static final long serialVersionUID = -225986016944002291L;
 
 	/**
@@ -33,11 +39,13 @@ class CompteBancaireState implements CompteState {
 	 * Cet objet n'est pas synchronisé et ne doit donc pas être accédé de
 	 * manière statique.
 	 */
+	@Transient
 	private final NumberFormat format = NumberFormat.getInstance();
 
 	/**
 	 * Le type de compte.
 	 */
+	@Enumerated(EnumType.STRING)
 	private TypeCompte type;
 	
 	/**

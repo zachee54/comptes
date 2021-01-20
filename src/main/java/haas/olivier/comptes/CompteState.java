@@ -1,10 +1,16 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
@@ -17,12 +23,32 @@ import haas.olivier.util.Month;
  *
  * @author Olivier Haas
  */
-interface CompteState extends Serializable {
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+abstract class CompteState implements Serializable {
+	private static final long serialVersionUID = 6193837940341269422L;
+	
+	/**
+	 * Identifiant unique.
+	 */
+	@Id
+	@GeneratedValue
+	private Integer id;
+	
+	protected CompteState() {
+	}
+	
+	/**
+	 * Renvoie l'identifiant unique.
+	 */
+	public Integer getId() {
+		return id;
+	}
 
 	/**
 	 * Renvoie le type de compte.
 	 */
-	TypeCompte getType();
+	abstract TypeCompte getType();
 	
 	/**
 	 * Renvoie le numéro du compte.
@@ -30,14 +56,14 @@ interface CompteState extends Serializable {
 	 * @return	Le numéro de compte, ou <code>null</code> si le compte n'a pas
 	 * 			de numéro.
 	 */
-	Long getNumero();
+	abstract Long getNumero();
 	
 	/**
 	 * Définit le numéro du compte.
 	 * 
 	 * @param numero	Le nouveau numéro. Peut être <code>null</code>.
 	 */
-	void setNumero(Long numero);
+	abstract void setNumero(Long numero);
 	
 	/**
 	 * Renvoie le solde du compte à la fin du mois spécifié.
@@ -48,7 +74,7 @@ interface CompteState extends Serializable {
 	 * @return			Le solde du compte à la fin du mois, selon
 	 * 					<code>suivi</code>.
 	 */
-	BigDecimal getSuivi(Compte compte, SuiviDAO suivi, Month month);
+	abstract BigDecimal getSuivi(Compte compte, SuiviDAO suivi, Month month);
 	
 	/**
 	 * Modifie l'historique du compte au titre d'un mois, en lui ajoutant le
@@ -58,7 +84,7 @@ interface CompteState extends Serializable {
 	 * @param month		Le mois au titre duquel modifier le solde.
 	 * @param delta		Le montant à ajouter au solde actuel.
 	 */
-	void addHistorique(Compte compte, Month month, BigDecimal delta);
+	abstract void addHistorique(Compte compte, Month month, BigDecimal delta);
 	
 	/**
 	 * Modifie le solde à vue du compte au titre d'un mois, en lui ajoutant le
@@ -68,7 +94,7 @@ interface CompteState extends Serializable {
 	 * @param month		Le mois au titre duquel modifier le solde.
 	 * @param delta		Le montant à ajouter au solde actuel.
 	 */
-	void addPointage(Compte compte, Month month, BigDecimal delta);
+	abstract void addPointage(Compte compte, Month month, BigDecimal delta);
 	
 	/**
 	 * Renvoie le sens dans lequel il faut lire l'écriture en consultant le
@@ -89,5 +115,5 @@ interface CompteState extends Serializable {
 	 * 					-1 si c'est l'opposé du montant qui doit figurer,
 	 * 					0 si aucun des comptes ne correspond à l'instance.
 	 */
-	public int getViewSign(Compte compte, Compte debit, Compte credit);
+	public abstract int getViewSign(Compte compte, Compte debit, Compte credit);
 }

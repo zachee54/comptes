@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -16,14 +16,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Random;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.GenericGenerator;
 
 /**
  * Un compte.
@@ -86,8 +85,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 * @see {@link haas.olivier.comptes.gui.diagram.ComptesDiagramFactory#newModel()}
 	 */
 	@Id
-	@GeneratedValue(generator="increment")
-	@GenericGenerator(name="increment", strategy = "increment")
+	@GeneratedValue
 	private Integer id;
 	
 	/**
@@ -115,7 +113,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	/**
 	 * L'état du compte.
 	 */
-	@Transient
+	@ManyToOne(cascade = CascadeType.ALL)
 	private CompteState state = new CompteBancaireState(TypeCompte.COMPTE_CARTE, null);
 	
 	protected Compte() {
@@ -124,6 +122,7 @@ public class Compte implements Comparable<Compte>, Serializable {
 	/**
 	 * Construit un compte.
 	 * 
+	 * TODO Supprimer id avec Hibernate
 	 * @param id	L'identifiant unique du compte.
 	 * @param type	Le type de compte.
 	 */
@@ -159,8 +158,6 @@ public class Compte implements Comparable<Compte>, Serializable {
 
 	/**
 	 * Renvoie l'identifiant unique et persistant du compte.
-	 * 
-	 * @return	Un identifiant unique et persistant.
 	 */
 	public Integer getId() {
 		return id;
@@ -222,6 +219,13 @@ public class Compte implements Comparable<Compte>, Serializable {
 	}
 	
 	/**
+	 * Renvoie l'état du compte.
+	 */
+	public CompteState getState() {
+		return state;
+	}
+	
+	/**
 	 * Définit le nom du compte.
 	 * 
 	 * @param nom	Le nouveau nom du compte.
@@ -277,6 +281,13 @@ public class Compte implements Comparable<Compte>, Serializable {
 	 */
 	public void setColor(Color color) {
 		this.color = color;
+	}
+	
+	/**
+	 * Modifie l'état du compte.
+	 */
+	public void setState(CompteState state) {
+		this.state = state;
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -8,6 +8,10 @@ import haas.olivier.comptes.dao.SuiviDAO;
 import haas.olivier.util.Month;
 
 import java.math.BigDecimal;
+
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 /**
  * L'état d'un compte budgétaire.
@@ -18,12 +22,14 @@ import java.math.BigDecimal;
  * 
  * @author Olivier HAAS
  */
-class CompteBudgetState implements CompteState {
+@Entity
+class CompteBudgetState extends CompteState {
 	private static final long serialVersionUID = -1159441918416714602L;
 
 	/**
 	 * Le type de compte.
 	 */
+	@Enumerated(EnumType.STRING)
 	private TypeCompte type;
 	
 	/**
