@@ -14,7 +14,10 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Une écriture comptable.
+import javax.persistence.Entity;
+
+/**
+ * Une écriture comptable.
  * <p>
  * Suivant les classes concrètes dérivées de <code>Compte</code> utilisées en
  * débit et crédit, il peut s'agir d'une recette, d'une dépense, d'un virement
@@ -22,10 +25,12 @@ import java.util.regex.Pattern;
  * 
  * @author Olivier Haas
  */
+@Entity
 public class Ecriture implements Comparable<Ecriture>, Serializable {
 	private static final long serialVersionUID = 6211208191867018351L;
 
-	/** Comparateur d'écritures selon les dates de pointages plutôt que selon
+	/**
+	 * Comparateur d'écritures selon les dates de pointages plutôt que selon
 	 * l'ordre naturel.
 	 * <p>
 	 * Les écritures non pointées sont classées à la fin.<br>
@@ -41,7 +46,8 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 	implements Serializable, Comparator<Ecriture> {
 		private static final long serialVersionUID = 979484917860753125L;
 
-		/** Ce tri doit être consistant avec <code>equals</code>, ce qui
+		/**
+		 * Ce tri doit être consistant avec <code>equals</code>, ce qui
 		 * implique d'utiliser les mêmes critères de départage que
 		 * {@link Ecriture#compareTo(Ecriture)}.
 		 */
@@ -80,46 +86,79 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			}
 			
 			return result;			// Si on arrive ici, renvoyer le résultat
-		}// compareTo
-	}// static nested class SortPointages
+		}
+	}
 
-	/** Format de date pour l'affichage. */
+	/**
+	 * Format de date pour l'affichage.
+	 */
 	private static final DateFormat DF = new SimpleDateFormat("dd/MM/yyyy");
 
-	/** Les qualifications possibles d'une écriture au regard de l'épargne.
+	/**
+	 * Les qualifications possibles d'une écriture au regard de l'épargne.
 	 * 
 	 * @author Olivier HAAS
 	 */
 	public static enum TypeEpargne {
 		EPARGNE, PRELEVEMENT, NEUTRE;
-	}// private static nested enum
+	}
 
 	// Propriétés définies par le constructeur
-	/** Identifiant unique. */
+	
+	/**
+	 * Identifiant unique.
+	 */
 	public final Integer id;
-	/** Date d'écriture. */
+	
+	/**
+	 * Date d'écriture.
+	 */
 	public final Date date;
-	/** Compte débité. */
+	
+	/**
+	 * Compte débité.
+	 */
 	public final Compte debit;
-	/** Compte crédité. */
+	
+	/**
+	 * Compte crédité.
+	 */
 	public final Compte credit;
-	/** Montant. */
+	
+	/**
+	 * Montant.
+	 */
 	public final BigDecimal montant;
-	/** Nom de la personne. */
+	
+	/**
+	 * Nom de la personne.
+	 */
 	public final String tiers;
-	/** Libellé. */
+	
+	/**
+	 * Libellé.
+	 */
 	public final String libelle;
-	/** Numéro de chèque. */
+	
+	/**
+	 * Numéro de chèque.
+	 */
 	public final Integer cheque;
-	/** Date de pointage. */
+	
+	/**
+	 * Date de pointage.
+	 */
 	public final Date pointage;
 
 	// Propriété calculée par le constructeur
 	
-	/** Qualification à l'égard de l'épargne. */
+	/**
+	 * Qualification à l'égard de l'épargne.
+	 */
 	public final TypeEpargne epargne;
 
-	/** Vérifie la cohérence des arguments en vue de l'instanciation d'une
+	/**
+	 * Vérifie la cohérence des arguments en vue de l'instanciation d'une
 	 * écriture.
 	 * 
 	 * @param id		L'identifiant de l'écriture.
@@ -147,37 +186,38 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		if (date == null) {
 			throw new EcritureMissingArgumentException(
 					"La date de l'écriture ne peut pas être null", id);
-		}// if date
+		}
 		
 		if (debit == null) {
 			throw new EcritureMissingArgumentException(
 					"Le compte débité ne peut pas être null", id);
-		}// if debit
+		}
 		
 		if (credit == null) {
 			throw new EcritureMissingArgumentException(
 					"Le compte crédité ne peut pas être null", id);
-		}// if credit
+		}
 		
 		if (montant == null) {
 			throw new EcritureMissingArgumentException(
 					"Le montant de l'écriture ne peut pas être null", id);
-		}// if montant
+		}
 	
 		// Vérifier qu'on ne mouvemente pas un compte sur lui-même
 		if (debit == credit) {
 			throw new InconsistentArgumentsException(
 					"Un compte ne peut pas être à la fois débité et crédité dans la même écriture");
-		}// if debit et credit
+		}
 	
 		// Vérifier que le pointage est postérieur ou égal à la date d'écriture
 		if (pointage != null && pointage.before(date)) {
 			throw new InconsistentArgumentsException(
 					"Une écriture ne peut pas être pointée avant sa propre date");
-		}// if pointage
-	}// checkArguments
+		}
+	}
 
-	/** Construit une écriture.
+	/**
+	 * Construit une écriture.
 	 * <p>
 	 * Les paramètres correspondent aux données minimum pour que l'écriture soit
 	 * régulière. Ils ne sont pas modifiables ultérieurement.
@@ -220,7 +260,7 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			debit = credit;
 			credit = tmp;
 			montant = montant.negate();					// Montant opposé
-		}// if montant négatif
+		}
 		
 		// Définir les propriétés simples
 		this.id = id;
@@ -243,10 +283,11 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			epargne = TypeEpargne.PRELEVEMENT;
 		} else {
 			epargne = TypeEpargne.NEUTRE;
-		}// if sens épargne
-	}// constructeur
+		}
+	}
 	
-	/** Détermine si le libellé ou le nom du tiers de cette écriture contient
+	/**
+	 * Détermine si le libellé ou le nom du tiers de cette écriture contient
 	 * l'expression régulière spécifiée.
 	 * <p>
 	 * La comparaison se fait sur une chaîne en minuscules uniquement.
@@ -261,32 +302,27 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 					return true;						// Trouvé
 				}
 			}
-		}// for strings
+		}
 		return false;									// Pas trouvé
-	}// matches
+	}
 
 	@Override
 	public String toString() {
-		return "Ecriture: "
-				+ montant
-				+ " Débit: "
-				+ debit
-				+ "  crédit: "
-				+ credit
-				+ " Date: "
-				+ DF.format(date)
-				+ " Pointage le: "
-				+ (pointage == null ? "" : DF.format(pointage))
-				+ " Tiers: "
-				+ tiers
-				+ ", Libellé: "
-				+ libelle
-				+ ", Chèque n°"
-				+ cheque
-				+ (epargne == TypeEpargne.NEUTRE ? "" : epargne);
-	}// toString
+		return String.format(
+				"Ecriture: %s Débit: %s  crédit: %s Date: %s Pointage le: %s Tiers: %s, Libellé: %s, Chèque n°%s",
+				montant,
+				debit,
+				credit,
+				DF.format(date),
+				(pointage == null ? "" : DF.format(pointage)),
+				tiers,
+				libelle,
+				cheque,
+				(epargne == TypeEpargne.NEUTRE ? "" : epargne));
+	}
 
-	/** Range les écritures de la plus ancienne à la plus récente.
+	/**
+	 * Range les écritures de la plus ancienne à la plus récente.
 	 * <p>
 	 * Elles sont classées:<ul>
 	 * <li>	par dates
@@ -315,7 +351,8 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		// Comparer les dates
 		int result = date.compareTo(e.date);
 
-		/* Sinon, comparer les n° de chèques (ordre inverse aussi).
+		/*
+		 * Sinon, comparer les n° de chèques (ordre inverse aussi).
 		 * Les écritures avec chèque sont placées après les écritures sans
 		 * chèque (il fallait bien faire un choix pour garder la transitivité !)
 		 */
@@ -328,7 +365,7 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			else if (cheque != null && e.cheque != null) {
 				result = cheque.compareTo(e.cheque);			// Deux chèques
 			}
-		}// chèques 
+		}
 		
 		// Sinon, comparer les pointages
 		if (result == 0) {
@@ -346,7 +383,7 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 				// null/null -> égalité ! Départage à suivre
 				result = 0;
 			}
-		}// pointages
+		}
 
 		// Sinon, comparer les identifiants
 		if (result == 0) {
@@ -357,12 +394,13 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			} else if (id == null && e.id != null) {
 				return 1;
 			}
-		}// identifiants
+		}
 
 		return result;
-	}// compareTo
+	}
 
-	/** Deux écritures sont égales si elles ne peuvent pas être départagées par
+	/**
+	 * Deux écritures sont égales si elles ne peuvent pas être départagées par
 	 * la méthode <code>compareTo</code>.
 	 * <p>
 	 * Autrement dit, elles sont égales ssi elles ont les mêmes dates, même
@@ -374,8 +412,8 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			return compareTo((Ecriture) obj) == 0;
 		} else {
 			return false;
-		}// if même classe
-	}// equals
+		}
+	}
 	
 	@Override
 	public int hashCode() {
@@ -387,5 +425,5 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		res = mul*res + (cheque == null ? 0 : cheque.hashCode());
 		res = mul*res + (date == null ? 0 : date.hashCode());
 		return res;
-	}// hashCode
-}// class Ecriture
+	}
+}
