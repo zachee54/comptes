@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -14,7 +14,14 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 /**
  * Une écriture comptable.
@@ -108,54 +115,61 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 	/**
 	 * Identifiant unique.
 	 */
-	public final Integer id;
+	@Id
+	@GeneratedValue
+	public Integer id;
 	
 	/**
 	 * Date d'écriture.
 	 */
-	public final Date date;
+	@Temporal(TemporalType.DATE)
+	public Date date;
 	
 	/**
 	 * Compte débité.
 	 */
-	public final Compte debit;
+	@ManyToOne(cascade = CascadeType.ALL)
+	public Compte debit;
 	
 	/**
 	 * Compte crédité.
 	 */
-	public final Compte credit;
+	@ManyToOne(cascade = CascadeType.ALL)
+	public Compte credit;
 	
 	/**
 	 * Montant.
 	 */
-	public final BigDecimal montant;
+	public BigDecimal montant;
 	
 	/**
 	 * Nom de la personne.
 	 */
-	public final String tiers;
+	public String tiers;
 	
 	/**
 	 * Libellé.
 	 */
-	public final String libelle;
+	public String libelle;
 	
 	/**
 	 * Numéro de chèque.
 	 */
-	public final Integer cheque;
+	public Integer cheque;
 	
 	/**
 	 * Date de pointage.
 	 */
-	public final Date pointage;
+	@Temporal(TemporalType.DATE)
+	public Date pointage;
 
 	// Propriété calculée par le constructeur
 	
 	/**
 	 * Qualification à l'égard de l'épargne.
 	 */
-	public final TypeEpargne epargne;
+	@Transient
+	public TypeEpargne epargne;
 
 	/**
 	 * Vérifie la cohérence des arguments en vue de l'instanciation d'une
@@ -216,6 +230,9 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		}
 	}
 
+	protected Ecriture() {
+	}
+	
 	/**
 	 * Construit une écriture.
 	 * <p>
@@ -277,6 +294,13 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		montant = montant.setScale(2, RoundingMode.HALF_UP);
 		
 		// Déterminer le type d'épargne à partir des types de comptes
+		updateTypeEpargne();
+	}
+	
+	/**
+	 * Met à jour le type d'épargne en fonction des types de comptes.
+	 */
+	private void updateTypeEpargne() {
 		if (!debit.isEpargne() && credit.isEpargne()) {
 			epargne = TypeEpargne.EPARGNE;
 		} else if (debit.isEpargne() && !credit.isEpargne()) {
@@ -284,6 +308,133 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		} else {
 			epargne = TypeEpargne.NEUTRE;
 		}
+	}
+	
+	/**
+	 * Renvoie l'identifiant unique.
+	 */
+	public Integer getId() {
+		return id;
+	}
+	
+	/**
+	 * Renvoie la date.
+	 */
+	public Date getDate() {
+		return date;
+	}
+	
+	/**
+	 * Modifie la date.
+	 */
+	public void setDate(Date date) {
+		this.date = date;
+	}
+	
+	/**
+	 * Renvoie le compte débité.
+	 */
+	public Compte getDebit() {
+		return debit;
+	}
+	
+	/**
+	 * Modifie le compte débité.
+	 */
+	public void setDebit(Compte debit) {
+		this.debit = debit;
+		updateTypeEpargne();
+	}
+	
+	/**-
+	 * Renvoie le compte crédité.
+	 */
+	public Compte getCredit() {
+		return credit;
+	}
+	
+	/**
+	 * Modifie le compte crédité.
+	 */
+	public void setCredit(Compte credit) {
+		this.credit = credit;
+		updateTypeEpargne();
+	}
+	
+	/**
+	 * Renvoie le montant.
+	 */
+	public BigDecimal getMontant() {
+		return montant;
+	}
+	
+	/**
+	 * Modifie le montant.
+	 */
+	public void setMontant(BigDecimal montant) {
+		this.montant = montant;
+	}
+	
+	/**
+	 * Renvoie le nom du tiers.
+	 */
+	public String getTiers() {
+		return tiers;
+	}
+	
+	/**
+	 * Modifie le nom du tiers.
+	 */
+	public void setTiers(String tiers) {
+		this.tiers = tiers;
+	}
+	
+	/**
+	 * Renvoie le libellé.
+	 */
+	public String getLibelle() {
+		return libelle;
+	}
+	
+	/**
+	 * Modifie le libellé.
+	 */
+	public void setLibelle(String libelle) {
+		this.libelle = libelle;
+	}
+	
+	/**
+	 * Renvoie le numéro du chèque.
+	 * 
+	 * @return	Le numéro du chèque, ou <code>null</code> s'il n'y a pas de
+	 * 			chèque.
+	 */
+	public Integer getCheque() {
+		return cheque;
+	}
+	
+	/**
+	 * Modifie le numéro du chèque.
+	 * 
+	 * @param cheque	Le nouveau numéro de chèque, ou <code>null</code> pour
+	 * 					supprimer le numéro actuel.
+	 */
+	public void setCheque(Integer cheque) {
+		this.cheque = cheque;
+	}
+	
+	/**
+	 * Renvoie la date de pointage.
+	 */
+	public Date getPointage() {
+		return pointage;
+	}
+	
+	/**
+	 * Modifie la date de pointage.
+	 */
+	public void setPointage(Date pointage) {
+		this.pointage = pointage;
 	}
 	
 	/**

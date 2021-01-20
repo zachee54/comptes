@@ -58,11 +58,6 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getComptes()
-	 */
 	@Override
 	public Iterator<Compte> getComptes() throws IOException {
 		return entityManager.createQuery(
@@ -71,14 +66,12 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 				.iterator();
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getEcritures()
-	 */
 	@Override
 	public Iterator<Ecriture> getEcritures() throws IOException {
-		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return entityManager.createQuery(
+				"select e from Ecriture e", Ecriture.class)
+				.getResultList()
+				.iterator();
 	}
 
 	/** 
@@ -139,15 +132,26 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 	 */
 	@Override
 	public void save(CacheDAOFactory cache) throws IOException {
-		for (Compte compte : cache.getCompteDAO().getAll()) {
-			if (entityManager.contains(compte)) {
-				entityManager.merge(compte);
-			} else {
-				entityManager.persist(compte);
-			}
-		}
+		savePojos(cache.getCompteDAO().getAll());
+		savePojos(cache.getEcritureDAO().getAll());
 		entityManager.getTransaction().commit();
 		entityManager.getTransaction().begin();
+	}
+	
+	/**
+	 * Sauvegarde des POJOS.
+	 * @param <P>
+	 * 
+	 * @param pojos	Les POJOS à sauvegarder.
+	 */
+	private <P> void savePojos(Iterable<P> pojos) {
+		for (P pojo : pojos) {
+			if (entityManager.contains(pojo)) {
+				entityManager.merge(pojo);
+			} else {
+				entityManager.persist(pojo);
+			}
+		}
 	}
 
 	/** 

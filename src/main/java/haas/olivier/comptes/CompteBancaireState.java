@@ -53,6 +53,9 @@ class CompteBancaireState extends CompteState {
 	 */
 	private Long numero;
 
+	protected CompteBancaireState() {
+	}
+	
 	/**
 	 * Construit un état de compte bancaire.
 	 * 
