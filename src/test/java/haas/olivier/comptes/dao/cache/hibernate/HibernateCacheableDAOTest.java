@@ -12,8 +12,6 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
-import haas.olivier.comptes.EcritureMissingArgumentException;
-import haas.olivier.comptes.InconsistentArgumentsException;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.EcritureDAO;
@@ -96,6 +94,33 @@ public class HibernateCacheableDAOTest {
 	
 	@Test
 	public void testSaveComptes() throws IOException {
+		Compte[] comptes = {compte1, compte2};
+		when(cacheCompteDAO.getAll()).thenReturn(Arrays.asList(comptes));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getComptes(), comptes);
+	}
+	
+	@Test
+	public void testSaveAddCompte() throws IOException {
+		when(cacheCompteDAO.getAll()).thenReturn(
+				Collections.singleton(compte1));
+		factory.save(cacheDAO);
+		
+		// Ajouter un deuxième compte
+		Compte[] comptes = {compte1, compte2};
+		when(cacheCompteDAO.getAll()).thenReturn(Arrays.asList(comptes));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getComptes(), comptes);
+	}
+	
+	@Test
+	public void testSaveUpdateComptes() throws IOException {
 		when(cacheCompteDAO.getAll()).thenReturn(Collections.singleton(compte1));
 		
 		// Méthode testée (1ère passe)
@@ -121,39 +146,7 @@ public class HibernateCacheableDAOTest {
 	}
 	
 	@Test
-	public void testSaveEcritures() throws EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
-		when(cacheCompteDAO.getAll()).thenReturn(
-				Arrays.asList(new Compte[] {compte1, compte2}));
-		
-		when(cacheEcritureDAO.getAll()).thenReturn(
-				Collections.singleton(ecriture1));
-		
-		// Méthode testée (1ère phase)
-		factory.save(cacheDAO);
-		
-		Iterator<Ecriture> iterator = factory.getEcritures();
-		assertTrue(iterator.hasNext());
-		assertSame(ecriture1, iterator.next());
-		assertFalse(iterator.hasNext());
-		
-		// 2ème phase
-		
-		ecriture1.setLibelle("Libellé modifié");
-		ecriture1.setDate(new Date(4632186L));
-		ecriture1.setCredit(new Compte(3, TypeCompte.ENFANTS));
-		
-		when(cacheEcritureDAO.getAll()).thenReturn(
-				Arrays.asList(new Ecriture[] {ecriture1, ecriture2}));
-
-		// Méthode testée (2ème passe avec 1 nouvelle écriture + 1 modifiée)
-		factory.save(cacheDAO);
-		
-		checkCollection(factory.getEcritures(),
-				new Ecriture[] {ecriture1, ecriture2});
-	}
-	
-	@Test
-	public void testDeleteCompte() throws IOException {
+	public void testSaveDeleteCompte() throws IOException {
 		when(cacheCompteDAO.getAll()).thenReturn(
 				Arrays.asList(new Compte[] {compte1, compte2}));
 		
@@ -169,7 +162,34 @@ public class HibernateCacheableDAOTest {
 	}
 	
 	@Test
-	public void testDeleteEcriture() throws IOException {
+	public void testSaveEcritures() throws IOException {
+		Ecriture[] ecritures = {ecriture1, ecriture2};
+		when(cacheEcritureDAO.getAll()).thenReturn(Arrays.asList(ecritures));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getEcritures(), ecritures);
+	}
+	
+	@Test
+	public void testSaveAddEcriture() throws IOException {
+		when(cacheEcritureDAO.getAll()).thenReturn(
+				Collections.singleton(ecriture1));
+		factory.save(cacheDAO);
+		
+		// Ajouter une deuxième écriture
+		Ecriture[] ecritures = {ecriture1, ecriture2};
+		when(cacheEcritureDAO.getAll()).thenReturn(Arrays.asList(ecritures));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getEcritures(), ecritures);
+	}
+	
+	@Test
+	public void testSaveDeleteEcriture() throws IOException {
 		when(cacheEcritureDAO.getAll()).thenReturn(
 				Arrays.asList(new Ecriture[] {ecriture1, ecriture2}));
 		
