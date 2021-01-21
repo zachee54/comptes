@@ -1,7 +1,9 @@
 package haas.olivier.comptes.dao.cache.hibernate;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -132,8 +134,8 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 	 */
 	@Override
 	public void save(CacheDAOFactory cache) throws IOException {
-		savePojos(cache.getCompteDAO().getAll());
-		savePojos(cache.getEcritureDAO().getAll());
+		savePojos(cache.getCompteDAO().getAll(), getComptes());
+		savePojos(cache.getEcritureDAO().getAll(), getEcritures());
 		entityManager.getTransaction().commit();
 		entityManager.getTransaction().begin();
 	}
@@ -142,16 +144,47 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 	 * Sauvegarde des POJOS.
 	 * @param <P>
 	 * 
-	 * @param pojos	Les POJOS à sauvegarder.
+	 * @param pojos
+	 * 			Les POJOs à sauvegarder.
+	 * 
+	 * @param persistedIterator
+	 * 			Les POJOs connus du contexte. Ceux qui ne sont pas dans
+	 * 			<code>pojos</code> seront supprimés.
 	 */
-	private <P> void savePojos(Iterable<P> pojos) {
+	private <P> void savePojos(Iterable<P> pojos,
+			Iterator<P> persistedIterator) {
+		Collection<P> persisted = gatherFromIterator(persistedIterator);
 		for (P pojo : pojos) {
 			if (entityManager.contains(pojo)) {
 				entityManager.merge(pojo);
+				persisted.remove(pojo);
 			} else {
 				entityManager.persist(pojo);
 			}
 		}
+		
+		// Supprimer les POJOs qui n'ont pas été spécifiés
+		for (P pojo : persisted) {
+			entityManager.remove(pojo);
+		}
+	}
+	
+	/**
+	 * Rassemble les valeurs d'un itérateur.
+	 * 
+	 * @param iterator	L'itérateur parcourant les objets à rassembler.
+	 * 
+	 * @return			Une collection des objets parcourus par l'itérateur.<br>
+	 * 					<b>Pour des raisons de performance, cette collection est
+	 * 					un {@link java.util.IdentityHashMap.KeySet}, qui
+	 * 					implémente <code>Collection</code> mais n'en respecte
+	 * 					pas précisément le contrat</b>.
+	 */
+	private <P> Collection<P> gatherFromIterator(Iterator<P> iterator) {
+		IdentityHashMap<P, Void> map = new IdentityHashMap<>();
+		while (iterator.hasNext())
+			map.put(iterator.next(), null);
+		return map.keySet();
 	}
 
 	/** 

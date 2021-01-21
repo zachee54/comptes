@@ -53,6 +53,10 @@ public class HibernateCacheableDAOTest {
 	@Mock
 	private EcritureDAO cacheEcritureDAO;
 	
+	// POJOs divers
+	private Compte compte1, compte2;
+	private Ecriture ecriture1, ecriture2;
+	
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
@@ -65,6 +69,14 @@ public class HibernateCacheableDAOTest {
 		
 		factory = new HibernateCacheableDAO(
 				"jdbc:hsqldb:mem:test", "org.hsqldb.jdbc.JDBCDriver");
+		
+		compte1 = new Compte(null, TypeCompte.COMPTE_CARTE);
+		compte2 = new Compte(null, TypeCompte.RECETTES);
+		ecriture1 = new Ecriture(null, new Date(156L), new Date(192L),
+				compte1, compte2, BigDecimal.ONE, "libellé 1", "tiers 1", 457);
+		ecriture2 = new Ecriture(null, new Date(993156L),
+				new Date(700000192L), compte2, compte1, BigDecimal.TEN,
+				"libellé 2", "tiers 2", null);
 	}
 
 	@After
@@ -84,7 +96,6 @@ public class HibernateCacheableDAOTest {
 	
 	@Test
 	public void testSaveComptes() throws IOException {
-		Compte compte1 = new Compte(0, TypeCompte.COMPTE_CARTE);
 		when(cacheCompteDAO.getAll()).thenReturn(Collections.singleton(compte1));
 		
 		// Méthode testée (1ère passe)
@@ -99,7 +110,6 @@ public class HibernateCacheableDAOTest {
 		
 		compte1.setNom("mon compte 1");
 		
-		Compte compte2 = new Compte(0, TypeCompte.RECETTES);
 		when(cacheCompteDAO.getAll()).thenReturn(
 				Arrays.asList(new Compte[] {compte1, compte2}));
 		
@@ -112,13 +122,9 @@ public class HibernateCacheableDAOTest {
 	
 	@Test
 	public void testSaveEcritures() throws EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
-		Compte compte1 = new Compte(1, TypeCompte.COMPTE_COURANT);
-		Compte compte2 = new Compte(2, TypeCompte.DEPENSES_EN_EPARGNE);
 		when(cacheCompteDAO.getAll()).thenReturn(
 				Arrays.asList(new Compte[] {compte1, compte2}));
 		
-		Ecriture ecriture1 = new Ecriture(null, new Date(156L), new Date(192L),
-				compte1, compte2, BigDecimal.ONE, "libellé 1", "tiers 1", 457);
 		when(cacheEcritureDAO.getAll()).thenReturn(
 				Collections.singleton(ecriture1));
 		
@@ -136,10 +142,6 @@ public class HibernateCacheableDAOTest {
 		ecriture1.setDate(new Date(4632186L));
 		ecriture1.setCredit(new Compte(3, TypeCompte.ENFANTS));
 		
-		Ecriture ecriture2 = new Ecriture(null, new Date(993156L),
-				new Date(700000192L), compte2, compte1, BigDecimal.TEN,
-				"libellé 2", "tiers 2", null);
-		
 		when(cacheEcritureDAO.getAll()).thenReturn(
 				Arrays.asList(new Ecriture[] {ecriture1, ecriture2}));
 
@@ -148,6 +150,38 @@ public class HibernateCacheableDAOTest {
 		
 		checkCollection(factory.getEcritures(),
 				new Ecriture[] {ecriture1, ecriture2});
+	}
+	
+	@Test
+	public void testDeleteCompte() throws IOException {
+		when(cacheCompteDAO.getAll()).thenReturn(
+				Arrays.asList(new Compte[] {compte1, compte2}));
+		
+		factory.save(cacheDAO);
+		
+		when(cacheCompteDAO.getAll()).thenReturn(
+				Collections.singleton(compte2));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getComptes(), new Compte[] {compte2});
+	}
+	
+	@Test
+	public void testDeleteEcriture() throws IOException {
+		when(cacheEcritureDAO.getAll()).thenReturn(
+				Arrays.asList(new Ecriture[] {ecriture1, ecriture2}));
+		
+		factory.save(cacheDAO);
+		
+		when(cacheEcritureDAO.getAll()).thenReturn(
+				Collections.singleton(ecriture2));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getEcritures(), new Ecriture[] {ecriture2});
 	}
 	
 	/**
