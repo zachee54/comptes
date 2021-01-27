@@ -186,6 +186,25 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 			map.put(iterator.next(), null);
 		return map.keySet();
 	}
+	
+	/**
+	 * Rétablit l'état des POJOs lors du dernier enregistrement.
+	 */
+	void reload() throws IOException {
+		entityManager.clear();
+		refreshPojos(getComptes());
+		refreshPojos(getEcritures());
+	}
+	
+	/**
+	 * Rétablit l'état des POJOs lors du dernier enregistrement.
+	 * 
+	 * @param pojosIterator	Un itérateur des POJOs à rafraîchir.
+	 */
+	private <P> void refreshPojos(Iterator<P> pojosIterator) {
+		while (pojosIterator.hasNext())
+			entityManager.refresh(pojosIterator.next());
+	}
 
 	/** 
 	 * (methode de remplacement)

@@ -8,15 +8,17 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Map;
+
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
-import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
 import haas.olivier.comptes.dao.cache.hibernate.HibernateCacheableDAO;
 
 import org.junit.After;
@@ -40,7 +42,7 @@ public class HibernateCacheableDAOTest {
 	/**
 	 * Objet testé.
 	 */
-	private CacheableDAOFactory factory;
+	private HibernateCacheableDAO factory;
 	
 	@Mock
 	private CacheDAOFactory cacheDAO;
@@ -70,6 +72,8 @@ public class HibernateCacheableDAOTest {
 		
 		compte1 = new Compte(null, TypeCompte.COMPTE_CARTE);
 		compte2 = new Compte(null, TypeCompte.RECETTES);
+		compte2.setNom("compte 2");
+		
 		ecriture1 = new Ecriture(null, new Date(156L), new Date(192L),
 				compte1, compte2, BigDecimal.ONE, "libellé 1", "tiers 1", 457);
 		ecriture2 = new Ecriture(null, new Date(993156L),
@@ -90,6 +94,46 @@ public class HibernateCacheableDAOTest {
 	@Test
 	public void testGetEcritures() throws IOException {
 		assertFalse(factory.getEcritures().hasNext());
+	}
+	
+	@Test
+	public void testReload() throws IOException {
+		when(cacheCompteDAO.getAll()).thenReturn(
+				Arrays.asList(new Compte[] {compte1, compte2}));
+		when(cacheEcritureDAO.getAll()).thenReturn(
+				Collections.singleton(ecriture1));
+		factory.save(cacheDAO);
+		
+		compte1.setNumero(13L);
+		compte2.setNom("nom modifié");
+		ecriture1.setLibelle("libellé modifié");
+		
+		// Méthode testée
+		factory.reload();
+		
+		Iterator<Compte> comptesIterator = factory.getComptes();
+		Map<Integer, Compte> comptes = new HashMap<>();
+		while (comptesIterator.hasNext()) {
+			Compte compte = comptesIterator.next();
+			comptes.put(compte.getId(), compte);
+		}
+		
+		// Vérifier la réinitialisation du compte 1
+		assertEquals(2, comptes.size());
+		Integer id1 = compte1.getId();
+		Compte compte1Reloaded = comptes.get(id1);
+		assertNull(compte1Reloaded.getNumero());
+		
+		// Vérifier la réinitialisation du compte 2
+		Integer id2 = compte2.getId();
+		Compte compte2Reloaded = comptes.get(id2);
+		assertEquals("compte 2", compte2Reloaded.getNom());
+		
+		// Vérifier la réinitialisation de l'écriture
+		Iterator<Ecriture> ecrituresIterator = factory.getEcritures();
+		assertTrue(ecrituresIterator.hasNext());
+		assertEquals("libellé 1", ecrituresIterator.next().getLibelle());
+		assertFalse(ecrituresIterator.hasNext());
 	}
 	
 	@Test

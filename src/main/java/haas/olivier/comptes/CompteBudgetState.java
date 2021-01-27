@@ -32,6 +32,9 @@ class CompteBudgetState extends CompteState {
 	@Enumerated(EnumType.STRING)
 	private TypeCompte type;
 	
+	protected CompteBudgetState() {
+	}
+	
 	/**
 	 * Construit un état de compte budgétaire.
 	 * 
