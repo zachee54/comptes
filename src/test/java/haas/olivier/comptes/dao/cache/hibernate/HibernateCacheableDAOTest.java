@@ -164,29 +164,22 @@ public class HibernateCacheableDAOTest {
 	}
 	
 	@Test
-	public void testSaveUpdateComptes() throws IOException {
+	public void testSaveUpdateCompte() throws IOException {
 		when(cacheCompteDAO.getAll()).thenReturn(Collections.singleton(compte1));
-		
-		// Méthode testée (1ère passe)
 		factory.save(cacheDAO);
 		
-		Iterator<Compte> iterator = factory.getComptes();
-		assertTrue(iterator.hasNext());
-		assertSame(compte1, iterator.next());
-		assertFalse(iterator.hasNext());
+		compte1.setNom("nom modifié");
 		
-		// 2ème phase
-		
-		compte1.setNom("mon compte 1");
-		
-		when(cacheCompteDAO.getAll()).thenReturn(
-				Arrays.asList(new Compte[] {compte1, compte2}));
-		
-		// Méthode testée (2ème passe avec 1 nouveau compte + 1 modifié)
+		// Méthode testée (mise à jour du compte 1)
 		factory.save(cacheDAO);
 		
-		checkCollection(factory.getComptes(),
-				new Compte[] {compte1, compte2});
+		// Réinitialiser pour obliger la relecture depuis la BDD
+		factory.reload();
+		
+		Iterator<Compte> comptesIterator = factory.getComptes();
+		assertTrue(comptesIterator.hasNext());
+		assertEquals("nom modifié", comptesIterator.next().getNom());
+		assertFalse(comptesIterator.hasNext());
 	}
 	
 	@Test
@@ -230,6 +223,26 @@ public class HibernateCacheableDAOTest {
 		factory.save(cacheDAO);
 		
 		checkCollection(factory.getEcritures(), ecritures);
+	}
+	
+	@Test
+	public void testSaveUpdateEcriture() throws IOException {
+		when(cacheEcritureDAO.getAll()).thenReturn(
+				Collections.singleton(ecriture1));
+		factory.save(cacheDAO);
+		
+		ecriture1.setLibelle("nom modifié");
+		
+		// Méthode testée (mise à jour due l'écriture 1)
+		factory.save(cacheDAO);
+		
+		// Réinitialiser pour obliger la relecture depuis la BDD
+		factory.reload();
+		
+		Iterator<Ecriture> ecrituresIterator = factory.getEcritures();
+		assertTrue(ecrituresIterator.hasNext());
+		assertEquals("nom modifié", ecrituresIterator.next().getLibelle());
+		assertFalse(ecrituresIterator.hasNext());
 	}
 	
 	@Test
