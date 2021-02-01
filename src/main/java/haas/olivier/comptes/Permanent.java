@@ -11,10 +11,12 @@ import haas.olivier.util.Month;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +97,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	/**
 	 * Les dates (quantièmes) des écritures à générer en fonction du mois.
 	 */
-	private final Map<Month, Integer> jours;
+	private final Map<YearMonth, Integer> jours;
 	
 	/**
 	 * Le compte à débiter par les écritures générées.
@@ -158,7 +160,26 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		this.libelle = libelle;
 		this.tiers = tiers;
 		this.pointer = pointer;
-		this.jours = jours;
+		this.jours = convertJours(jours);
+	}
+	
+	/**
+	 * Convertit la table des jours en utilisant l'implémentation
+	 * <code>java.time.YearMonth</code> au lieu de
+	 * <code>haas.olivier.util.Month</code>.
+	 * 
+	 * @param jours	La table des jours.
+	 * 
+	 * @return		Une table des jours identique avec des
+	 * 				<code>YearMonth</code>s
+	 */
+	private static Map<YearMonth, Integer> convertJours(
+			Map<Month, Integer> jours) {
+		Map<YearMonth, Integer> result = new HashMap<>();
+		jours.forEach( (m,i) -> result.put(
+				YearMonth.of(m.getYear(), m.getNumInYear()),
+				i));
+		return result;
 	}
 
 	/**
@@ -183,14 +204,15 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		// Trouver la date
 
 		// Parcourir les mois à la recherche du plus récent avant la cible
-		Month maxMonth = null;
-		for (Month m : jours.keySet()) {
-			if (!month.before(m)) { // Mois antérieur à la cible
+		YearMonth target = YearMonth.of(month.getYear(), month.getNumInYear());
+		YearMonth maxMonth = null;
+		for (YearMonth m : jours.keySet()) {
+			if (!target.isBefore(m)) { // Mois antérieur à la cible
 				if (maxMonth == null) {
 					// Rien de défini: prendre ce mois par défaut
 					maxMonth = m;
 
-				} else if (maxMonth.before(m)) {
+				} else if (maxMonth.isBefore(m)) {
 					// m est plus récent que le max actuel
 
 					maxMonth = m; // m est le nouveau max
@@ -215,13 +237,13 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		Date date = cal.getTime();				// Date définitive
 
 		// Purger la liste des dates
-		Month today = Month.getInstance();
-		Iterator<Month> it = jours.keySet().iterator();
+		YearMonth today = YearMonth.now();
+		Iterator<YearMonth> it = jours.keySet().iterator();
 		while (it.hasNext()) {
 
 			// Ce mois est-il obsolète de plus de 12 mois ?
-			Month m2 = it.next().getTranslated(12);
-			if (m2.before(maxMonth) && m2.before(today)) {
+			YearMonth m2 = it.next().plusYears(1);
+			if (m2.isBefore(maxMonth) && m2.isBefore(today)) {
 				it.remove();					// Supprimer
 			}
 		}
@@ -413,7 +435,11 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	 * @return	Les dates des écritures à générer en fonction des mois.
 	 */
 	public Map<Month, Integer> getJours() {
-		return jours;
+		Map<Month, Integer> result = new HashMap<>();
+		jours.forEach( (m,i) -> result.put(
+				Month.getInstance(m.getYear(), m.getMonthValue()),
+				i));
+		return result;
 	}
 	
 	/**
