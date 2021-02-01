@@ -89,7 +89,8 @@ class PermanentEditorController {
 			PermanentState state = permanent.getState();
 			if (state instanceof PermanentFixe) {
 				editor.setType(PermanentEditor.FIXE);
-				editor.setMontants(((PermanentFixe) state).montants);
+				editor.setMontants(
+						((PermanentFixe) state).getMontantsByMonth());
 				
 			} else if (state instanceof PermanentProport) {
 				editor.setType(PermanentEditor.PROPORTIONNEL);
@@ -157,7 +158,8 @@ class PermanentEditorController {
 		if (state instanceof PermanentFixe) {
 			if (editor.getType() != PermanentEditor.FIXE)
 				return true;
-			if (!((PermanentFixe) state).montants.equals(editor.getMontants()))
+			if (!((PermanentFixe) state).getMontantsByMonth().equals(
+					editor.getMontants()))
 				return true;
 		} else if (state instanceof PermanentProport) {
 			if (editor.getType() != PermanentEditor.PROPORTIONNEL)

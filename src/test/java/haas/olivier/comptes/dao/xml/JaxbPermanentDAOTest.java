@@ -94,8 +94,8 @@ public class JaxbPermanentDAOTest {
 		p1.getJours().put(month, 15);
 		p1.getJours().put(month2, 2);
 		p1.getJours().put(month4, 0);
-		p1State.montants.put(month0, new BigDecimal("514623.1"));
-		p1State.montants.put(month4, BigDecimal.TEN.negate());
+		p1State.getMontantsByMonth().put(month0, new BigDecimal("514623.1"));
+		p1State.getMontantsByMonth().put(month4, BigDecimal.TEN.negate());
 		p2.getJours().put(month3, -15);
 		p3.getJours().put(month, 7);
 		p3.getJours().put(month4, 45);

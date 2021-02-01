@@ -6,7 +6,7 @@ package haas.olivier.comptes;
 import haas.olivier.util.Month;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
+import java.time.YearMonth;
 import java.util.Map;
 
 /**
@@ -19,7 +19,7 @@ public class PermanentFixe extends PermanentState {
 	/**
 	 * Montants prédéfinis par mois.
 	 */
-	public final Map<Month, BigDecimal> montants;
+	private final Map<YearMonth, BigDecimal> montants;
 
 	/**
 	 * Construit un état d'opération permanente dont les montants sont fixés à
@@ -29,7 +29,7 @@ public class PermanentFixe extends PermanentState {
 	 * 					les mois.
 	 */
 	public PermanentFixe(Map<Month, BigDecimal> montants) {
-		this.montants = montants;
+		this.montants = Permanent.convertMonths(montants);
 	}
 
 	/**
@@ -46,23 +46,7 @@ public class PermanentFixe extends PermanentState {
 	@Override
 	public BigDecimal getMontant(Month month)
 			throws InconsistentArgumentsException {
-
-		// Parcourir les mois à la recherche du dernier montant antérieur
-		Month maxMonthAmount = null;		// Mois à retenir pour les montants
-		for (Month m : montants.keySet()) {
-			if (!month.before(m)) {			// Mois antérieur à la cible
-				if (maxMonthAmount == null) {
-					// Rien de défini: prendre cette valeur par défaut
-					maxMonthAmount = m;
-
-				} else if (maxMonthAmount.before(m)) {
-					// m est plus récent que le max actuel
-
-					maxMonthAmount = m;		// m est le nouveau max
-
-				}
-			}
-		}
+		YearMonth maxMonthAmount = Permanent.getFloor(montants, month);
 
 		// Si pas de date antérieure définie, lever une exception
 		if (maxMonthAmount == null) {
@@ -71,18 +55,20 @@ public class PermanentFixe extends PermanentState {
 		}
 
 		// Purger la liste des mois
-		Month today = Month.getInstance();
-		for (Iterator<Month> it2 = montants.keySet().iterator();
-				it2.hasNext();) {
-
-			// Ce mois est-il obsolète de plus de 12 mois ?
-			Month m2 = it2.next().getTranslated(12);
-			if (m2.before(maxMonthAmount) && m2.before(today)) {
-				it2.remove();
-			}
-		}
+		Permanent.purgeMapBefore(montants, maxMonthAmount);
 		
 		// Montant à retenir
 		return montants.get(maxMonthAmount);
+	}
+	
+	/**
+	 * Renvoie le planning des montants en utilisant une classe personnalisée
+	 * pour l'implémentation des mois.
+	 * 
+	 * @return	Une Map des montants, les clés étant des
+	 * 			<code>haas.olivier.util.Month</code>.
+	 */
+	public Map<Month, BigDecimal> getMontantsByMonth() {
+		return Permanent.wrapWithMonth(montants);
 	}
 }

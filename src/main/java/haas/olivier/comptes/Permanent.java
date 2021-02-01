@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -160,7 +163,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		this.libelle = libelle;
 		this.tiers = tiers;
 		this.pointer = pointer;
-		this.jours = convertJours(jours);
+		this.jours = convertMonths(jours);
 	}
 	
 	/**
@@ -173,13 +176,127 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	 * @return		Une table des jours identique avec des
 	 * 				<code>YearMonth</code>s
 	 */
-	private static Map<YearMonth, Integer> convertJours(
-			Map<Month, Integer> jours) {
-		Map<YearMonth, Integer> result = new HashMap<>();
-		jours.forEach( (m,i) -> result.put(
+	static <T> Map<YearMonth, T> convertMonths(Map<Month, T> jours) {
+		Map<YearMonth, T> result = new HashMap<>();
+		jours.forEach( (m, t) -> result.put(
 				YearMonth.of(m.getYear(), m.getNumInYear()),
-				i));
+				t));
 		return result;
+	}
+	
+	/**
+	 * Renvoie le mois le plus récent contenu dans la Map, et antérieur ou égal
+	 * au mois spécifié.
+	 * 
+	 * @param plan	Un planning dont les clés sont des mois.
+	 * @param month	Un mois.
+	 * 
+	 * @return		Le mois le plus élevé antérieur ou égal à <code>month</code>
+	 * 				parmi les clés de <code>plan</code>, à défaut
+	 * 				<code>null</code>.
+	 */
+	static YearMonth getFloor(Map<YearMonth, ?> plan, Month month) {
+		YearMonth target = YearMonth.of(month.getYear(), month.getNumInYear());
+		YearMonth floor = null;
+		for (YearMonth m : plan.keySet()) {
+			if (!target.isBefore(m)) { // Mois antérieur à la cible
+				if (floor == null) {
+					// Rien de défini: prendre ce mois par défaut
+					floor = m;
+
+				} else if (floor.isBefore(m)) {
+					// m est plus récent que le max actuel
+
+					floor = m; // m est le nouveau max
+
+				}
+			}
+		}
+		return floor;
+	}
+	
+	/**
+	 * Supprime les entrées de la Map vieilles de plus d'un an et antérieures au
+	 * mois spécifié.
+	 * 
+	 * @param plan	La map à modifier.
+	 * @param month	Le mois le plus ancien à garder même s'il est vieux de plus
+	 * 				d'un an par rapport à la date du jour.
+	 */
+	static void purgeMapBefore(Map<YearMonth, ?> plan, YearMonth month) {
+		YearMonth today = YearMonth.now();
+		Iterator<YearMonth> it = plan.keySet().iterator();
+		while (it.hasNext()) {
+
+			// Ce mois est-il obsolète de plus de 12 mois ?
+			YearMonth m2 = it.next().plusYears(1);
+			if (m2.isBefore(month) && m2.isBefore(today)) {
+				it.remove();					// Supprimer
+			}
+		}
+	}
+	
+	/**
+	 * Enveloppe une Map dont les clés sont des <code>java.time.YearMonth</code>
+	 * dans une Map dont les clés sont des <code>haas.olivier.util.Month</code>.
+	 * Il s'agit d'une vue d'une Map sur une autre ; les modifications sont donc
+	 * répercutées de l'une sur l'autre.
+	 * 
+	 * @param map	La map à envelopper.
+	 *  
+	 * @return		Une Map enveloppante.
+	 */
+	static <T> Map<Month, T> wrapWithMonth(Map<YearMonth, T> map) {
+		return new AbstractMap<Month, T>() {
+			
+			@Override
+			public T put(Month key, T value) {
+				return map.put(
+						YearMonth.of(key.getYear(), key.getNumInYear()),
+						value);
+			}
+
+			@Override
+			public Set<Entry<Month, T>> entrySet() {
+				return new AbstractSet<Entry<Month, T>>() {
+					
+					@Override
+					public Iterator<Entry<Month, T>> iterator() {
+						final Iterator<Entry<YearMonth, T>> it =
+								map.entrySet().iterator();
+						return new Iterator<Entry<Month, T>>() {
+
+							@Override
+							public boolean hasNext() {
+								return it.hasNext();
+							}
+
+							@Override
+							public Entry<Month, T> next() {
+								Entry<YearMonth, T> entry = it.next();
+								YearMonth yearMonth = entry.getKey();
+								return new SimpleEntry<Month, T>(
+										Month.getInstance(
+												yearMonth.getYear(),
+												yearMonth.getMonthValue()),
+										entry.getValue());
+							}
+							
+							@Override
+							public void remove() {
+								it.remove();
+							}
+							
+						};
+					}
+
+					@Override
+					public int size() {
+						return map.size();
+					}
+				};
+			}
+		};
 	}
 
 	/**
@@ -202,24 +319,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 			throws EcritureMissingArgumentException, InconsistentArgumentsException {
 
 		// Trouver la date
-
-		// Parcourir les mois à la recherche du plus récent avant la cible
-		YearMonth target = YearMonth.of(month.getYear(), month.getNumInYear());
-		YearMonth maxMonth = null;
-		for (YearMonth m : jours.keySet()) {
-			if (!target.isBefore(m)) { // Mois antérieur à la cible
-				if (maxMonth == null) {
-					// Rien de défini: prendre ce mois par défaut
-					maxMonth = m;
-
-				} else if (maxMonth.isBefore(m)) {
-					// m est plus récent que le max actuel
-
-					maxMonth = m; // m est le nouveau max
-
-				}
-			}
-		}
+		YearMonth maxMonth = getFloor(jours, month);
 
 		// Si pas de date antérieure définie, lever une exception
 		if (maxMonth == null) {
@@ -237,16 +337,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		Date date = cal.getTime();				// Date définitive
 
 		// Purger la liste des dates
-		YearMonth today = YearMonth.now();
-		Iterator<YearMonth> it = jours.keySet().iterator();
-		while (it.hasNext()) {
-
-			// Ce mois est-il obsolète de plus de 12 mois ?
-			YearMonth m2 = it.next().plusYears(1);
-			if (m2.isBefore(maxMonth) && m2.isBefore(today)) {
-				it.remove();					// Supprimer
-			}
-		}
+		purgeMapBefore(jours, maxMonth);
 
 		// Créer l'écriture
 		EcritureDraft draft = new EcritureDraft();
@@ -435,11 +526,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	 * @return	Les dates des écritures à générer en fonction des mois.
 	 */
 	public Map<Month, Integer> getJours() {
-		Map<Month, Integer> result = new HashMap<>();
-		jours.forEach( (m,i) -> result.put(
-				Month.getInstance(m.getYear(), m.getMonthValue()),
-				i));
-		return result;
+		return wrapWithMonth(jours);
 	}
 	
 	/**

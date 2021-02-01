@@ -131,8 +131,8 @@ extends ReadOnlyIterator<haas.olivier.comptes.Permanent> {
 		// Selon le type d'opération
 		PermanentState state = p.getState();
 		if (state instanceof PermanentFixe) {
-			result.setMontants(
-					prepareMontants(((PermanentFixe) state).montants));
+			result.setMontants(prepareMontants(
+					((PermanentFixe) state).getMontantsByMonth()));
 			
 		} else if (state instanceof PermanentProport) {
 			result.setDependance(

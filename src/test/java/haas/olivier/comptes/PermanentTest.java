@@ -130,7 +130,7 @@ public class PermanentTest {
 		perm.setState(state);
 
 		// Aucun montant
-		state.montants.put(mai, new BigDecimal("5"));
+		state.getMontantsByMonth().put(mai, new BigDecimal("5"));
 		try {
 			perm.createEcriture(avril);
 			fail("Doit lever une exception");
