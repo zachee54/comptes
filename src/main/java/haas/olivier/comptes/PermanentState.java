@@ -10,7 +10,7 @@ import haas.olivier.util.Month;
  *
  * @author Olivier Haas
  */
-public interface PermanentState {
+public abstract class PermanentState {
 	
 	/**
 	 * Renvoie le montant de l'écriture à générer.
@@ -25,8 +25,7 @@ public interface PermanentState {
 	 * 				Si des informations manquent pour définir le montant au
 	 * 				titre de ce mois.
 	 */
-	BigDecimal getMontant(Month month)
+	abstract BigDecimal getMontant(Month month)
 			throws EcritureMissingArgumentException,
 			InconsistentArgumentsException;
-
 }

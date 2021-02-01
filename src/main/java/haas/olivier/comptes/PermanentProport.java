@@ -14,7 +14,7 @@ import java.math.RoundingMode;
  *
  * @author Olivier Haas
  */
-public class PermanentProport implements PermanentState {
+public class PermanentProport extends PermanentState {
 
 	/**
 	 * Écriture permanente dont dépend celle-ci.

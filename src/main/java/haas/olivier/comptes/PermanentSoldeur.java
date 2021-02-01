@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  *
  * @author Olivier HAAS
  */
-public class PermanentSoldeur implements PermanentState {
+public class PermanentSoldeur extends PermanentState {
 
 	/**
 	 * L'opération permanente à laquelle appartient cet état.

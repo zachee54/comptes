@@ -14,7 +14,7 @@ import java.util.Map;
  * 
  * @author Olivier HAAS
  */
-public class PermanentFixe implements PermanentState {
+public class PermanentFixe extends PermanentState {
 
 	/**
 	 * Montants prédéfinis par mois.
