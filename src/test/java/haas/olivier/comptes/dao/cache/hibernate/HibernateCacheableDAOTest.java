@@ -15,11 +15,16 @@ import java.util.Map;
 
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
+import haas.olivier.comptes.Permanent;
+import haas.olivier.comptes.PermanentProport;
+import haas.olivier.comptes.PermanentSoldeur;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
+import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.cache.hibernate.HibernateCacheableDAO;
+import haas.olivier.util.Month;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -53,9 +58,13 @@ public class HibernateCacheableDAOTest {
 	@Mock
 	private EcritureDAO cacheEcritureDAO;
 	
+	@Mock
+	private CachePermanentDAO cachePermanentDAO;
+	
 	// POJOs divers
 	private Compte compte1, compte2;
 	private Ecriture ecriture1, ecriture2;
+	private Permanent permanentFixe, permanentProport, permanentSoldeur;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -63,9 +72,11 @@ public class HibernateCacheableDAOTest {
 		
 		when(cacheCompteDAO.getAll()).thenReturn(Collections.emptyList());
 		when(cacheEcritureDAO.getAll()).thenReturn(Collections.emptyList());
+		when(cachePermanentDAO.getAll()).thenReturn(Collections.emptyList());
 		
 		when(cacheDAO.getCompteDAO()).thenReturn(cacheCompteDAO);
 		when(cacheDAO.getEcritureDAO()).thenReturn(cacheEcritureDAO);
+		when(cacheDAO.getPermanentDAO()).thenReturn(cachePermanentDAO);
 		
 		factory = new HibernateCacheableDAO(
 				"jdbc:hsqldb:mem:test", "org.hsqldb.jdbc.JDBCDriver");
@@ -79,6 +90,23 @@ public class HibernateCacheableDAOTest {
 		ecriture2 = new Ecriture(null, new Date(993156L),
 				new Date(700000192L), compte2, compte1, BigDecimal.TEN,
 				"libellé 2", "tiers 2", null);
+		
+		Map<Month, Integer> jours = new HashMap<>();
+		jours.put(Month.getInstance(2019, 5), 13);
+		permanentFixe = new Permanent(null, "permanent fixe",
+				compte1, compte2, "libellé fixe",
+				"tiers fixe", false, jours);
+		
+		permanentProport = new Permanent(null, "permanent proportionnel",
+				compte1, compte2, "libellé proportionnel",
+				"tiers proportionnel", false, new HashMap<>(jours));
+		permanentProport.setState(
+				new PermanentProport(permanentFixe, BigDecimal.TEN));
+		
+		permanentSoldeur = new Permanent(null, "permanent soldeur",
+				compte1, compte2, "libellé soldeur",
+				"tiers soldeur", false, new HashMap<>(jours));
+		permanentSoldeur.setState(new PermanentSoldeur(permanentSoldeur));
 	}
 
 	@After
@@ -94,6 +122,11 @@ public class HibernateCacheableDAOTest {
 	@Test
 	public void testGetEcritures() throws IOException {
 		assertFalse(factory.getEcritures().hasNext());
+	}
+	
+	@Test
+	public void testGetPermanents() throws IOException {
+		assertFalse(factory.getPermanents(cachePermanentDAO).hasNext());
 	}
 	
 	@Test
@@ -259,6 +292,83 @@ public class HibernateCacheableDAOTest {
 		factory.save(cacheDAO);
 		
 		checkCollection(factory.getEcritures(), new Ecriture[] {ecriture2});
+	}
+	
+	@Test
+	public void testSavePermanents() throws IOException {
+		Permanent[] permanents =
+			{permanentFixe, permanentProport, permanentSoldeur};
+		when(cachePermanentDAO.getAll()).thenReturn(Arrays.asList(permanents));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getPermanents(cachePermanentDAO), permanents);
+	}
+	
+	@Test
+	public void testSaveAddPermanent() throws IOException {
+		when(cachePermanentDAO.getAll()).thenReturn(
+				Collections.singleton(permanentSoldeur));
+		factory.save(cacheDAO);
+		
+		// Ajouter une deuxième écriture permanente
+		Permanent[] permanents = {permanentFixe, permanentSoldeur};
+		when(cachePermanentDAO.getAll()).thenReturn(Arrays.asList(permanents));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(factory.getPermanents(cachePermanentDAO), permanents);
+	}
+	
+	@Test
+	public void testSaveUpdatePermanent() throws IOException {
+		when(cachePermanentDAO.getAll()).thenReturn(
+				Collections.singleton(permanentFixe));
+		factory.save(cacheDAO);
+		
+		permanentFixe.setNom("nom modifié");
+		permanentFixe.setPointee(true);
+		Map<Month, Integer> jours = permanentFixe.getJours();
+		jours.put(Month.getInstance(2017, 12), 3);
+		jours.put(Month.getInstance(2019, 5), 7);
+		
+		// Méthode testée (mise à jour du compte 1)
+		factory.save(cacheDAO);
+		
+		// Réinitialiser pour obliger la relecture depuis la BDD
+		factory.reload();
+		
+		Iterator<Permanent> permanentsIterator =
+				factory.getPermanents(cachePermanentDAO);
+		assertTrue(permanentsIterator.hasNext());
+		Permanent permanent = permanentsIterator.next();
+		assertEquals("nom modifié", permanent.getNom());
+		assertTrue(permanent.isAutoPointee());
+		Map<Month, Integer> joursReload = permanent.getJours();
+		assertEquals((Integer) 3, joursReload.get(Month.getInstance(2017, 12)));
+		assertEquals((Integer) 7, joursReload.get(Month.getInstance(2019, 5)));
+		assertFalse(permanentsIterator.hasNext());
+	}
+	
+	@Test
+	public void testSaveDeletePermanent() throws IOException {
+		when(cachePermanentDAO.getAll()).thenReturn(
+				Arrays.asList(new Permanent[] {
+						permanentFixe, permanentProport, permanentSoldeur}));
+		
+		factory.save(cacheDAO);
+		
+		when(cachePermanentDAO.getAll()).thenReturn(
+				Collections.singleton(permanentSoldeur));
+		
+		// Méthode testée
+		factory.save(cacheDAO);
+		
+		checkCollection(
+				factory.getPermanents(cachePermanentDAO),
+				new Permanent[] {permanentSoldeur});
 	}
 	
 	/**
