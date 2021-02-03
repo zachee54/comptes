@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -7,6 +7,9 @@ import haas.olivier.util.Month;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 /**
  * L'état d'une opération permanente qui génère des écritures dont les montants
@@ -14,18 +17,25 @@ import java.math.RoundingMode;
  *
  * @author Olivier Haas
  */
+@Entity
 public class PermanentProport extends PermanentState {
+	private static final long serialVersionUID = 8416209118287401779L;
+
 
 	/**
 	 * Écriture permanente dont dépend celle-ci.
 	 */
-	public final Permanent dependance;
+	@ManyToOne(cascade = CascadeType.PERSIST)
+	public Permanent dependance;
 	
 	/**
 	 * Coefficient multiplicateur, exprimé en pourcentage.
 	 */
-	public final BigDecimal taux;
+	public BigDecimal taux;
 
+	protected PermanentProport() {
+	}
+	
 	/**
 	 * Construit un état d'opération permanente qui génère des écritures dont le
 	 * montant est proportionnel à une autre opération permanente

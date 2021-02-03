@@ -76,15 +76,13 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 				.iterator();
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getPermanents(haas.olivier.comptes.dao.cache.CachePermanentDAO)
-	 */
 	@Override
 	public Iterator<Permanent> getPermanents(CachePermanentDAO cache)
 			throws IOException {
-		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return entityManager.createQuery(
+				"select p from Permanent p", Permanent.class)
+				.getResultList()
+				.iterator();
 	}
 
 	/** 
@@ -136,6 +134,7 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 	public void save(CacheDAOFactory cache) throws IOException {
 		savePojos(cache.getCompteDAO().getAll(), getComptes());
 		savePojos(cache.getEcritureDAO().getAll(), getEcritures());
+		savePojos(cache.getPermanentDAO().getAll(), getPermanents(null));
 		entityManager.getTransaction().commit();
 		entityManager.getTransaction().begin();
 	}

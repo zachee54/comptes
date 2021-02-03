@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -9,18 +9,27 @@ import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Map;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+
 /**
  * L'état d'une opération permanente dont les montants sont fixés à l'avance.
  * 
  * @author Olivier HAAS
  */
+@Entity
 public class PermanentFixe extends PermanentState {
+	private static final long serialVersionUID = -3256470081643511525L;
 
 	/**
 	 * Montants prédéfinis par mois.
 	 */
-	private final Map<YearMonth, BigDecimal> montants;
+	@ElementCollection
+	private Map<YearMonth, BigDecimal> montants;
 
+	protected PermanentFixe() {
+	}
+	
 	/**
 	 * Construit un état d'opération permanente dont les montants sont fixés à
 	 * l'avance.

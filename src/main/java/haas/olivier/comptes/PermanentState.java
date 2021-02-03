@@ -1,6 +1,16 @@
+/*
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
+ */
 package haas.olivier.comptes;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 import haas.olivier.util.Month;
 
@@ -10,7 +20,35 @@ import haas.olivier.util.Month;
  *
  * @author Olivier Haas
  */
-public abstract class PermanentState {
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public abstract class PermanentState implements Serializable {
+	private static final long serialVersionUID = 8422661694947570809L;
+	
+	/**
+	 * L'identifiant unique.
+	 */
+	@Id
+	@GeneratedValue
+	private Integer id;
+	
+	protected PermanentState() {
+	}
+	
+	/**
+	 * Renvoie l'identifiant unique.
+	 */
+	public Integer getId() {
+		return id;
+	}
+	
+	/**
+	 * Modifie l'identifiant unique.
+	 */
+	public void SetId(Integer id) {
+		this.id = id;
+	}
+	
 	
 	/**
 	 * Renvoie le montant de l'écriture à générer.

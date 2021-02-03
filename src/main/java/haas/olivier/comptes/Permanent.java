@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
@@ -26,6 +26,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+
 /**
  * Une opération récurrente capable de générer une écriture pré-définie.
  * <p>
@@ -40,6 +48,7 @@ import java.util.logging.Logger;
  * 
  * @author Olivier Haas
  */
+@Entity
 public class Permanent implements Comparable<Permanent>, Serializable {
 	private static final long serialVersionUID = 8897891019381288870L;
 	
@@ -90,6 +99,8 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	/**
 	 * L'identifiant de l'opération permanente.
 	 */
+	@Id
+	@GeneratedValue
 	private Integer id;
 	
 	/**
@@ -100,16 +111,19 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	/**
 	 * Les dates (quantièmes) des écritures à générer en fonction du mois.
 	 */
-	private final Map<YearMonth, Integer> jours;
+	@ElementCollection
+	private Map<YearMonth, Integer> jours;
 	
 	/**
 	 * Le compte à débiter par les écritures générées.
 	 */
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	private Compte debit;
 	
 	/**
 	 * Le compte à créditer par les écritures générées.
 	 */
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	private Compte credit;
 	
 	/**
@@ -130,8 +144,12 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	/**
 	 * L'état déterminante le comportement de l'opération permanente.
 	 */
-	private PermanentState state = new PermanentFixe(Collections.emptyMap());
+	@OneToOne(cascade = CascadeType.ALL)
+	private PermanentState state;
 
+	protected Permanent() {
+	}
+	
 	/**
 	 * Construit une opération permanente.
 	 * 
@@ -164,6 +182,7 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		this.tiers = tiers;
 		this.pointer = pointer;
 		this.jours = convertMonths(jours);
+		this.state = new PermanentFixe(Collections.emptyMap());
 	}
 	
 	/**
@@ -380,46 +399,6 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	}
 	
 	/**
-	 * Renvoie le montant de l'écriture à générer (dépend de l'implémentation
-	 * concrète).
-	 * 
-	 * @param month	Le mois au titre duquel générer l'écriture.
-	 * 
-	 * @throws EcritureMissingArgumentException
-	 * 				Si les données sont insuffisantes pour instancier
-	 * 				l'écriture.
-	 * 
-	 * @throws InconsistentArgumentException
-	 * 				Si des informations manquent pour définir le montant au
-	 * 				titre de ce mois.
-	 */
-	BigDecimal getMontant(Month month)
-			throws EcritureMissingArgumentException,
-			InconsistentArgumentsException {
-		return state.getMontant(month);
-	}
-	
-	/**
-	 * Renvoie l'état actuel de l'opération permanente.
-	 * 
-	 * @return	L'état actuel de l'opération permanente.
-	 */
-	public PermanentState getState() {
-		return state;
-	}
-	
-	/**
-	 * Modifie l'état de l'opération permanente.
-	 * 
-	 * @param state	Le nouvel état de l'opération permanente.
-	 */
-	public void setState(PermanentState state) {
-		if (state == null)
-			throw new NullPointerException();
-		this.state = state;
-	}
-	
-	/**
 	 * Renvoie le nom de l'opération permanente.
 	 * 
 	 * @return	Le nom de l'opération permanente.
@@ -520,6 +499,36 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	}
 	
 	/**
+	 * Définit si les écritures doivent être pointées automatiquement.
+	 * 
+	 * @param pointer	<code>true</code> si les écritures doivent être pointées
+	 * 					automatiquement.
+	 */
+	public void setPointee(boolean pointer) {
+		this.pointer = pointer;
+	}
+
+	/**
+	 * Renvoie l'état actuel de l'opération permanente.
+	 * 
+	 * @return	L'état actuel de l'opération permanente.
+	 */
+	public PermanentState getState() {
+		return state;
+	}
+
+	/**
+	 * Modifie l'état de l'opération permanente.
+	 * 
+	 * @param state	Le nouvel état de l'opération permanente.
+	 */
+	public void setState(PermanentState state) {
+		if (state == null)
+			throw new NullPointerException();
+		this.state = state;
+	}
+
+	/**
 	 * Renvoie les dates (quantièmes) des écritures à générer en fonction des
 	 * mois.
 	 * 
@@ -528,15 +537,25 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 	public Map<Month, Integer> getJours() {
 		return wrapWithMonth(jours);
 	}
-	
+
 	/**
-	 * Définit si les écritures doivent être pointées automatiquement.
+	 * Renvoie le montant de l'écriture à générer (dépend de l'implémentation
+	 * concrète).
 	 * 
-	 * @param pointer	<code>true</code> si les écritures doivent être pointées
-	 * 					automatiquement.
+	 * @param month	Le mois au titre duquel générer l'écriture.
+	 * 
+	 * @throws EcritureMissingArgumentException
+	 * 				Si les données sont insuffisantes pour instancier
+	 * 				l'écriture.
+	 * 
+	 * @throws InconsistentArgumentException
+	 * 				Si des informations manquent pour définir le montant au
+	 * 				titre de ce mois.
 	 */
-	public void setPointee(boolean pointer) {
-		this.pointer = pointer;
+	BigDecimal getMontant(Month month)
+			throws EcritureMissingArgumentException,
+			InconsistentArgumentsException {
+		return state.getMontant(month);
 	}
 
 	@Override

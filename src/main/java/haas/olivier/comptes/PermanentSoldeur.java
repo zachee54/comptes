@@ -1,11 +1,14 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes;
 
 import haas.olivier.util.Month;
 
 import java.math.BigDecimal;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 
 /**
  * L'état d'une opération permanente dont le montant correspond au solde d'un
@@ -14,12 +17,18 @@ import java.math.BigDecimal;
  *
  * @author Olivier HAAS
  */
+@Entity
 public class PermanentSoldeur extends PermanentState {
+	private static final long serialVersionUID = 8595871078180688948L;
 
 	/**
 	 * L'opération permanente à laquelle appartient cet état.
 	 */
-	private final Permanent permanent;
+	@OneToOne(cascade = CascadeType.PERSIST)
+	private Permanent permanent;
+	
+	protected PermanentSoldeur() {
+	}
 	
 	/**
 	 * Construit un état d'opération permanente générant des écritures dont le
