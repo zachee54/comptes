@@ -247,6 +247,7 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 
 	@Override
 	public void close() {
+		entityManager.getTransaction().commit();
 		entityManagerFactory.close();
 	}
 }
