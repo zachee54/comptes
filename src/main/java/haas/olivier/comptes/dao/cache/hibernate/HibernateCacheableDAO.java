@@ -40,6 +40,27 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 	 */
 	private final EntityManager entityManager;
 	
+	/**
+	 * Le type de modèle, pour affichage utilisateur.
+	 */
+	private String name;
+	
+	/**
+	 * Le nom de la source, pour affichage utilisateur.
+	 */
+	private String source;
+	
+	/**
+	 * Le nom complet de la source, pour affichage utilisateur.
+	 */
+	private String sourceFullName;
+	
+	/**
+	 * Construit un accès Hibernate vers une source de données.
+	 * 
+	 * @param url			L'URL de la source de données.
+	 * @param driver		Le nom qualifié du pilote.
+	 */
 	public HibernateCacheableDAO(String url, String driver) {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("javax.persistence.jdbc.url", url);
@@ -50,11 +71,6 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 		entityManager.getTransaction().begin();
 	}
 	
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getBanques()
-	 */
 	@Override
 	public Iterator<Banque> getBanques() throws IOException {
 		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
@@ -85,31 +101,16 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 				.iterator();
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getHistorique()
-	 */
 	@Override
 	public Iterator<Solde> getHistorique() throws IOException {
 		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getSoldesAVue()
-	 */
 	@Override
 	public Iterator<Solde> getSoldesAVue() throws IOException {
 		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getMoyennes()
-	 */
 	@Override
 	public Iterator<Solde> getMoyennes() throws IOException {
 		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
@@ -125,11 +126,6 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#save(haas.olivier.comptes.dao.cache.CacheDAOFactory)
-	 */
 	@Override
 	public void save(CacheDAOFactory cache) throws IOException {
 		savePojos(cache.getCompteDAO().getAll(), getComptes());
@@ -205,44 +201,45 @@ public class HibernateCacheableDAO implements CacheableDAOFactory {
 			entityManager.refresh(pojosIterator.next());
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getName()
-	 */
 	@Override
 	public String getName() {
-		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return name;
+	}
+	
+	/**
+	 * Modifie le type de modèle pour affichage utilisateur.
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getSource()
-	 */
 	@Override
 	public String getSource() {
-		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return source;
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#getSourceFullName()
+	/**
+	 * Modifie le nom de la source pour affichage utilisateur.
 	 */
+	public void setSource(String source) {
+		this.source = source;
+	}
+	
 	@Override
 	public String getSourceFullName() {
-		return null;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return sourceFullName;
+	}
+	
+	/**
+	 * Modifie le nom complet de la source pour affichage utilisateur.
+	 */
+	public void setSourceFullName(String sourceFullName) {
+		this.sourceFullName = sourceFullName;
 	}
 
-	/** 
-	 * (methode de remplacement)
-	 * {@inheritDoc}
-	 * @see haas.olivier.comptes.dao.cache.CacheableDAOFactory#canBeSaved()
-	 */
 	@Override
 	public boolean canBeSaved() {
-		return false;    // DOCUMENTEZ_MOI Raccord de méthode auto-généré
+		return true;
 	}
 
 	@Override

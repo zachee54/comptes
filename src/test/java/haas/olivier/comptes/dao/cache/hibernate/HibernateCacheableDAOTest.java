@@ -115,6 +115,29 @@ public class HibernateCacheableDAOTest {
 	}
 	
 	@Test
+	public void testGetSource() {
+		factory.setSource("nom de la source");
+		assertEquals("nom de la source", factory.getSource());
+	}
+	
+	@Test
+	public void testGetSourceFullName() {
+		factory.setSource("nom complet de la source");
+		assertEquals("nom complet de la source", factory.getSource());
+	}
+	
+	@Test
+	public void testGetName() {
+		factory.setSource("type de modèle");
+		assertEquals("type de modèle", factory.getSource());
+	}
+	
+	@Test
+	public void testCanBeSaved() {
+		assertTrue(factory.canBeSaved());
+	}
+	
+	@Test
 	public void testGetComptes() throws IOException {
 		assertFalse(factory.getComptes().hasNext());
 	}
