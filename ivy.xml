@@ -33,5 +33,6 @@
 		<dependency org="junit" name="junit" conf="junit->default" rev="4.11" />
 		<dependency org="org.mockito" name="mockito-core" conf="test->default" rev="2.21.0" />
 		<dependency org="org.glassfish.jaxb" name="jaxb-runtime" conf="compile->default" rev="2.4.0-b180830.0438" />
+		<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="2.7.4" />
 	</dependencies>
 </ivy-module>
