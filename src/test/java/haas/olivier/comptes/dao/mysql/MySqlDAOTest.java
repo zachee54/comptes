@@ -2,6 +2,7 @@ package haas.olivier.comptes.dao.mysql;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -99,8 +100,8 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testSave() {
-		fail("Not yet implemented");
+	public void testSave() throws IOException {
+		dao.save();
 	}
 
 	@Test

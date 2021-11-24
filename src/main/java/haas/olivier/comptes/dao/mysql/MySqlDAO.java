@@ -3,6 +3,7 @@ package haas.olivier.comptes.dao.mysql;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.mariadb.jdbc.MariaDbDataSource;
 
@@ -123,8 +124,52 @@ public class MySqlDAO extends DAOFactory {
 
 	@Override
 	public void save() throws IOException {
-		// TODO Auto-generated method stub
-
+		try (Connection connection = getConnection()) {
+			createTablesIfNotExist(connection);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
+	}
+	
+	/**
+	 * Crée les tables SQL si elles n'existent pas déjà.
+	 * 
+	 * @param connection	Une connexion.
+	 * @throws SQLException
+	 */
+	private void createTablesIfNotExist(Connection connection)
+			throws SQLException {
+		try (Statement statement = connection.createStatement()) {
+			statement.execute(
+					"CREATE TABLE IF NOT EXISTS compte_states ("
+					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+					+ "type INT UNSIGNED NOT NULL,"
+					+ "numero BIGINT DEFAULT NULL,"
+					+ "CONSTRAINT UNIQUE KEY (type, numero))");
+			statement.execute(
+					"CREATE TABLE IF NOT EXISTS comptes ("
+					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+					+ "nom VARCHAR(50) NOT NULL,"
+					+ "ouverture DATE NOT NULL,"
+					+ "cloture DATE DEFAULT NULL,"
+					+ "couleur INT UNSIGNED NOT NULL,"
+					+ "compte_state_id INT UNSIGNED NOT NULL,"
+					+ "CONSTRAINT FOREIGN KEY comptes_states (compte_state_id) REFERENCES compte_states(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+			statement.execute(
+					"CREATE TABLE IF NOT EXISTS ecritures ("
+					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+					+ "debit_id INT UNSIGNED NOT NULL,"
+					+ "credit_id INT UNSIGNED NOT NULL,"
+					+ "date DATE NOT NULL,"
+					+ "pointage DATE DEFAULT NULL,"
+					+ "libelle VARCHAR(50) NULL,"
+					+ "tiers VARCHAR(50) NULL,"
+					+ "cheque BIGINT UNSIGNED DEFAULT NULL,"
+					+ "montant INT NOT NULL,"
+					+ "epargne INT NOT NULL DEFAULT 0,"
+					+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+					+ "CONSTRAINT FOREIGN KEY ecritures_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+		}
 	}
 
 	@Override
