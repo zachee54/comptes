@@ -73,8 +73,11 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Compte> getComptes() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return new MySqlComptesLoader(this);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -136,12 +139,14 @@ public class MySqlDAO implements CacheableDAOFactory {
 	private void createTablesIfNotExist(Connection connection)
 			throws SQLException {
 		try (Statement statement = connection.createStatement()) {
+			
 			statement.execute(
 					"CREATE TABLE IF NOT EXISTS compte_states ("
 					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 					+ "type INT UNSIGNED NOT NULL,"
 					+ "numero BIGINT DEFAULT NULL,"
 					+ "CONSTRAINT UNIQUE KEY (type, numero))");
+			
 			statement.execute(
 					"CREATE TABLE IF NOT EXISTS comptes ("
 					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -151,6 +156,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 					+ "couleur INT UNSIGNED NOT NULL,"
 					+ "compte_state_id INT UNSIGNED NOT NULL,"
 					+ "CONSTRAINT FOREIGN KEY comptes_states (compte_state_id) REFERENCES compte_states(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+			
 			statement.execute(
 					"CREATE TABLE IF NOT EXISTS ecritures ("
 					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
