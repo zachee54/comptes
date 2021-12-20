@@ -4,24 +4,26 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 
 import org.mariadb.jdbc.MariaDbDataSource;
 
-import haas.olivier.comptes.dao.BanqueDAO;
-import haas.olivier.comptes.dao.CompteDAO;
-import haas.olivier.comptes.dao.DAOFactory;
-import haas.olivier.comptes.dao.EcritureDAO;
-import haas.olivier.comptes.dao.PermanentDAO;
-import haas.olivier.comptes.dao.PropertiesDAO;
-import haas.olivier.comptes.dao.SuiviDAO;
-import haas.olivier.util.Month;
+import haas.olivier.comptes.Banque;
+import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.Ecriture;
+import haas.olivier.comptes.Permanent;
+import haas.olivier.comptes.dao.cache.CacheDAOFactory;
+import haas.olivier.comptes.dao.cache.CachePermanentDAO;
+import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
+import haas.olivier.comptes.dao.cache.CacheablePropertiesDAO;
+import haas.olivier.comptes.dao.cache.Solde;
 
 /**
  * Un objet d'accès aux données au format MySQL.
  *
  * @author Olivier Haas
  */
-public class MySqlDAO extends DAOFactory {
+public class MySqlDAO implements CacheableDAOFactory {
 	
 	/** Le nom d'utilisateur de la base de données. */
 	private final String username;
@@ -64,66 +66,60 @@ public class MySqlDAO extends DAOFactory {
 	}
 
 	@Override
-	public BanqueDAO getBanqueDAO() {
+	public Iterator<Banque> getBanques() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public CompteDAO getCompteDAO() {
+	public Iterator<Compte> getComptes() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public EcritureDAO getEcritureDAO() {
+	public Iterator<Ecriture> getEcritures() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public PermanentDAO getPermanentDAO() {
+	public Iterator<Permanent> getPermanents(CachePermanentDAO cache) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SuiviDAO getHistoriqueDAO() {
+	public Iterator<Solde> getHistorique() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SuiviDAO getSoldeAVueDAO() {
+	public Iterator<Solde> getSoldesAVue() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SuiviDAO getMoyenneDAO() {
+	public Iterator<Solde> getMoyennes() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public PropertiesDAO getPropertiesDAO() {
+	public CacheablePropertiesDAO getProperties() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public boolean canBeSaved() {
 		return true;
 	}
 
 	@Override
-	public boolean mustBeSaved() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void save() throws IOException {
+	public void save(CacheDAOFactory cache) throws IOException {
 		try (Connection connection = getConnection()) {
 			createTablesIfNotExist(connection);
 		} catch (SQLException e) {
@@ -173,18 +169,6 @@ public class MySqlDAO extends DAOFactory {
 	}
 
 	@Override
-	protected void erase() throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Month getDebut() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String getName() {
 		return "MySQL";
 	}
@@ -199,6 +183,12 @@ public class MySqlDAO extends DAOFactory {
 	public String getSourceFullName() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

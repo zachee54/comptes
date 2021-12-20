@@ -50,42 +50,42 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testGetBanqueDAO() {
+	public void testGetBanques() {
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testGetCompteDAO() {
+	public void testGetComptes() {
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testGetEcritureDAO() {
+	public void testGetEcritures() {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testGetPermanents() {
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testGetPermanentDAO() {
+	public void testGetHistoriques() {
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testGetHistoriqueDAO() {
+	public void testGetSoldesAVue() {
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testGetSoldeAVueDAO() {
+	public void testGetMoyennes() {
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testGetMoyenneDAO() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetPropertiesDAO() {
+	public void testGetProperties() {
 		fail("Not yet implemented");
 	}
 
@@ -95,23 +95,9 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testMustBeSaved() {
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testSave() throws IOException {
-		dao.save();
-	}
-
-	@Test
-	public void testErase() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetDebut() {
-		fail("Not yet implemented");
+		// TODO à compléter
+		dao.save(null);
 	}
 
 	@Test
@@ -139,6 +125,11 @@ public class MySqlDAOTest {
 		try (Connection connection = dao.getConnection()) {
 			assertFalse(connection.isClosed());
 		}
+	}
+	
+	@Test
+	public void testClose() {
+		fail("Not yet implemented");
 	}
 
 }
