@@ -24,36 +24,22 @@ class MySqlComptesLoader implements Iterator<Compte> {
 			throws SQLException {
 		try (PreparedStatement compteStatement = connection.prepareStatement(
 				"REPLACE INTO comptes"
-				+ "(id, nom, ouverture, cloture, couleur, compte_state_id) "
-				+ "VALUES (?,?,?,?,?,?)");
-				
-				PreparedStatement stateStatement = connection.prepareStatement(
-						"REPLACE INTO compte_states (type, numero) "
-						+ "VALUES (?,?)",
-						Statement.RETURN_GENERATED_KEYS)) {
+				+ "(id, nom, type, numero, ouverture, cloture, couleur) "
+				+ "VALUES (?,?,?,?,?,?,?)")) {
 			
 			Iterator<Compte> comptesIt = comptes.iterator();
 			while (comptesIt.hasNext()) {
 				Compte compte = comptesIt.next();
 				
-				stateStatement.setInt(1, compte.getType().ordinal());
-				stateStatement.setLong(2, compte.getNumero());
-				stateStatement.executeUpdate();
-				Integer stateId = null;
-				try (ResultSet keys = stateStatement.getGeneratedKeys()) {
-					if (keys.next()) {
-						stateId = keys.getInt(1);
-					}
-				}
-				
 				compteStatement.setInt(1, compte.getId());
 				compteStatement.setString(2, compte.getNom());
-				compteStatement.setDate(3,
+				compteStatement.setInt(3, compte.getType().ordinal());
+				compteStatement.setLong(4, compte.getNumero());
+				compteStatement.setDate(5,
 						new Date(compte.getOuverture().getTime()));
-				compteStatement.setDate(4,
+				compteStatement.setDate(6,
 						new Date(compte.getCloture().getTime()));
-				compteStatement.setInt(5, compte.getColor().getRGB());
-				compteStatement.setInt(6, stateId);
+				compteStatement.setInt(7, compte.getColor().getRGB());
 				compteStatement.execute();
 			}
 		}

@@ -145,20 +145,14 @@ public class MySqlDAO implements CacheableDAOFactory {
 		try (Statement statement = connection.createStatement()) {
 			
 			statement.execute(
-					"CREATE TABLE IF NOT EXISTS compte_states ("
-					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-					+ "type INT UNSIGNED NOT NULL,"
-					+ "numero BIGINT DEFAULT NULL,"
-					+ "CONSTRAINT UNIQUE KEY (type, numero))");
-			
-			statement.execute(
 					"CREATE TABLE IF NOT EXISTS comptes ("
 					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 					+ "nom VARCHAR(50) NOT NULL,"
+					+ "type INT UNSIGNED NOT NULL,"
+					+ "numero BIGINT DEFAULT NULL,"
 					+ "ouverture DATE NOT NULL,"
 					+ "cloture DATE DEFAULT NULL,"
 					+ "couleur INT UNSIGNED NOT NULL,"
-					+ "compte_state_id INT UNSIGNED NOT NULL,"
 					+ "CONSTRAINT FOREIGN KEY comptes_states (compte_state_id) REFERENCES compte_states(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
 			
 			statement.execute(
