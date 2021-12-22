@@ -128,7 +128,6 @@ public class MySqlDAO implements CacheableDAOFactory {
 			
 			MySqlComptesLoader.save(cache.getCompteDAO().getAll(), connection);
 			
-			
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
@@ -152,8 +151,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 					+ "numero BIGINT DEFAULT NULL,"
 					+ "ouverture DATE NOT NULL,"
 					+ "cloture DATE DEFAULT NULL,"
-					+ "couleur INT UNSIGNED NOT NULL,"
-					+ "CONSTRAINT FOREIGN KEY comptes_states (compte_state_id) REFERENCES compte_states(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+					+ "couleur INT NOT NULL)");
 			
 			statement.execute(
 					"CREATE TABLE IF NOT EXISTS ecritures ("

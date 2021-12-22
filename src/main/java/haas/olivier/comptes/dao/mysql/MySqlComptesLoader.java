@@ -24,7 +24,7 @@ class MySqlComptesLoader implements Iterator<Compte> {
 			throws SQLException {
 		try (PreparedStatement compteStatement = connection.prepareStatement(
 				"REPLACE INTO comptes"
-				+ "(id, nom, type, numero, ouverture, cloture, couleur) "
+				+ "(id, nom, type, couleur, ouverture, cloture, numero) "
 				+ "VALUES (?,?,?,?,?,?,?)")) {
 			
 			Iterator<Compte> comptesIt = comptes.iterator();
@@ -34,12 +34,19 @@ class MySqlComptesLoader implements Iterator<Compte> {
 				compteStatement.setInt(1, compte.getId());
 				compteStatement.setString(2, compte.getNom());
 				compteStatement.setInt(3, compte.getType().ordinal());
-				compteStatement.setLong(4, compte.getNumero());
+				compteStatement.setInt(4, compte.getColor().getRGB());
 				compteStatement.setDate(5,
 						new Date(compte.getOuverture().getTime()));
+				
+				java.util.Date cloture = compte.getCloture();
 				compteStatement.setDate(6,
-						new Date(compte.getCloture().getTime()));
-				compteStatement.setInt(7, compte.getColor().getRGB());
+						cloture == null ? null : new Date(cloture.getTime()));
+				
+				Long numero = compte.getNumero();
+				if (numero != null) {
+					compteStatement.setLong(7, compte.getNumero());
+				}
+				
 				compteStatement.execute();
 			}
 		}
@@ -59,9 +66,7 @@ class MySqlComptesLoader implements Iterator<Compte> {
 	 */
 	MySqlComptesLoader(Connection connection) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
-			resultSet = statement.executeQuery(
-					"SELECT *, type, numero FROM comptes "
-					+ "JOIN compte_states ON (comptes.compte_state_id = compte_states.id)");
+			resultSet = statement.executeQuery("SELECT * FROM comptes ");
 		}
 	}
 	

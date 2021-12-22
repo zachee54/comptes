@@ -2,10 +2,15 @@ package haas.olivier.comptes.dao.mysql;
 
 import static org.junit.Assert.*;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -13,12 +18,21 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.mockito.Mockito.*;
+
+import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.TypeCompte;
+import haas.olivier.comptes.dao.CompteDAO;
+import haas.olivier.comptes.dao.cache.CacheDAOFactory;
+
 public class MySqlDAOTest {
 	
 	private static final String DATABASE = "comptes_mysqldao_test";
 	
 	private static final MySqlDAO STATIC_DAO =
 			new MySqlDAO("localhost", 3306, null, "comptes_mysqldao_test", "dummypassword");
+	
+	private static Compte compte1, compte2;
 
 	/** Objet testé. */
 	private MySqlDAO dao;
@@ -30,6 +44,18 @@ public class MySqlDAOTest {
 			statement.execute("DROP DATABASE IF EXISTS " + DATABASE);
 			statement.execute("CREATE DATABASE " + DATABASE);
 		}
+		
+		compte1 = new Compte(1, TypeCompte.COMPTE_EPARGNE);
+		compte1.setNom("Le compte 1");
+		compte1.setNumero(57931L);
+		compte1.setOuverture(new Date(35468L));
+		compte1.setColor(Color.CYAN);
+		
+		compte2 = new Compte(7, TypeCompte.RECETTES_EN_EPARGNE);
+		compte2.setNom("Le compte n°7");
+		compte2.setOuverture(new Date(24963479L));
+		compte2.setCloture(new Date(3696347895263L));
+		compte2.setColor(Color.ORANGE);
 	}
 
 	@AfterClass
@@ -55,8 +81,26 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testGetComptes() {
-		fail("Not yet implemented");
+	public void testGetComptes() throws IOException {
+		List<Compte> comptes = new ArrayList<>();
+		comptes.add(compte1);
+		comptes.add(compte2);
+		
+		CompteDAO cacheCompteDAO = mock(CompteDAO.class);
+		when(cacheCompteDAO.getAll()).thenReturn(comptes);
+		
+		CacheDAOFactory cache = mock(CacheDAOFactory.class);
+		when(cache.getCompteDAO()).thenReturn(cacheCompteDAO);
+		
+		dao.save(cache);
+		
+		// Méthode testée
+		Iterator<Compte> comptesIt = dao.getComptes();
+		
+		while (comptesIt.hasNext()) {
+			assertTrue(comptes.remove(comptesIt.next()));
+		}
+		assertTrue(comptes.isEmpty());
 	}
 
 	@Test
@@ -92,12 +136,6 @@ public class MySqlDAOTest {
 	@Test
 	public void testCanBeSaved() {
 		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSave() throws IOException {
-		// TODO à compléter
-		dao.save(null);
 	}
 
 	@Test
