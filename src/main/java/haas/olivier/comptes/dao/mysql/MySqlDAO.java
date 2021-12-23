@@ -123,8 +123,12 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Ecriture> getEcritures() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try (Connection connection = getConnection()) {
+			return new MySqlEcrituresDAO(connection, comptesById);
+			
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -203,7 +207,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 					+ "pointage DATE DEFAULT NULL,"
 					+ "libelle VARCHAR(50) NULL,"
 					+ "tiers VARCHAR(50) NULL,"
-					+ "cheque BIGINT UNSIGNED DEFAULT NULL,"
+					+ "cheque INT UNSIGNED DEFAULT NULL,"
 					+ "montant INT NOT NULL,"
 					+ "epargne INT NOT NULL DEFAULT 0,"
 					+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
