@@ -73,7 +73,11 @@ class MySqlComptesDAO implements Iterator<Compte> {
 	@Override
 	public boolean hasNext() {
 		try {
-			return !resultSet.isLast();
+			if (resultSet.isLast()) {
+				resultSet.close();
+				return false;
+			}
+			return true;
 			
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
