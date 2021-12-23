@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.mariadb.jdbc.MariaDbDataSource;
 
@@ -36,6 +38,9 @@ public class MySqlDAO implements CacheableDAOFactory {
 	
 	/** La connexion courante à la base de données. */
 	private Connection connection;
+	
+	/** Les comptes, classés par identifiants. */
+	private Map<Integer, Compte> comptesById;
 	
 	/**
 	 * Construit un accès à une source de données MySQL.
@@ -73,8 +78,44 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Compte> getComptes() throws IOException {
+		return getComptesById().values().iterator();
+	}
+	
+	/**
+	 * Renvoie les comptes classés par identifiants.
+	 * 
+	 * @return	Les comptes, classés par identifiants.
+	 * 
+	 * @throws IOException
+	 */
+	private Map<Integer, Compte> getComptesById() throws IOException {
+		if (comptesById == null) {
+			comptesById = loadComptes();
+		}
+		return comptesById;
+	}
+	
+	/**
+	 * Charge les comptes à partir de la base de données.
+	 * 
+	 * @return	Les comptes, classés par identifiants.
+	 * 
+	 * @throws IOException
+	 */
+	private Map<Integer, Compte> loadComptes() throws IOException {
 		try (Connection connection = getConnection()) {
-			return new MySqlComptesDAO(connection);
+			Iterator<Compte> comptesIterator =
+					new MySqlComptesDAO(connection);
+			
+			Map<Integer, Compte> comptesMap = new HashMap<>();
+			while (comptesIterator.hasNext()) {
+				Compte compte = comptesIterator.next();
+				comptesMap.put(compte.getId(), compte);
+			}
+			
+			
+			return comptesMap;
+			
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
