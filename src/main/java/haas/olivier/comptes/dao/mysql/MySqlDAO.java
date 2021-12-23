@@ -177,20 +177,23 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public String getSource() {
-		// TODO Auto-generated method stub
-		return null;
+		return dataSource.getDatabaseName();
 	}
 
 	@Override
 	public String getSourceFullName() {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("%s %s",
+				dataSource.getServerName(),
+				dataSource.getDatabaseName());
 	}
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			throw new IOException (e);
+		}
 	}
 
 }
