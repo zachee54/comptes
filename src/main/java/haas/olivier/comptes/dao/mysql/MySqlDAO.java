@@ -74,7 +74,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 	@Override
 	public Iterator<Compte> getComptes() throws IOException {
 		try (Connection connection = getConnection()) {
-			return new MySqlComptesLoader(connection);
+			return new MySqlComptesDAO(connection);
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
@@ -126,7 +126,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 		try (Connection connection = getConnection()) {
 			createTablesIfNotExist(connection);
 			
-			MySqlComptesLoader.save(cache.getCompteDAO().getAll(), connection);
+			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
 			
 		} catch (SQLException e) {
 			throw new IOException(e);

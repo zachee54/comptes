@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.TypeCompte;
 
-class MySqlComptesLoader implements Iterator<Compte> {
+class MySqlComptesDAO implements Iterator<Compte> {
 	
 	/**
 	 * Sauvegarde des comptes.
@@ -64,7 +64,7 @@ class MySqlComptesLoader implements Iterator<Compte> {
 	 * 
 	 * @throws SQLException
 	 */
-	MySqlComptesLoader(Connection connection) throws SQLException {
+	MySqlComptesDAO(Connection connection) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			resultSet = statement.executeQuery("SELECT * FROM comptes ");
 		}
