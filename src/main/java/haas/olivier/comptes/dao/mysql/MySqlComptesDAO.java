@@ -17,20 +17,24 @@ class MySqlComptesDAO implements Iterator<Compte> {
 	
 	/**
 	 * Sauvegarde des comptes.
+	 * Les anciens comptes seront supprimés.
+	 * 
+	 * @param comptes		Les comptes à sauvegarder.
+	 * @param connection	Une connexion active.
 	 * 
 	 * @throws SQLException
 	 */
 	static void save(Collection<Compte> comptes, Connection connection)
 			throws SQLException {
 		try (PreparedStatement compteStatement = connection.prepareStatement(
-				"REPLACE INTO comptes"
+				"INSERT INTO comptes"
 				+ "(id, nom, type, couleur, ouverture, cloture, numero) "
 				+ "VALUES (?,?,?,?,?,?,?)")) {
 			
-			Iterator<Compte> comptesIt = comptes.iterator();
-			while (comptesIt.hasNext()) {
-				Compte compte = comptesIt.next();
-				
+			connection.setAutoCommit(false);
+			compteStatement.execute("DELETE FROM comptes");
+			
+			for (Compte compte : comptes) {
 				compteStatement.setInt(1, compte.getId());
 				compteStatement.setString(2, compte.getNom());
 				compteStatement.setInt(3, compte.getType().ordinal());
@@ -49,6 +53,15 @@ class MySqlComptesDAO implements Iterator<Compte> {
 				
 				compteStatement.execute();
 			}
+			
+			connection.commit();
+			
+		} catch (SQLException e) {
+			connection.rollback();
+			throw e;
+			
+		} finally {
+			connection.setAutoCommit(true);
 		}
 	}
 
