@@ -73,12 +73,14 @@ class MySqlComptesDAO implements Iterator<Compte> {
 	/**
 	 * Construit un itérateur sur l'ensemble des comptes de la base de données.
 	 * 
-	 * @param connection	Une connexion à la base de données.
+	 * @param connectionProvider	Un fournisseur de connexion à la base de
+	 * 								données.
 	 * 
 	 * @throws SQLException
 	 */
-	MySqlComptesDAO(Connection connection) throws SQLException {
-		try (Statement statement = connection.createStatement()) {
+	MySqlComptesDAO(ConnectionProvider connectionProvider) throws SQLException {
+		try (Connection connection = connectionProvider.getConnection();
+				Statement statement = connection.createStatement()) {
 			resultSet = statement.executeQuery("SELECT * FROM comptes ");
 		}
 	}

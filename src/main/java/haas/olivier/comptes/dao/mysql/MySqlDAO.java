@@ -27,20 +27,14 @@ import haas.olivier.comptes.dao.cache.Solde;
  */
 public class MySqlDAO implements CacheableDAOFactory {
 	
-	/** Le nom d'utilisateur de la base de données. */
-	private final String username;
-	
-	/** Le mot de passe de la base de données. */
-	private final String password;
-	
-	/** La source de données. */
-	private final MariaDbDataSource dataSource;
-	
-	/** La connexion courante à la base de données. */
-	private Connection connection;
+	/** Le fournisseur de connexion. */
+	private final ConnectionProvider connectionProvider;
 	
 	/** Les comptes, classés par identifiants. */
 	private Map<Integer, Compte> comptesById;
+	
+	/** La source de données. */
+	private final MariaDbDataSource dataSource;
 	
 	/**
 	 * Construit un accès à une source de données MySQL.
@@ -52,22 +46,8 @@ public class MySqlDAO implements CacheableDAOFactory {
 	public MySqlDAO(String hostname, int port, String database, String username,
 			String password) {
 		dataSource = new MariaDbDataSource(hostname, port, database);
-		this.username = username;
-		this.password = password;
-	}
-	
-	/**
-	 * Renvoie une connexion à la base de données.
-	 * 
-	 * @return	Une connexion ouverte.
-	 * 
-	 * @throws SQLException
-	 */
-	Connection getConnection() throws SQLException {
-		if (connection == null || connection.isClosed()) {
-			connection = dataSource.getConnection(username, password);
-		}
-		return connection;
+		connectionProvider =
+				new ConnectionProvider(dataSource, username, password);
 	}
 
 	@Override
@@ -78,7 +58,11 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Compte> getComptes() throws IOException {
-		return getComptesById().values().iterator();
+		try {
+			return getComptesById().values().iterator();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 	
 	/**
@@ -86,9 +70,9 @@ public class MySqlDAO implements CacheableDAOFactory {
 	 * 
 	 * @return	Les comptes, classés par identifiants.
 	 * 
-	 * @throws IOException
+	 * @throws SQLException
 	 */
-	private Map<Integer, Compte> getComptesById() throws IOException {
+	private Map<Integer, Compte> getComptesById() throws SQLException {
 		if (comptesById == null) {
 			comptesById = loadComptes();
 		}
@@ -100,32 +84,26 @@ public class MySqlDAO implements CacheableDAOFactory {
 	 * 
 	 * @return	Les comptes, classés par identifiants.
 	 * 
-	 * @throws IOException
+	 * @throws SQLException
 	 */
-	private Map<Integer, Compte> loadComptes() throws IOException {
-		try (Connection connection = getConnection()) {
-			Iterator<Compte> comptesIterator =
-					new MySqlComptesDAO(connection);
-			
-			Map<Integer, Compte> comptesMap = new HashMap<>();
-			while (comptesIterator.hasNext()) {
-				Compte compte = comptesIterator.next();
-				comptesMap.put(compte.getId(), compte);
-			}
-			
-			
-			return comptesMap;
-			
-		} catch (SQLException e) {
-			throw new IOException(e);
+	private Map<Integer, Compte> loadComptes() throws SQLException {
+		Iterator<Compte> comptesIterator =
+				new MySqlComptesDAO(connectionProvider);
+
+		Map<Integer, Compte> comptesMap = new HashMap<>();
+		while (comptesIterator.hasNext()) {
+			Compte compte = comptesIterator.next();
+			comptesMap.put(compte.getId(), compte);
 		}
+
+
+		return comptesMap;
 	}
 
 	@Override
 	public Iterator<Ecriture> getEcritures() throws IOException {
-		try (Connection connection = getConnection()) {
-			return new MySqlEcrituresDAO(connection, comptesById);
-			
+		try {
+			return new MySqlEcrituresDAO(connectionProvider, getComptesById());
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
@@ -168,7 +146,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public void save(CacheDAOFactory cache) throws IOException {
-		try (Connection connection = getConnection()) {
+		try (Connection connection = connectionProvider.getConnection()) {
 			createTablesIfNotExist(connection);
 			
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
@@ -234,11 +212,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public void close() throws IOException {
-		try {
-			connection.close();
-		} catch (SQLException e) {
-			throw new IOException (e);
-		}
+		connectionProvider.close();
 	}
 
 }

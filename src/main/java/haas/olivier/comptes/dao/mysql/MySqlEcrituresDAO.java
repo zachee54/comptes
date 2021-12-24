@@ -25,15 +25,19 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 	/**
 	 * Construit un itérateur sur l'ensemble des écritures.
 	 * 
-	 * @param connection	Une connexion à la base de données.
-	 * @param comptesById	Les comptes, classés par identifiants.
+	 * @param connectionProvider	Un fournisseur de connexion à la base de
+	 * 								données.
+	 * 
+	 * @param comptesById			Les comptes, classés par identifiants.
 	 * 
 	 * @throws SQLException
 	 */
-	MySqlEcrituresDAO(Connection connection, Map<Integer, Compte> comptesById)
-			throws SQLException {
+	MySqlEcrituresDAO(ConnectionProvider connectionProvider,
+			Map<Integer, Compte> comptesById)
+					throws SQLException {
 		this.comptesById = comptesById;
-		try (Statement statement = connection.createStatement()) {
+		try (Connection connection = connectionProvider.getConnection();
+				Statement statement = connection.createStatement()) {
 			resultSet = statement.executeQuery("SELECT * from ecritures");
 		}
 	}
