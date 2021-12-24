@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -49,6 +50,8 @@ class MySqlComptesDAO implements Iterator<Compte> {
 				Long numero = compte.getNumero();
 				if (numero != null) {
 					compteStatement.setLong(7, compte.getNumero());
+				} else {
+					compteStatement.setNull(7, Types.BIGINT);
 				}
 				
 				compteStatement.execute();

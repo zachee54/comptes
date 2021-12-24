@@ -2,9 +2,12 @@ package haas.olivier.comptes.dao.mysql;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -16,6 +19,59 @@ import haas.olivier.comptes.InconsistentArgumentsException;
 
 class MySqlEcrituresDAO implements Iterator<Ecriture> {
 
+	/**
+	 * Sauvegarde des écritures.
+	 * Les anciennes écritures seront supprimées.
+	 * 
+	 * @param ecritures		Les écritures à sauvegarder.
+	 * @param connection	Une connexion active.
+	 * 
+	 * @throws SQLException
+	 */
+	static void save(Iterable<Ecriture> ecritures, Connection connection) throws SQLException {
+		try (Statement statement = connection.createStatement();
+				PreparedStatement ecritureStatement =
+						connection.prepareStatement(
+								"INSERT INTO ecritures"
+								+ "(id, debit_id, credit_id, date, pointage, libelle, tiers, cheque, montant) "
+								+ "VALUES (?,?,?,?,?,?,?,?,?)")) {
+			
+			connection.setAutoCommit(true);
+			ecritureStatement.execute("DELETE FROM ecritures");
+			
+			for (Ecriture ecriture : ecritures) {
+				ecritureStatement.setInt(1, ecriture.id);
+				ecritureStatement.setInt(2, ecriture.debit.getId());
+				ecritureStatement.setInt(3, ecriture.credit.getId());
+				ecritureStatement.setDate(4, new Date(ecriture.date.getTime()));
+				
+				java.util.Date pointage = ecriture.pointage;
+				ecritureStatement.setDate(5,
+						pointage == null ? null : new Date(pointage.getTime()));
+				
+				ecritureStatement.setString(6, ecriture.libelle);
+				ecritureStatement.setString(7, ecriture.tiers);
+				
+				if (ecriture.cheque != null) {
+					ecritureStatement.setInt(8, ecriture.cheque);
+				} else {
+					ecritureStatement.setNull(8, Types.INTEGER);
+				}
+				
+				ecritureStatement.setInt(9, ecriture.montant.movePointRight(2).intValue());
+				
+				ecritureStatement.execute();
+			}
+			
+		} catch (SQLException e) {
+			connection.rollback();
+			throw e;
+			
+		} finally {
+			connection.setAutoCommit(false);
+		}
+	}
+	
 	/** Le résultat de la requête SQL sur l'ensemble des écritures. */
 	private ResultSet resultSet;
 	

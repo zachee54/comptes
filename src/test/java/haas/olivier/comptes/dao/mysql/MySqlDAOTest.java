@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,8 +22,12 @@ import org.junit.Test;
 import static org.mockito.Mockito.*;
 
 import haas.olivier.comptes.Compte;
+import haas.olivier.comptes.Ecriture;
+import haas.olivier.comptes.EcritureMissingArgumentException;
+import haas.olivier.comptes.InconsistentArgumentsException;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
+import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 
 public class MySqlDAOTest {
@@ -74,6 +79,20 @@ public class MySqlDAOTest {
 	@After
 	public void tearDown() throws Exception {
 	}
+	
+	/**
+	 * Crée un mock renvoyant les comptes {@link #compte1} et {@link #compte2}.
+	 * 
+	 * @return	Un Mock.
+	 * 
+	 * @throws IOException
+	 */
+	private CompteDAO createCompteDAO() throws IOException {
+		CompteDAO compteDAO = mock(CompteDAO.class);
+		when(compteDAO.getAll()).thenReturn(
+				List.of(compte1, compte2));
+		return compteDAO;
+	}
 
 	@Test
 	public void testGetBanques() {
@@ -82,12 +101,10 @@ public class MySqlDAOTest {
 
 	@Test
 	public void testGetComptes() throws IOException {
-		List<Compte> comptes = new ArrayList<>();
-		comptes.add(compte1);
-		comptes.add(compte2);
+		CompteDAO cacheCompteDAO = createCompteDAO();
 		
-		CompteDAO cacheCompteDAO = mock(CompteDAO.class);
-		when(cacheCompteDAO.getAll()).thenReturn(comptes);
+		List<Compte> comptes = new ArrayList<>();
+		comptes.addAll(cacheCompteDAO.getAll());
 		
 		CacheDAOFactory cache = mock(CacheDAOFactory.class);
 		when(cache.getCompteDAO()).thenReturn(cacheCompteDAO);
@@ -104,8 +121,50 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testGetEcritures() {
-		fail("Not yet implemented");
+	public void testGetEcritures() throws EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
+		Ecriture ecriture1 = new Ecriture(
+				3,
+				new Date(2482148L),
+				new Date(8941476L),
+				compte1,
+				compte2,
+				BigDecimal.ONE,
+				"libellé 1",
+				null,
+				null);
+		Ecriture ecriture2 = new Ecriture(
+				31,
+				new Date(932487L),
+				new Date(3147826L),
+				compte2,
+				compte1,
+				BigDecimal.TEN,
+				null,
+				"tiers 2",
+				3544782);
+		
+		List<Ecriture> ecritures = new ArrayList<>(2);
+		ecritures.add(ecriture1);
+		ecritures.add(ecriture2);
+		
+		CompteDAO cacheCompteDAO = createCompteDAO();
+		
+		EcritureDAO cacheEcritureDAO = mock(EcritureDAO.class);
+		when(cacheEcritureDAO.getAll()).thenReturn(ecritures);
+		
+		CacheDAOFactory cache = mock(CacheDAOFactory.class);
+		when(cache.getEcritureDAO()).thenReturn(cacheEcritureDAO);
+		when(cache.getCompteDAO()).thenReturn(cacheCompteDAO);
+		
+		dao.save(cache);
+		
+		// Méthode testée
+		Iterator<Ecriture> ecrituresIterator = dao.getEcritures();
+		
+		while (ecrituresIterator.hasNext()) {
+			assertTrue(ecritures.remove(ecrituresIterator.next()));
+		}
+		assertTrue(ecritures.isEmpty());
 	}
 	
 	@Test

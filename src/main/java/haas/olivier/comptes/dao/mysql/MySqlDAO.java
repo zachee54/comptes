@@ -150,6 +150,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 			createTablesIfNotExist(connection);
 			
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
+			MySqlEcrituresDAO.save(cache.getEcritureDAO().getAll(), connection);
 			
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -187,7 +188,6 @@ public class MySqlDAO implements CacheableDAOFactory {
 					+ "tiers VARCHAR(50) NULL,"
 					+ "cheque INT UNSIGNED DEFAULT NULL,"
 					+ "montant INT NOT NULL,"
-					+ "epargne INT NOT NULL DEFAULT 0,"
 					+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
 					+ "CONSTRAINT FOREIGN KEY ecritures_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
 		}
