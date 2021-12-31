@@ -48,6 +48,8 @@ public class MySqlDAOTest {
 	private static final String PASSWORD = "dummypassword";
 	
 	private static Compte compte1, compte2;
+	
+	private static Ecriture ecriture1, ecriture2;
 
 	/** Objet testé. */
 	private MySqlDAO dao;
@@ -71,6 +73,28 @@ public class MySqlDAOTest {
 		compte2.setOuverture(new Date(24963479L));
 		compte2.setCloture(new Date(3696347895263L));
 		compte2.setColor(Color.ORANGE);
+		
+		ecriture1 = new Ecriture(
+				3,
+				new Date(2482148L),
+				new Date(8941476L),
+				compte1,
+				compte2,
+				BigDecimal.ONE,
+				"libellé 1",
+				null,
+				null);
+		
+		ecriture2 = new Ecriture(
+				31,
+				new Date(932487L),
+				new Date(3147826L),
+				compte2,
+				compte1,
+				BigDecimal.TEN,
+				null,
+				"tiers 2",
+				3544782);
 	}
 
 	@AfterClass
@@ -91,17 +115,50 @@ public class MySqlDAOTest {
 	}
 	
 	/**
+	 * Crée un mock de CacheDAOFactory.
+	 * 
+	 * @return	Un mock complet.
+	 * 
+	 * @throws IOException
+	 */
+	private CacheDAOFactory createCacheDAO() throws IOException {
+		CompteDAO compteDAO = createCompteDAO();
+		EcritureDAO ecritureDAO = createEcritureDAO();
+		
+		CacheDAOFactory cache = mock(CacheDAOFactory.class);
+		when(cache.getCompteDAO()).thenReturn(compteDAO);
+		when(cache.getEcritureDAO()).thenReturn(ecritureDAO);
+		
+		return cache;
+	}
+	
+	/**
 	 * Crée un mock renvoyant les comptes {@link #compte1} et {@link #compte2}.
 	 * 
 	 * @return	Un Mock.
 	 * 
 	 * @throws IOException
 	 */
-	private CompteDAO createCompteDAO() throws IOException {
+	private static CompteDAO createCompteDAO() throws IOException {
 		CompteDAO compteDAO = mock(CompteDAO.class);
 		when(compteDAO.getAll()).thenReturn(
 				List.of(compte1, compte2));
 		return compteDAO;
+	}
+	
+	/**
+	 * Crée un mock renvoyant les écritures {@link #ecriture1} et
+	 * {@link #ecriture2}.
+	 * 
+	 * @return	Un Mock.
+	 * 
+	 * @throws IOException
+	 */
+	private static EcritureDAO createEcritureDAO() throws IOException {
+		EcritureDAO ecritureDAO = mock(EcritureDAO.class);
+		when(ecritureDAO.getAll()).thenReturn(
+				List.of(ecriture1, ecriture2));
+		return ecritureDAO;
 	}
 
 	@Test
@@ -111,13 +168,10 @@ public class MySqlDAOTest {
 
 	@Test
 	public void testGetComptes() throws IOException {
-		CompteDAO cacheCompteDAO = createCompteDAO();
+		CacheDAOFactory cache = createCacheDAO();
 		
 		List<Compte> comptes = new ArrayList<>();
-		comptes.addAll(cacheCompteDAO.getAll());
-		
-		CacheDAOFactory cache = mock(CacheDAOFactory.class);
-		when(cache.getCompteDAO()).thenReturn(cacheCompteDAO);
+		comptes.addAll(cache.getCompteDAO().getAll());
 		
 		dao.save(cache);
 		
@@ -132,44 +186,14 @@ public class MySqlDAOTest {
 
 	@Test
 	public void testGetEcritures() throws EcritureMissingArgumentException, InconsistentArgumentsException, IOException {
-		Ecriture ecriture1 = new Ecriture(
-				3,
-				new Date(2482148L),
-				new Date(8941476L),
-				compte1,
-				compte2,
-				BigDecimal.ONE,
-				"libellé 1",
-				null,
-				null);
-		Ecriture ecriture2 = new Ecriture(
-				31,
-				new Date(932487L),
-				new Date(3147826L),
-				compte2,
-				compte1,
-				BigDecimal.TEN,
-				null,
-				"tiers 2",
-				3544782);
+		dao.save(createCacheDAO());
+		
+		// Méthode testée
+		Iterator<Ecriture> ecrituresIterator = dao.getEcritures();
 		
 		List<Ecriture> ecritures = new ArrayList<>(2);
 		ecritures.add(ecriture1);
 		ecritures.add(ecriture2);
-		
-		CompteDAO cacheCompteDAO = createCompteDAO();
-		
-		EcritureDAO cacheEcritureDAO = mock(EcritureDAO.class);
-		when(cacheEcritureDAO.getAll()).thenReturn(ecritures);
-		
-		CacheDAOFactory cache = mock(CacheDAOFactory.class);
-		when(cache.getEcritureDAO()).thenReturn(cacheEcritureDAO);
-		when(cache.getCompteDAO()).thenReturn(cacheCompteDAO);
-		
-		dao.save(cache);
-		
-		// Méthode testée
-		Iterator<Ecriture> ecrituresIterator = dao.getEcritures();
 		
 		while (ecrituresIterator.hasNext()) {
 			assertTrue(ecritures.remove(ecrituresIterator.next()));
