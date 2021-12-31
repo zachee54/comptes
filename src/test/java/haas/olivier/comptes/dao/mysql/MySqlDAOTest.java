@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -62,22 +64,29 @@ public class MySqlDAOTest {
 			statement.execute("CREATE DATABASE " + DATABASE);
 		}
 		
+		DateFormat df = new SimpleDateFormat("dd/MM/yy");
+		Date date1 = df.parse("14/07/2001");
+		Date date2 = df.parse("06/05/2004");
+		Date date3 = df.parse("21/04/2006");
+		Date date4 = df.parse("25/11/2006");
+		Date date5 = df.parse("29/12/2006");
+		
 		compte1 = new Compte(1, TypeCompte.COMPTE_EPARGNE);
 		compte1.setNom("Le compte 1");
 		compte1.setNumero(57931L);
-		compte1.setOuverture(new Date(35468L));
+		compte1.setOuverture(date1);
 		compte1.setColor(Color.CYAN);
 		
 		compte2 = new Compte(7, TypeCompte.RECETTES_EN_EPARGNE);
 		compte2.setNom("Le compte n°7");
-		compte2.setOuverture(new Date(24963479L));
-		compte2.setCloture(new Date(3696347895263L));
+		compte2.setOuverture(date2);
+		compte2.setCloture(date5);
 		compte2.setColor(Color.ORANGE);
 		
 		ecriture1 = new Ecriture(
 				3,
-				new Date(2482148L),
-				new Date(8941476L),
+				date3,
+				date4,
 				compte1,
 				compte2,
 				BigDecimal.ONE,
@@ -87,8 +96,8 @@ public class MySqlDAOTest {
 		
 		ecriture2 = new Ecriture(
 				31,
-				new Date(932487L),
-				new Date(3147826L),
+				date4,
+				null,
 				compte2,
 				compte1,
 				BigDecimal.TEN,
