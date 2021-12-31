@@ -6,18 +6,20 @@ import java.awt.Color;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mariadb.jdbc.MariaDbDataSource;
 
 import static org.mockito.Mockito.*;
 
@@ -34,8 +36,16 @@ public class MySqlDAOTest {
 	
 	private static final String DATABASE = "comptes_mysqldao_test";
 	
-	private static final MySqlDAO STATIC_DAO =
-			new MySqlDAO("localhost", 3306, null, "comptes_mysqldao_test", "dummypassword");
+	/**
+	 * Source de données utilisée uniquement pour créer et supprimer la base de
+	 * tests.
+	 */
+	private static final DataSource DATASOURCE =
+			new MariaDbDataSource("localhost", 3306, null);
+	
+	private static final String USERNAME = "comptes_mysqldao_test";
+	
+	private static final String PASSWORD = "dummypassword";
 	
 	private static Compte compte1, compte2;
 
@@ -44,7 +54,7 @@ public class MySqlDAOTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		try (Connection connection = STATIC_DAO.getConnection();
+		try (Connection connection = DATASOURCE.getConnection(USERNAME, PASSWORD);
 				Statement statement = connection.createStatement()) {
 			statement.execute("DROP DATABASE IF EXISTS " + DATABASE);
 			statement.execute("CREATE DATABASE " + DATABASE);
@@ -65,7 +75,7 @@ public class MySqlDAOTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		try (Connection connection = STATIC_DAO.getConnection();
+		try (Connection connection = DATASOURCE.getConnection(USERNAME, PASSWORD);
 				Statement statement = connection.createStatement()) {
 			statement.execute("DROP DATABASE IF EXISTS " + DATABASE);
 		}
@@ -73,7 +83,7 @@ public class MySqlDAOTest {
 
 	@Before
 	public void setUp() throws Exception {
-		dao = new MySqlDAO("localhost", 3306, DATABASE, "comptes", "dummypassword");
+		dao = new MySqlDAO("localhost", 3306, DATABASE, USERNAME, PASSWORD);
 	}
 
 	@After
@@ -215,13 +225,6 @@ public class MySqlDAOTest {
 	@Test
 	public void testMySqlDAO() {
 		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetConnection() throws SQLException {
-		try (Connection connection = dao.getConnection()) {
-			assertFalse(connection.isClosed());
-		}
 	}
 	
 	@Test
