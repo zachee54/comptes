@@ -200,6 +200,10 @@ public class MySqlDAOTest {
 		// Méthode testée
 		Iterator<Ecriture> ecrituresIterator = dao.getEcritures();
 		
+		checkOriginalEcritures(ecrituresIterator);
+	}
+	
+	private void checkOriginalEcritures(Iterator<Ecriture> ecrituresIterator) {	
 		List<Ecriture> ecritures = new ArrayList<>(2);
 		ecritures.add(ecriture1);
 		ecritures.add(ecriture2);
@@ -208,6 +212,41 @@ public class MySqlDAOTest {
 			assertTrue(ecritures.remove(ecrituresIterator.next()));
 		}
 		assertTrue(ecritures.isEmpty());
+	}
+	
+	@Test
+	public void testSave() throws IOException, EcritureMissingArgumentException, InconsistentArgumentsException {
+		CacheDAOFactory cache = createCacheDAO();
+		
+		// Première sauvegarde banale (utilisée aussi dans les autres tests)
+		dao.save(cache);
+		
+		// Créer une erreur de clé étrangère
+		Compte compte = new Compte(5, TypeCompte.COMPTE_CARTE);	// Compte inconnu du DAO
+		Ecriture ecriture = new Ecriture(
+				8,
+				ecriture2.date,
+				ecriture2.pointage,
+				ecriture2.debit,
+				compte,	// Casse la clé étrangère dans la base
+				ecriture2.montant,
+				ecriture2.libelle,
+				ecriture2.tiers,
+				ecriture2.cheque);
+		when(cache.getEcritureDAO().getAll()).thenReturn(
+				List.of(ecriture1, ecriture2, ecriture));
+		
+		try {
+			// Méthode testée
+			dao.save(cache);
+			
+			fail("Foreign key constraint should fail");
+			
+		} catch (IOException e) {
+			
+			// Il doit toujours rester les deux écritures sauvegardées en premier
+			checkOriginalEcritures(dao.getEcritures());
+		}
 	}
 	
 	@Test
