@@ -149,8 +149,12 @@ public class MySqlDAO implements CacheableDAOFactory {
 		try (Connection connection = connectionProvider.getConnection()) {
 			createTablesIfNotExist(connection);
 			
+			connection.setAutoCommit(false);
+			
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
 			MySqlEcrituresDAO.save(cache.getEcritureDAO().getAll(), connection);
+			
+			connection.setAutoCommit(true);
 			
 		} catch (SQLException e) {
 			throw new IOException(e);

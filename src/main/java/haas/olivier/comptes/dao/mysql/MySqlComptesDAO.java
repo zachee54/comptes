@@ -33,6 +33,7 @@ class MySqlComptesDAO implements Iterator<Compte> {
 				+ "VALUES (?,?,?,?,?,?,?)")) {
 			
 			connection.setAutoCommit(false);
+			compteStatement.execute("DELETE FROM ecritures");
 			compteStatement.execute("DELETE FROM comptes");
 			
 			for (Compte compte : comptes) {
@@ -57,14 +58,9 @@ class MySqlComptesDAO implements Iterator<Compte> {
 				compteStatement.execute();
 			}
 			
-			connection.commit();
-			
 		} catch (SQLException e) {
 			connection.rollback();
 			throw e;
-			
-		} finally {
-			connection.setAutoCommit(true);
 		}
 	}
 

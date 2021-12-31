@@ -36,9 +36,6 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 								+ "(id, debit_id, credit_id, date, pointage, libelle, tiers, cheque, montant) "
 								+ "VALUES (?,?,?,?,?,?,?,?,?)")) {
 			
-			connection.setAutoCommit(true);
-			ecritureStatement.execute("DELETE FROM ecritures");
-			
 			for (Ecriture ecriture : ecritures) {
 				ecritureStatement.setInt(1, ecriture.id);
 				ecritureStatement.setInt(2, ecriture.debit.getId());
@@ -66,9 +63,6 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 		} catch (SQLException e) {
 			connection.rollback();
 			throw e;
-			
-		} finally {
-			connection.setAutoCommit(false);
 		}
 	}
 	
