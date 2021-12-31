@@ -113,6 +113,11 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 				throw new NoSuchElementException();
 			}
 			
+			Integer cheque = resultSet.getInt("cheque");
+			if (resultSet.wasNull()) {
+				cheque = null;
+			}
+			
 			return new Ecriture(
 					resultSet.getInt("id"),
 					resultSet.getDate("date"),
@@ -123,7 +128,7 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 					.movePointLeft(2),
 					resultSet.getString("libelle"),
 					resultSet.getString("tiers"),
-					resultSet.getInt("cheque"));
+					cheque);
 			
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
