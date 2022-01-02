@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Olivier HAAS. All rights reserved.
+ * Copyright 2013-2021 Olivier HAAS. All rights reserved.
  */
 package haas.olivier.comptes.dao.cache;
 
@@ -9,7 +9,6 @@ import haas.olivier.comptes.dao.BanqueDAO;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
-import haas.olivier.comptes.dao.PermanentDAO;
 import haas.olivier.comptes.dao.PropertiesDAO;
 import haas.olivier.util.Month;
 
@@ -123,7 +122,7 @@ public class CacheDAOFactory extends DAOFactory {
 	}
 
 	@Override
-	public PermanentDAO getPermanentDAO() {
+	public CachePermanentDAO getPermanentDAO() {
 		return pDAO;
 	}
 

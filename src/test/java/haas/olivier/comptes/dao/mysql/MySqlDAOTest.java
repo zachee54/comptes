@@ -11,8 +11,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -29,10 +31,16 @@ import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.EcritureMissingArgumentException;
 import haas.olivier.comptes.InconsistentArgumentsException;
+import haas.olivier.comptes.Permanent;
+import haas.olivier.comptes.PermanentFixe;
+import haas.olivier.comptes.PermanentProport;
+import haas.olivier.comptes.PermanentSoldeur;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
+import haas.olivier.comptes.dao.cache.CachePermanentDAO;
+import haas.olivier.util.Month;
 
 public class MySqlDAOTest {
 	
@@ -46,12 +54,11 @@ public class MySqlDAOTest {
 			new MariaDbDataSource("localhost", 3306, null);
 	
 	private static final String USERNAME = "comptes_mysqldao_test";
-	
 	private static final String PASSWORD = "dummypassword";
 	
 	private static Compte compte1, compte2;
-	
 	private static Ecriture ecriture1, ecriture2;
+	private static Permanent permanent1, permanent2, permanent3;
 
 	/** Objet testé. */
 	private MySqlDAO dao;
@@ -104,6 +111,52 @@ public class MySqlDAOTest {
 				null,
 				"tiers 2",
 				3544782);
+		
+		Map<Month, Integer> jours1 = new HashMap<>();
+		jours1.put(Month.getInstance(2004, 7), 15);
+		jours1.put(Month.getInstance(2008, 12), -2);
+		permanent1 = new Permanent(
+				3,
+				"Permanent n°3",
+				compte1,
+				compte2,
+				"Libellé permanent 3",
+				null,
+				false,
+				jours1);
+		Map<Month, BigDecimal> montants = new HashMap<>();
+		montants.put(Month.getInstance(2010, 9), new BigDecimal("11.3"));
+		montants.put(Month.getInstance(2010, 10), BigDecimal.TEN);
+		permanent1.setState(new PermanentFixe(montants));
+		
+		Map<Month, Integer> jours2 = new HashMap<>();
+		jours2.put(Month.getInstance(2012, 1), 0);
+		jours2.put(Month.getInstance(2012, 2), 1);
+		permanent2 = new Permanent(
+				4,
+				"Opération permanente n°4",
+				compte2,
+				compte1,
+				null,
+				"Tiers du n°4",
+				true,
+				jours2);
+		permanent2.setState(new PermanentSoldeur(permanent2));
+		
+		Map<Month, Integer> jours3 = new HashMap<>();
+		jours3.put(Month.getInstance(2015, 12), 5);
+		jours3.put(Month.getInstance(2016, 1), 31);
+		jours3.put(Month.getInstance(2016, 2), 3);
+		permanent3 = new Permanent(
+				10,
+				"Permanent 10",
+				compte1,
+				compte2,
+				"Libellé du 10",
+				"Tiers du 10",
+				false,
+				jours3);
+		permanent3.setState(new PermanentProport(permanent1, new BigDecimal("0.5")));
 	}
 
 	@AfterClass
@@ -133,10 +186,12 @@ public class MySqlDAOTest {
 	private CacheDAOFactory createCacheDAO() throws IOException {
 		CompteDAO compteDAO = createCompteDAO();
 		EcritureDAO ecritureDAO = createEcritureDAO();
+		CachePermanentDAO permanentDAO = createPermanentDAO();
 		
 		CacheDAOFactory cache = mock(CacheDAOFactory.class);
 		when(cache.getCompteDAO()).thenReturn(compteDAO);
 		when(cache.getEcritureDAO()).thenReturn(ecritureDAO);
+		when(cache.getPermanentDAO()).thenReturn(permanentDAO);
 		
 		return cache;
 	}
@@ -168,6 +223,20 @@ public class MySqlDAOTest {
 		when(ecritureDAO.getAll()).thenReturn(
 				List.of(ecriture1, ecriture2));
 		return ecritureDAO;
+	}
+	
+	/**
+	 * Crée un mock renvoyant des écritures permanentes.
+	 * 
+	 * @return	Un Mock.
+	 * 
+	 * @throws IOException
+	 */
+	private static CachePermanentDAO createPermanentDAO() throws IOException {
+		CachePermanentDAO permanentDAO = mock(CachePermanentDAO.class);
+		when(permanentDAO.getAll()).thenReturn(
+				List.of(permanent1, permanent2, permanent3));
+		return permanentDAO;
 	}
 
 	@Test
@@ -215,6 +284,23 @@ public class MySqlDAOTest {
 	}
 	
 	@Test
+	public void testGetPermanents() throws IOException {
+		CacheDAOFactory cache = createCacheDAO();
+		dao.save(cache);
+		
+		// Méthode testée
+		Iterator<Permanent> permanentsIterator =
+				dao.getPermanents(cache.getPermanentDAO());
+		
+		List<Permanent> permanents =
+				new ArrayList<>(cache.getPermanentDAO().getAll());
+		while (permanentsIterator.hasNext()) {
+			assertTrue(permanents.remove(permanentsIterator.next()));
+		}
+		assertTrue(permanents.isEmpty());
+	}
+	
+	@Test
 	public void testSave() throws IOException, EcritureMissingArgumentException, InconsistentArgumentsException {
 		CacheDAOFactory cache = createCacheDAO();
 		
@@ -247,11 +333,6 @@ public class MySqlDAOTest {
 			// Il doit toujours rester les deux écritures sauvegardées en premier
 			checkOriginalEcritures(dao.getEcritures());
 		}
-	}
-	
-	@Test
-	public void testGetPermanents() {
-		fail("Not yet implemented");
 	}
 
 	@Test
