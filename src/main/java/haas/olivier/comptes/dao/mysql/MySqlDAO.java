@@ -111,8 +111,11 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Permanent> getPermanents(CachePermanentDAO cache) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return new MySqlPermanentsDAO(connectionProvider, getComptesById());
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -146,13 +149,23 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public void save(CacheDAOFactory cache) throws IOException {
-		try (Connection connection = connectionProvider.getConnection()) {
+		try (Connection connection = connectionProvider.getConnection();
+				Statement statement = connection.createStatement()) {
+			
 			createTablesIfNotExist(connection);
 			
 			connection.setAutoCommit(false);
+
+			// Vide les trois tables par cascade de clés étrangères
+			statement.execute("DELETE FROM permanents");
+			
+			statement.execute("DELETE FROM ecritures");
+			statement.execute("DELETE FROM comptes");
 			
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
 			MySqlEcrituresDAO.save(cache.getEcritureDAO().getAll(), connection);
+			MySqlPermanentsDAO.save(
+					cache.getPermanentDAO().getAll(), connection);
 			
 			connection.setAutoCommit(true);
 			
@@ -194,6 +207,38 @@ public class MySqlDAO implements CacheableDAOFactory {
 					+ "montant INT NOT NULL,"
 					+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
 					+ "CONSTRAINT FOREIGN KEY ecritures_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+			
+			statement.execute(
+					"CREATE TABLE IF NOT EXISTS permanents ("
+					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+					+ "nom VARCHAR(50),"
+					+ "debit_id INT UNSIGNED NOT NULL,"
+					+ "credit_id INT UNSIGNED NOT NULL,"
+					+ "libelle VARCHAR(50),"
+					+ "tiers VARCHAR(50),"
+					+ "dependance_id INT UNSIGNED DEFAULT NULL,"
+					+ "taux INT DEFAULT NULL,"
+					+ "pointer TINYINT(1),"
+					+ "CONSTRAINT FOREIGN KEY permanents_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+					+ "CONSTRAINT FOREIGN KEY permanents_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+			
+			statement.execute(
+					"CREATE TABLE IF NOT EXISTS permanents_jours ("
+					+ "permanent_id INT UNSIGNED NOT NULL,"
+					+ "year INT UNSIGNED NOT NULL,"
+					+ "month INT UNSIGNED NOT NULL,"
+					+ "jour INT NOT NULL,"
+					+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
+					+ "CONSTRAINT FOREIGN KEY permanents_jours (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
+			
+			statement.execute(
+					"CREATE TABLE IF NOT EXISTS permanents_montants ("
+					+ "permanent_id INT UNSIGNED NOT NULL,"
+					+ "year INT UNSIGNED NOT NULL,"
+					+ "month INT UNSIGNED NOT NULL,"
+					+ "montant INT NOT NULL,"
+					+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
+					+ "CONSTRAINT FOREIGN KEY permanents_montants (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
 		}
 	}
 

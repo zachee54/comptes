@@ -27,35 +27,31 @@ class MySqlComptesDAO implements Iterator<Compte> {
 	 */
 	static void save(Collection<Compte> comptes, Connection connection)
 			throws SQLException {
-		try (PreparedStatement compteStatement = connection.prepareStatement(
+		try (PreparedStatement statement = connection.prepareStatement(
 				"INSERT INTO comptes"
 				+ "(id, nom, type, couleur, ouverture, cloture, numero) "
 				+ "VALUES (?,?,?,?,?,?,?)")) {
 			
-			connection.setAutoCommit(false);
-			compteStatement.execute("DELETE FROM ecritures");
-			compteStatement.execute("DELETE FROM comptes");
-			
 			for (Compte compte : comptes) {
-				compteStatement.setInt(1, compte.getId());
-				compteStatement.setString(2, compte.getNom());
-				compteStatement.setInt(3, compte.getType().ordinal());
-				compteStatement.setInt(4, compte.getColor().getRGB());
-				compteStatement.setDate(5,
+				statement.setInt(1, compte.getId());
+				statement.setString(2, compte.getNom());
+				statement.setInt(3, compte.getType().ordinal());
+				statement.setInt(4, compte.getColor().getRGB());
+				statement.setDate(5,
 						new Date(compte.getOuverture().getTime()));
 				
 				java.util.Date cloture = compte.getCloture();
-				compteStatement.setDate(6,
+				statement.setDate(6,
 						cloture == null ? null : new Date(cloture.getTime()));
 				
 				Long numero = compte.getNumero();
 				if (numero != null) {
-					compteStatement.setLong(7, compte.getNumero());
+					statement.setLong(7, compte.getNumero());
 				} else {
-					compteStatement.setNull(7, Types.BIGINT);
+					statement.setNull(7, Types.BIGINT);
 				}
 				
-				compteStatement.execute();
+				statement.execute();
 			}
 			
 		} catch (SQLException e) {
@@ -67,7 +63,7 @@ class MySqlComptesDAO implements Iterator<Compte> {
 	/**
 	 * Le résultat de la requête SQL sur l'ensemble des comptes.
 	 */
-	private ResultSet resultSet;
+	private final ResultSet resultSet;
 	
 	/**
 	 * Construit un itérateur sur l'ensemble des comptes de la base de données.

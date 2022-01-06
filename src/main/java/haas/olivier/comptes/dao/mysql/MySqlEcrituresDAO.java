@@ -67,7 +67,7 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 	}
 	
 	/** Le résultat de la requête SQL sur l'ensemble des écritures. */
-	private ResultSet resultSet;
+	private final ResultSet resultSet;
 	
 	/** Les comptes, classés par identifiants. */
 	private final Map<Integer, Compte> comptesById;
