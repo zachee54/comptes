@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,6 +15,8 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
+import haas.olivier.comptes.ctrl.EcritureController;
+import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
@@ -52,8 +55,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Banque> getBanques() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyIterator();
 	}
 
 	@Override
@@ -120,20 +122,17 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public Iterator<Solde> getHistorique() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyIterator();
 	}
 
 	@Override
 	public Iterator<Solde> getSoldesAVue() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyIterator();
 	}
 
 	@Override
 	public Iterator<Solde> getMoyennes() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyIterator();
 	}
 
 	@Override
@@ -259,9 +258,13 @@ public class MySqlDAO implements CacheableDAOFactory {
 				dataSource.getDatabaseName());
 	}
 
+	/**
+	 * Ferme les ressources et lance le recalcul des soldes.
+	 */
 	@Override
 	public void close() throws IOException {
 		connectionProvider.close();
+		EcritureController.updateSuivis(DAOFactory.getFactory().getDebut());
 	}
 
 }

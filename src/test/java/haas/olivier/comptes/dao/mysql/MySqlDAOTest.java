@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mariadb.jdbc.MariaDbDataSource;
-
 import static org.mockito.Mockito.*;
 
 import haas.olivier.comptes.Compte;
@@ -37,9 +36,11 @@ import haas.olivier.comptes.PermanentProport;
 import haas.olivier.comptes.PermanentSoldeur;
 import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
+import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
+import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
 import haas.olivier.util.Month;
 
 public class MySqlDAOTest {
@@ -187,11 +188,13 @@ public class MySqlDAOTest {
 		CompteDAO compteDAO = createCompteDAO();
 		EcritureDAO ecritureDAO = createEcritureDAO();
 		CachePermanentDAO permanentDAO = createPermanentDAO();
+		CacheSuiviDAO histoDAO = mock(CacheSuiviDAO.class);
 		
 		CacheDAOFactory cache = mock(CacheDAOFactory.class);
 		when(cache.getCompteDAO()).thenReturn(compteDAO);
 		when(cache.getEcritureDAO()).thenReturn(ecritureDAO);
 		when(cache.getPermanentDAO()).thenReturn(permanentDAO);
+		when(cache.getHistoriqueDAO()).thenReturn(histoDAO);
 		
 		return cache;
 	}
@@ -240,8 +243,8 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testGetBanques() {
-		fail("Not yet implemented");
+	public void testGetBanques() throws IOException {
+		assertFalse(dao.getBanques().hasNext());
 	}
 
 	@Test
@@ -336,18 +339,18 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testGetHistoriques() {
-		fail("Not yet implemented");
+	public void testGetHistoriques() throws IOException {
+		assertFalse(dao.getBanques().hasNext());
 	}
 
 	@Test
-	public void testGetSoldesAVue() {
-		fail("Not yet implemented");
+	public void testGetSoldesAVue() throws IOException {
+		assertFalse(dao.getBanques().hasNext());
 	}
 
 	@Test
-	public void testGetMoyennes() {
-		fail("Not yet implemented");
+	public void testGetMoyennes() throws IOException {
+		assertFalse(dao.getBanques().hasNext());
 	}
 
 	@Test
@@ -357,7 +360,7 @@ public class MySqlDAOTest {
 
 	@Test
 	public void testCanBeSaved() {
-		fail("Not yet implemented");
+		assertTrue(dao.canBeSaved());
 	}
 
 	@Test
@@ -374,15 +377,20 @@ public class MySqlDAOTest {
 	public void testGetSourceFullName() {
 		fail("Not yet implemented");
 	}
-
-	@Test
-	public void testMySqlDAO() {
-		fail("Not yet implemented");
-	}
 	
 	@Test
-	public void testClose() {
-		fail("Not yet implemented");
+	public void testClose() throws IOException {
+		dao.save(createCacheDAO());
+		
+		DAOFactory.setFactory(new CacheDAOFactory(dao));
+		
+		// Méthode testée
+		dao.close();
+		
+		// Vérifier que les soldes ont été calculés
+		BigDecimal solde = DAOFactory.getFactory().getHistoriqueDAO().get(
+				compte1, Month.getInstance(2006, 11));
+		assertEquals(0, new BigDecimal(9).compareTo(solde));
 	}
 
 }
