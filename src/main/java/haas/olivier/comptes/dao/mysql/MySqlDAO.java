@@ -98,7 +98,6 @@ public class MySqlDAO implements CacheableDAOFactory {
 			comptesMap.put(compte.getId(), compte);
 		}
 
-
 		return comptesMap;
 	}
 
@@ -137,8 +136,11 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public CacheablePropertiesDAO getProperties() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return new MySqlPropertiesDAO(connectionProvider);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 	
 	@Override
@@ -155,8 +157,9 @@ public class MySqlDAO implements CacheableDAOFactory {
 			
 			connection.setAutoCommit(false);
 
-			// Vide les trois tables par cascade de clés étrangères
+			// Vident aussi les tables associées, par cascade de clés étrangères
 			statement.execute("DELETE FROM permanents");
+			statement.execute("DELETE FROM diagrams");
 			
 			statement.execute("DELETE FROM ecritures");
 			statement.execute("DELETE FROM comptes");
@@ -165,6 +168,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 			MySqlEcrituresDAO.save(cache.getEcritureDAO().getAll(), connection);
 			MySqlPermanentsDAO.save(
 					cache.getPermanentDAO().getAll(), connection);
+			MySqlPropertiesDAO.save(cache.getPropertiesDAO(), connection);
 			
 			connection.setAutoCommit(true);
 			
@@ -186,6 +190,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 			MySqlComptesDAO.createTable(statement);
 			MySqlEcrituresDAO.createTable(statement);
 			MySqlPermanentsDAO.createTables(statement);
+			MySqlPropertiesDAO.createTables(statement);
 		}
 	}
 
