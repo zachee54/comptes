@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -38,9 +39,12 @@ import haas.olivier.comptes.TypeCompte;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
+import haas.olivier.comptes.dao.PropertiesDAO;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.cache.CacheSuiviDAO;
+import haas.olivier.comptes.dao.cache.CacheablePropertiesDAO;
+import haas.olivier.diagram.DiagramMemento;
 import haas.olivier.util.Month;
 
 public class MySqlDAOTest {
@@ -60,6 +64,10 @@ public class MySqlDAOTest {
 	private static Compte compte1, compte2;
 	private static Ecriture ecriture1, ecriture2;
 	private static Permanent permanent1, permanent2, permanent3;
+	private static DiagramMemento memento1, memento2, memento3;
+	private static String diagram1 = "diagramme n°1",
+			diagram2 = "diagramme n°2",
+			diagram3 = "Diagramme n°3";
 
 	/** Objet testé. */
 	private MySqlDAO dao;
@@ -158,6 +166,19 @@ public class MySqlDAOTest {
 				false,
 				jours3);
 		permanent3.setState(new PermanentProport(permanent1, new BigDecimal("0.5")));
+		
+		memento1 = new DiagramMemento(
+				diagram1,
+				List.of(4, 3, 2, 9, 11, 7),
+				Set.of(2, 4, 7));
+		memento2 = new DiagramMemento(
+				diagram2,
+				List.of(14, 5, 10, 7),
+				Set.of());
+		memento3 = new DiagramMemento(
+				diagram3,
+				List.of(54, 0, 42, 2, 15, 9),
+				Set.of(15, 2, 0));
 	}
 
 	@AfterClass
@@ -189,12 +210,14 @@ public class MySqlDAOTest {
 		EcritureDAO ecritureDAO = createEcritureDAO();
 		CachePermanentDAO permanentDAO = createPermanentDAO();
 		CacheSuiviDAO histoDAO = mock(CacheSuiviDAO.class);
+		PropertiesDAO propertiesDAO = createPropertiesDAO();
 		
 		CacheDAOFactory cache = mock(CacheDAOFactory.class);
 		when(cache.getCompteDAO()).thenReturn(compteDAO);
 		when(cache.getEcritureDAO()).thenReturn(ecritureDAO);
 		when(cache.getPermanentDAO()).thenReturn(permanentDAO);
 		when(cache.getHistoriqueDAO()).thenReturn(histoDAO);
+		when(cache.getPropertiesDAO()).thenReturn(propertiesDAO);
 		
 		return cache;
 	}
@@ -240,6 +263,21 @@ public class MySqlDAOTest {
 		when(permanentDAO.getAll()).thenReturn(
 				List.of(permanent1, permanent2, permanent3));
 		return permanentDAO;
+	}
+	
+	/**
+	 * Crée un mock renvoyant des propriétés.
+	 * 
+	 * @return	Un Mock.
+	 */
+	private static PropertiesDAO createPropertiesDAO() {
+		PropertiesDAO propertiesDAO = mock(PropertiesDAO.class);
+		when(propertiesDAO.getDiagramNames()).thenReturn(
+				List.of(diagram1, diagram2, diagram3));
+		when(propertiesDAO.getDiagramProperties(diagram1)).thenReturn(memento1);
+		when(propertiesDAO.getDiagramProperties(diagram2)).thenReturn(memento2);
+		when(propertiesDAO.getDiagramProperties(diagram3)).thenReturn(memento3);
+		return propertiesDAO;
 	}
 
 	@Test
@@ -354,8 +392,20 @@ public class MySqlDAOTest {
 	}
 
 	@Test
-	public void testGetProperties() {
-		fail("Not yet implemented");
+	public void testGetProperties() throws IOException {
+		CacheDAOFactory cache = createCacheDAO();
+		dao.save(cache);
+		
+		// Méthode testée
+		CacheablePropertiesDAO propertiesDAO = dao.getProperties();
+		
+		Map<String, DiagramMemento> mementos =
+				propertiesDAO.getDiagramProperties();
+		assertEquals(3, mementos.size());
+		
+		assertEquals(memento1, mementos.get(diagram1));
+		assertEquals(memento2, mementos.get(diagram2));
+		assertEquals(memento3, mementos.get(diagram3));
 	}
 
 	@Test
