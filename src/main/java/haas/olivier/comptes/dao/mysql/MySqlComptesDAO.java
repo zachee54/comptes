@@ -17,6 +17,26 @@ import haas.olivier.comptes.TypeCompte;
 class MySqlComptesDAO implements Iterator<Compte> {
 	
 	/**
+	 * Crée la table des comptes si elle n'existe pas déjà dans la base de
+	 * données.
+	 * 
+	 * @param statement	La statement à utiliser.
+	 * 
+	 * @throws SQLException
+	 */
+	static void createTable(Statement statement) throws SQLException {
+		statement.execute(
+				"CREATE TABLE IF NOT EXISTS comptes ("
+				+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+				+ "nom VARCHAR(50) NOT NULL,"
+				+ "type INT UNSIGNED NOT NULL,"
+				+ "numero BIGINT DEFAULT NULL,"
+				+ "ouverture DATE NOT NULL,"
+				+ "cloture DATE DEFAULT NULL,"
+				+ "couleur INT NOT NULL)");
+	}
+	
+	/**
 	 * Sauvegarde des comptes.
 	 * Les anciens comptes seront supprimés.
 	 * 

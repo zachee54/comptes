@@ -25,6 +25,48 @@ import haas.olivier.util.Month;
 class MySqlPermanentsDAO implements Iterator<Permanent> {
 
 	/**
+	 * Crée les tables des opérations permanentes si elles n'existent pas déjà
+	 * dans la base de données.
+	 * 
+	 * @param statement	La statement à utiliser.
+	 * 
+	 * @throws SQLException
+	 */
+	static void createTables(Statement statement) throws SQLException {
+		statement.execute(
+				"CREATE TABLE IF NOT EXISTS permanents ("
+				+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+				+ "nom VARCHAR(50),"
+				+ "debit_id INT UNSIGNED NOT NULL,"
+				+ "credit_id INT UNSIGNED NOT NULL,"
+				+ "libelle VARCHAR(50),"
+				+ "tiers VARCHAR(50),"
+				+ "dependance_id INT UNSIGNED DEFAULT NULL,"
+				+ "taux INT DEFAULT NULL,"
+				+ "pointer TINYINT(1),"
+				+ "CONSTRAINT FOREIGN KEY permanents_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+				+ "CONSTRAINT FOREIGN KEY permanents_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+		
+		statement.execute(
+				"CREATE TABLE IF NOT EXISTS permanents_jours ("
+				+ "permanent_id INT UNSIGNED NOT NULL,"
+				+ "year INT UNSIGNED NOT NULL,"
+				+ "month INT UNSIGNED NOT NULL,"
+				+ "jour INT NOT NULL,"
+				+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
+				+ "CONSTRAINT FOREIGN KEY permanents_jours (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
+		
+		statement.execute(
+				"CREATE TABLE IF NOT EXISTS permanents_montants ("
+				+ "permanent_id INT UNSIGNED NOT NULL,"
+				+ "year INT UNSIGNED NOT NULL,"
+				+ "month INT UNSIGNED NOT NULL,"
+				+ "montant INT NOT NULL,"
+				+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
+				+ "CONSTRAINT FOREIGN KEY permanents_montants (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
+	}
+	
+	/**
 	 * Sauvegarde toutes les opérations permanentes.
 	 * 
 	 * @param permanents	Les opérations permanentes.

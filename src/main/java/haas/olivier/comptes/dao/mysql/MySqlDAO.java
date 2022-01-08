@@ -183,61 +183,9 @@ public class MySqlDAO implements CacheableDAOFactory {
 			throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			
-			statement.execute(
-					"CREATE TABLE IF NOT EXISTS comptes ("
-					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-					+ "nom VARCHAR(50) NOT NULL,"
-					+ "type INT UNSIGNED NOT NULL,"
-					+ "numero BIGINT DEFAULT NULL,"
-					+ "ouverture DATE NOT NULL,"
-					+ "cloture DATE DEFAULT NULL,"
-					+ "couleur INT NOT NULL)");
-			
-			statement.execute(
-					"CREATE TABLE IF NOT EXISTS ecritures ("
-					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-					+ "debit_id INT UNSIGNED NOT NULL,"
-					+ "credit_id INT UNSIGNED NOT NULL,"
-					+ "date DATE NOT NULL,"
-					+ "pointage DATE DEFAULT NULL,"
-					+ "libelle VARCHAR(50) NULL,"
-					+ "tiers VARCHAR(50) NULL,"
-					+ "cheque INT UNSIGNED DEFAULT NULL,"
-					+ "montant INT NOT NULL,"
-					+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
-					+ "CONSTRAINT FOREIGN KEY ecritures_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
-			
-			statement.execute(
-					"CREATE TABLE IF NOT EXISTS permanents ("
-					+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-					+ "nom VARCHAR(50),"
-					+ "debit_id INT UNSIGNED NOT NULL,"
-					+ "credit_id INT UNSIGNED NOT NULL,"
-					+ "libelle VARCHAR(50),"
-					+ "tiers VARCHAR(50),"
-					+ "dependance_id INT UNSIGNED DEFAULT NULL,"
-					+ "taux INT DEFAULT NULL,"
-					+ "pointer TINYINT(1),"
-					+ "CONSTRAINT FOREIGN KEY permanents_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
-					+ "CONSTRAINT FOREIGN KEY permanents_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
-			
-			statement.execute(
-					"CREATE TABLE IF NOT EXISTS permanents_jours ("
-					+ "permanent_id INT UNSIGNED NOT NULL,"
-					+ "year INT UNSIGNED NOT NULL,"
-					+ "month INT UNSIGNED NOT NULL,"
-					+ "jour INT NOT NULL,"
-					+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
-					+ "CONSTRAINT FOREIGN KEY permanents_jours (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
-			
-			statement.execute(
-					"CREATE TABLE IF NOT EXISTS permanents_montants ("
-					+ "permanent_id INT UNSIGNED NOT NULL,"
-					+ "year INT UNSIGNED NOT NULL,"
-					+ "month INT UNSIGNED NOT NULL,"
-					+ "montant INT NOT NULL,"
-					+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
-					+ "CONSTRAINT FOREIGN KEY permanents_montants (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
+			MySqlComptesDAO.createTable(statement);
+			MySqlEcrituresDAO.createTable(statement);
+			MySqlPermanentsDAO.createTables(statement);
 		}
 	}
 

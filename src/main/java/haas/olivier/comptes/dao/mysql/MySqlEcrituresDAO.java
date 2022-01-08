@@ -20,6 +20,30 @@ import haas.olivier.comptes.InconsistentArgumentsException;
 class MySqlEcrituresDAO implements Iterator<Ecriture> {
 
 	/**
+	 * Crée la table des écritures si elle n'existe pas déjà dans la base de
+	 * données.
+	 * 
+	 * @param statement	La statement à utiliser.
+	 * 
+	 * @throws SQLException
+	 */
+	static void createTable(Statement statement) throws SQLException {
+		statement.execute(
+				"CREATE TABLE IF NOT EXISTS ecritures ("
+				+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+				+ "debit_id INT UNSIGNED NOT NULL,"
+				+ "credit_id INT UNSIGNED NOT NULL,"
+				+ "date DATE NOT NULL,"
+				+ "pointage DATE DEFAULT NULL,"
+				+ "libelle VARCHAR(50) NULL,"
+				+ "tiers VARCHAR(50) NULL,"
+				+ "cheque INT UNSIGNED DEFAULT NULL,"
+				+ "montant INT NOT NULL,"
+				+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+				+ "CONSTRAINT FOREIGN KEY ecritures_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
+	}
+	
+	/**
 	 * Sauvegarde des écritures.
 	 * Les anciennes écritures seront supprimées.
 	 * 
