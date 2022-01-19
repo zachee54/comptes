@@ -415,17 +415,17 @@ public class MySqlDAOTest {
 
 	@Test
 	public void testGetName() {
-		fail("Not yet implemented");
+		assertTrue(dao.getName().toLowerCase().contains("sql"));
 	}
 
 	@Test
 	public void testGetSource() {
-		fail("Not yet implemented");
+		assertTrue(dao.getSource().contains("comptes_mysqldao_test"));
 	}
 
 	@Test
 	public void testGetSourceFullName() {
-		fail("Not yet implemented");
+		assertTrue(dao.getSource().contains("comptes_mysqldao_test"));
 	}
 	
 	@Test
