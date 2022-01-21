@@ -41,6 +41,15 @@ class ConnectionProvider implements Closeable {
 		return connection;
 	}
 	
+	/**
+	 * Renvoie le mot de passe utilisé.
+	 * 
+	 * @return	Le mot de passe de la base de données.
+	 */
+	String getPassword() {
+		return password;
+	}
+	
 	public void close() throws IOException {
 		try {
 			connection.close();

@@ -206,9 +206,12 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 	@Override
 	public String getSourceFullName() {
-		return String.format("%s %s",
+		return String.format("jdbc:mysql:%s:%s:%s:%s:%s",
 				dataSource.getServerName(),
-				dataSource.getDatabaseName());
+				dataSource.getPort(),
+				dataSource.getDatabaseName(),
+				dataSource.getUserName(),
+				connectionProvider.getPassword());
 	}
 
 	/**
