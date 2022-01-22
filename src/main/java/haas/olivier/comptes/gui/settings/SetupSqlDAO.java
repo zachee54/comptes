@@ -77,15 +77,19 @@ public class SetupSqlDAO {
 	 * Construit une boîte dialogue de sélection d'une base de données.
 	 * 
 	 * @param gui			L'interface principale.
-	 * @param title			Le titre de la boîte de dialogue.
-	 * @param actionMethod	Le nom de la méthode de l'objet actuel, à lancer
-	 * 						lors de la validation de la boîte de dialogue.
 	 */
 	private SetupSqlDAO(SimpleGUI gui) {
 		this.gui = gui;
 		this.dialog = new JDialog(gui.getFrame(), true);
 	}
 	
+	/**
+	 * Fabrique le contenu de la boîte de dialogue.
+	 * 
+	 * @param title			Le titre de la boîte de dialogue.
+	 * @param actionMethod	Le nom de la méthode de l'objet actuel, à lancer
+	 * 						lors de la validation de la boîte de dialogue.
+	 */
 	private void init(String title, String actionMethod) {
 		dialog.setTitle(title);
 		
@@ -177,19 +181,9 @@ public class SetupSqlDAO {
 	 */
 	public void openDatabase() {
 		try {
-			DAOFactory.setFactory(
-					new CacheDAOFactory(new MySqlDAO(
-							hostField.getText(),
-							Integer.parseInt(portField.getText()),
-							databaseField.getText(),
-							usernameField.getText(),
-							passwordField.getText())));
-			
+			toggleFactory(false);
 			dialog.dispose();
 			gui.createTabs();
-			
-		} catch (NumberFormatException e) {
-			LOGGER.severe("Le numéro de port doit être un nombre entier");
 			
 		} catch (IOException e) {
 			LOGGER.log(
@@ -202,6 +196,41 @@ public class SetupSqlDAO {
 	 * les données saisies.
 	 */
 	public void saveDatabase() {
-		
+		try {
+			toggleFactory(true);
+			dialog.dispose();
+			DAOFactory.getFactory().save();
+			
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE,
+					"Impossible de sauvegarder la base de données", e);
+		}
+	}
+	
+	/**
+	 * Bascule vers une nouvelle MySqlDAOFactory définie d'après les données
+	 * saisies.
+	 * 
+	 * @param replace	Si <code>true</code>, les données sont trsnaférées
+	 * 					depuis l'ancienne Factory.
+	 * 
+	 * @throws IOException
+	 */
+	private void toggleFactory(boolean replace) throws IOException {
+		try {
+			DAOFactory.setFactory(
+					new CacheDAOFactory(new MySqlDAO(
+							hostField.getText(),
+							Integer.parseInt(portField.getText()),
+							databaseField.getText(),
+							usernameField.getText(),
+							passwordField.getText())),
+					replace);
+			gui.updateDaoName();
+			
+		} catch (NumberFormatException e) {
+			throw new IOException(
+					"Le numéro de port doit être un nombre entier", e);
+		}
 	}
 }

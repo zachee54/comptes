@@ -52,7 +52,9 @@ class ConnectionProvider implements Closeable {
 	
 	public void close() throws IOException {
 		try {
-			connection.close();
+			if (connection != null) {
+				connection.close();
+			}
 		} catch (SQLException e) {
 			throw new IOException (e);
 		}

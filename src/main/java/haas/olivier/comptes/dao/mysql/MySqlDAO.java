@@ -188,12 +188,25 @@ public class MySqlDAO implements CacheableDAOFactory {
 	private void createTablesIfNotExist(Connection connection)
 			throws SQLException {
 		try (Statement statement = connection.createStatement()) {
-			
+			createDatabaseIfNotExists(statement);
 			MySqlComptesDAO.createTable(statement);
 			MySqlEcrituresDAO.createTable(statement);
 			MySqlPermanentsDAO.createTables(statement);
 			MySqlPropertiesDAO.createTables(statement);
 		}
+	}
+	
+	/**
+	 * Crée la base de données si elle n'existe pas déjà.
+	 * 
+	 * @param statement	Une instruction SQL.
+	 * 
+	 * @throws SQLException
+	 */
+	private void createDatabaseIfNotExists(Statement statement)
+			throws SQLException {
+		statement.execute("CREATE DATABASE IF NOT EXISTS "
+				+ dataSource.getDatabaseName());
 	}
 
 	@Override
