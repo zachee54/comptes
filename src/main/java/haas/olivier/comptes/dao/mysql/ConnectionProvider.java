@@ -42,6 +42,15 @@ class ConnectionProvider implements Closeable {
 	}
 	
 	/**
+	 * Renvoie le nom d'utilisateur.
+	 * 
+	 * @return	Le nom d'utilisateur.
+	 */
+	String getUsername() {
+		return username;
+	}
+	
+	/**
 	 * Renvoie le mot de passe utilisé.
 	 * 
 	 * @return	Le mot de passe de la base de données.

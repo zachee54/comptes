@@ -77,7 +77,6 @@ public class MySqlDAOTest {
 		try (Connection connection = DATASOURCE.getConnection(USERNAME, PASSWORD);
 				Statement statement = connection.createStatement()) {
 			statement.execute("DROP DATABASE IF EXISTS " + DATABASE);
-			statement.execute("CREATE DATABASE " + DATABASE);
 		}
 		
 		DateFormat df = new SimpleDateFormat("dd/MM/yy");

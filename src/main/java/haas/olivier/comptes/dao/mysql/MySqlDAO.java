@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.mariadb.jdbc.MariaDbDataSource;
 
 import haas.olivier.comptes.Banque;
@@ -47,12 +49,56 @@ public class MySqlDAO implements CacheableDAOFactory {
 	 * @param database	Le nom de la base de données.
 	 * @param username	Le nom d'utilisateur de la base de données.
 	 * @param password	Le mot de passe.
+	 * 
+	 * @throws IOException
 	 */
 	public MySqlDAO(String hostname, int port, String database, String username,
-			String password) {
+			String password) throws IOException {
 		dataSource = new MariaDbDataSource(hostname, port, database);
 		connectionProvider =
 				new ConnectionProvider(dataSource, username, password);
+		createDatabaseIfNotExists();
+	}
+	
+	/**
+	 * Crée la base de données si elle n'existe pas encore.
+	 * 
+	 * @throws IOException
+	 */
+	private void createDatabaseIfNotExists() throws IOException {
+		DataSource rootDataSource = new MariaDbDataSource(
+				dataSource.getServerName(),
+				dataSource.getPort(),
+				null);
+		
+		try (Connection rootConnection = rootDataSource.getConnection(
+				connectionProvider.getUsername(),
+				connectionProvider.getPassword());
+				Statement statement = rootConnection.createStatement()) {
+			statement.execute(
+					"CREATE DATABASE IF NOT EXISTS "
+							+ dataSource.getDatabaseName());
+			
+			createTablesIfNotExist();
+			
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
+	}
+	
+	/**
+	 * Crée les tables SQL si elles n'existent pas déjà.
+	 * 
+	 * @throws SQLException
+	 */
+	private void createTablesIfNotExist() throws SQLException {
+		try (Connection connection = connectionProvider.getConnection();
+				Statement statement = connection.createStatement()) {
+			MySqlComptesDAO.createTable(statement);
+			MySqlEcrituresDAO.createTable(statement);
+			MySqlPermanentsDAO.createTables(statement);
+			MySqlPropertiesDAO.createTables(statement);
+		}
 	}
 
 	@Override
@@ -154,61 +200,33 @@ public class MySqlDAO implements CacheableDAOFactory {
 	public void save(CacheDAOFactory cache) throws IOException {
 		try (Connection connection = connectionProvider.getConnection();
 				Statement statement = connection.createStatement()) {
-			
-			createTablesIfNotExist(connection);
-			
+
 			connection.setAutoCommit(false);
 
-			// Vident aussi les tables associées, par cascade de clés étrangères
+			/* 
+			 * Vident aussi les tables associées, par cascade de clés
+			 * étrangères.
+			 */
 			statement.execute("DELETE FROM permanents");
 			statement.execute("DELETE FROM diagrams");
-			
+
 			statement.execute("DELETE FROM ecritures");
 			statement.execute("DELETE FROM comptes");
-			
+
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
-			MySqlEcrituresDAO.save(cache.getEcritureDAO().getAll(), connection);
+			MySqlEcrituresDAO.save(
+					cache.getEcritureDAO().getAll(), connection);
 			MySqlPermanentsDAO.save(
 					cache.getPermanentDAO().getAll(), connection);
 			MySqlPropertiesDAO.save(cache.getPropertiesDAO(), connection);
-			
+
 			connection.setAutoCommit(true);
-			
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
 	}
 	
-	/**
-	 * Crée les tables SQL si elles n'existent pas déjà.
-	 * 
-	 * @param connection	Une connexion.
-	 * @throws SQLException
-	 */
-	private void createTablesIfNotExist(Connection connection)
-			throws SQLException {
-		try (Statement statement = connection.createStatement()) {
-			createDatabaseIfNotExists(statement);
-			MySqlComptesDAO.createTable(statement);
-			MySqlEcrituresDAO.createTable(statement);
-			MySqlPermanentsDAO.createTables(statement);
-			MySqlPropertiesDAO.createTables(statement);
-		}
-	}
-	
-	/**
-	 * Crée la base de données si elle n'existe pas déjà.
-	 * 
-	 * @param statement	Une instruction SQL.
-	 * 
-	 * @throws SQLException
-	 */
-	private void createDatabaseIfNotExists(Statement statement)
-			throws SQLException {
-		statement.execute("CREATE DATABASE IF NOT EXISTS "
-				+ dataSource.getDatabaseName());
-	}
-
 	@Override
 	public String getName() {
 		return "MySQL";
