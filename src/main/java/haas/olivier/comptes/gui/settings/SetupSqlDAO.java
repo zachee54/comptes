@@ -2,6 +2,7 @@ package haas.olivier.comptes.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.beans.EventHandler;
 import java.io.IOException;
@@ -12,7 +13,6 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -21,13 +21,39 @@ import javax.swing.JTextField;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.mysql.MySqlDAO;
+import haas.olivier.comptes.gui.SimpleGUI;
 
 public class SetupSqlDAO {
+	
+	/** Le Logger de cette classe. */
+	private static final Logger LOGGER =
+			Logger.getLogger(SetupSqlDAO.class.getName());
 
-	public static void runOpenDialog(JFrame frame) {
-		SetupSqlDAO instance = new SetupSqlDAO(frame);
-		instance.showOpenDialog();
+	/**
+	 * Crée et lance une boîte de dialogue pour ouvrir une base de données.
+	 * 
+	 * @param gui	L'interface principale.
+	 */
+	public static void runOpenDialog(SimpleGUI gui) {
+		SetupSqlDAO instance = new SetupSqlDAO(gui);
+		instance.init("Ouvrir une base de données", "openDatabase");
+		instance.showDialog();
 	}
+	
+	/**
+	 * Crée et lance une boîte de dialogue pour sauvegarder les données dans une
+	 * base de données.
+	 * 
+	 * @param gui	L'interface principale.
+	 */
+	public static void runSaveDialog(SimpleGUI gui) {
+		SetupSqlDAO instance = new SetupSqlDAO(gui);
+		instance.init("Sauvegarder dans une base de données", "saveDatabase");
+		instance.showDialog();
+	}
+	
+	/** L'interface principale de l'application. */
+	private final SimpleGUI gui;
 	
 	/** La boîte de dialogue d'ouverture de la ressource. */
 	private final JDialog dialog;
@@ -47,8 +73,21 @@ public class SetupSqlDAO {
 	/** Le champ du mot de passe. */
 	private final JTextField passwordField = new JPasswordField();
 	
-	private SetupSqlDAO(JFrame frame) {
-		this.dialog = new JDialog(frame, true);
+	/**
+	 * Construit une boîte dialogue de sélection d'une base de données.
+	 * 
+	 * @param gui			L'interface principale.
+	 * @param title			Le titre de la boîte de dialogue.
+	 * @param actionMethod	Le nom de la méthode de l'objet actuel, à lancer
+	 * 						lors de la validation de la boîte de dialogue.
+	 */
+	private SetupSqlDAO(SimpleGUI gui) {
+		this.gui = gui;
+		this.dialog = new JDialog(gui.getFrame(), true);
+	}
+	
+	private void init(String title, String actionMethod) {
+		dialog.setTitle(title);
 		
 		JLabel hostLabel = new JLabel("Hôte");
 		JLabel portLabel = new JLabel("Port");
@@ -109,33 +148,34 @@ public class SetupSqlDAO {
 		
 		JButton okButton = new JButton("OK");
 		okButton.addActionListener(EventHandler.create(
-				ActionListener.class, this, "openDatabase"));
+				ActionListener.class, this, actionMethod));
 		
 		JButton cancelButton = new JButton("Annuler");
 		cancelButton.addActionListener(EventHandler.create(
 				ActionListener.class, dialog, "dispose"));
 		
-		JPanel submitPanel = new JPanel();
+		JPanel submitPanel = new JPanel(new GridLayout());
 		submitPanel.add(okButton);
 		submitPanel.add(cancelButton);
-		dialog.add(submitPanel, BorderLayout.SOUTH);
+		
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.add(submitPanel);
+		dialog.add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 	/**
 	 * Affiche la boîte de dialogue.
 	 */
-	private void showOpenDialog() {
+	private void showDialog() {
 		dialog.pack();
 		dialog.setLocationRelativeTo(dialog.getOwner());
 		dialog.setVisible(true);
 	}
 	
 	/**
-	 * Ouvre la base de données utilisant les données saisies.
+	 * Ouvre la base de données en utilisant les données saisies.
 	 */
 	public void openDatabase() {
-		Logger logger = Logger.getLogger(this.getClass().getName());
-		
 		try {
 			DAOFactory.setFactory(
 					new CacheDAOFactory(new MySqlDAO(
@@ -145,12 +185,23 @@ public class SetupSqlDAO {
 							usernameField.getText(),
 							passwordField.getText())));
 			
+			dialog.dispose();
+			gui.createTabs();
+			
 		} catch (NumberFormatException e) {
-			logger.severe("Le numéro de port doit être un nombre entier");
+			LOGGER.severe("Le numéro de port doit être un nombre entier");
 			
 		} catch (IOException e) {
-			logger.log(
+			LOGGER.log(
 					Level.SEVERE, "Impossible d'ouvrir la base de données", e);
 		}
+	}
+	
+	/**
+	 * Sauvegarde les données actuelles dans une base de données en utilisant
+	 * les données saisies.
+	 */
+	public void saveDatabase() {
+		
 	}
 }

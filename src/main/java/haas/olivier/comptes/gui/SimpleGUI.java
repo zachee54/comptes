@@ -322,14 +322,14 @@ ActionListener, PropertiesController {
 		fichier.add(new AbstractAction("Ouvrir un fichier") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new SetupDAO(SimpleGUI.this, frame, SetupDAO.OPEN);
+				new SetupDAO(SimpleGUI.this, SetupDAO.OPEN);
 			}
 		});// classe anonyme AbstractAction
 		
 		fichier.add(new AbstractAction("Ouvrir une base de données") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SetupSqlDAO.runOpenDialog(frame);
+				SetupSqlDAO.runOpenDialog(SimpleGUI.this);
 			}
 		});
 		
@@ -340,9 +340,17 @@ ActionListener, PropertiesController {
 		fichier.add(new AbstractAction("Enregistrer sous...") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new SetupDAO(SimpleGUI.this, frame, SetupDAO.SAVE);
+				new SetupDAO(SimpleGUI.this, SetupDAO.SAVE);
 			}
 		});// classe anonyme AbstractAction
+		
+		fichier.add(
+				new AbstractAction("Enregistrer dans une base de données...") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SetupSqlDAO.runSaveDialog(SimpleGUI.this);
+			}
+		});
 		
 		// Menu diagrammes
 		JMenu diagrams = new JMenu("Graphiques");
@@ -698,6 +706,10 @@ ActionListener, PropertiesController {
 		} finally {
 			System.exit(0);								// Quitter brutalement !
 		}
+	}
+	
+	public JFrame getFrame() {
+		return frame;
 	}
 	
 	@Override

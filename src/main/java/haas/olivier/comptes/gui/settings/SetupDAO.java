@@ -7,7 +7,6 @@ import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.csv.CsvDAO;
 import haas.olivier.comptes.gui.SimpleGUI;
-import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -44,7 +43,6 @@ public class SetupDAO extends JFileChooser {
 			"Format natif (sérialisation Java compressée)";
 	
 	private SimpleGUI gui;			// Gestionnaire de l'interface principale
-	private Component parent;							// Fenêtre parent
 	private FileFilter filterCSV =
 			new FileNameExtensionFilter(CSV, "csvz");	// Filtre CSV
 	private FileFilter filterSerial =
@@ -54,9 +52,8 @@ public class SetupDAO extends JFileChooser {
 	 * Ouvre un boîte de dialogue de sélection du fichier, et réalise l'action
 	 * correspondante.
 	 */
-	public SetupDAO(SimpleGUI gui, Component parent, int action) {
+	public SetupDAO(SimpleGUI gui, int action) {
 		this.gui = gui;
-		this.parent = parent;
 		
 		// Insérer les filtres dans le sélecteur de fichiers
 		addChoosableFileFilter(filterSerial);
@@ -82,7 +79,7 @@ public class SetupDAO extends JFileChooser {
 	 * Charge une nouvelle source de données.
 	 */
 	private void openFile() {
-		if (showOpenDialog(parent)
+		if (showOpenDialog(gui.getFrame())
 				== JFileChooser.APPROVE_OPTION) {		// Bouton OK
 			File file = getSelectedFile();				// Fichier à ouvrir
 			FileFilter filter = getFileFilter();		// Filtre DAO
@@ -119,7 +116,7 @@ public class SetupDAO extends JFileChooser {
 	 * d'utilisation.
 	 */
 	private void saveFile() {
-		if (showSaveDialog(parent)
+		if (showSaveDialog(gui.getFrame())
 				== JFileChooser.APPROVE_OPTION) {		// Bouton OK
 			File file = getSelectedFile();				// Fichier à écrire
 			FileFilter filter = getFileFilter();		// Filtre DAO
