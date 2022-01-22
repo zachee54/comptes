@@ -119,10 +119,11 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 	@Override
 	public boolean hasNext() {
 		try {
-			if (resultSet.isLast()) {
+			if (!resultSet.next()) {
 				resultSet.close();
 				return false;
 			}
+			resultSet.previous();
 			return true;
 			
 		} catch (SQLException e) {

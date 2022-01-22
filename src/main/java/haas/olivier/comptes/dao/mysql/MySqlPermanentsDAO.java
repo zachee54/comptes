@@ -358,7 +358,13 @@ class MySqlPermanentsDAO implements Iterator<Permanent> {
 	@Override
 	public boolean hasNext() {
 		try {
-			return !resultSet.isLast();
+			if (!resultSet.next()) {
+				resultSet.close();
+				return false;
+			}
+			resultSet.previous();
+			return true;
+			
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
