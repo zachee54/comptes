@@ -45,6 +45,8 @@ public class MySqlDAO implements CacheableDAOFactory {
 	 * @param hostname	Le nom de l'hôte.
 	 * @param port		Le port.
 	 * @param database	Le nom de la base de données.
+	 * @param username	Le nom d'utilisateur de la base de données.
+	 * @param password	Le mot de passe.
 	 */
 	public MySqlDAO(String hostname, int port, String database, String username,
 			String password) {

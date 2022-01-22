@@ -15,6 +15,7 @@ import haas.olivier.comptes.gui.diagram.DiagramFrame;
 import haas.olivier.comptes.gui.settings.SetupCompte;
 import haas.olivier.comptes.gui.settings.SetupDAO;
 import haas.olivier.comptes.gui.settings.SetupPermanent;
+import haas.olivier.comptes.gui.settings.SetupSqlDAO;
 import haas.olivier.comptes.gui.table.EcrituresTableModel;
 import haas.olivier.gui.IconLoader;
 import haas.olivier.gui.PropertiesController;
@@ -318,12 +319,19 @@ ActionListener, PropertiesController {
 		menuBar.add(fichier);
 		
 		// Ouvrir un fichier
-		fichier.add(new AbstractAction("Ouvrir") {
+		fichier.add(new AbstractAction("Ouvrir un fichier") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new SetupDAO(SimpleGUI.this, frame, SetupDAO.OPEN);
 			}
 		});// classe anonyme AbstractAction
+		
+		fichier.add(new AbstractAction("Ouvrir une base de données") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SetupSqlDAO.runOpenDialog(frame);
+			}
+		});
 		
 		// Enregistrer
 		fichier.add(actionSave);
