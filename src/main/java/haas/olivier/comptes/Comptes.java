@@ -6,6 +6,7 @@ package haas.olivier.comptes;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -17,6 +18,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.csv.CsvDAO;
+import haas.olivier.comptes.dao.mysql.MySqlDAO;
 import haas.olivier.comptes.gui.SimpleGUI;
 import haas.olivier.comptes.info.UncaughtExceptionLogger;
 import haas.olivier.info.DialogHandler;
@@ -24,9 +26,12 @@ import haas.olivier.util.NullPreferences;
 
 public class Comptes implements Runnable {
 	
+	/** Le Logger de la classe. */
+	private static final Logger LOGGER =
+			Logger.getLogger(Comptes.class.getName());
+	
 	// Spécifier le Look&Feel
 	static {
-		Logger logger = Logger.getLogger(Comptes.class.getName());
 		try {
 			// CrossPlatform (Metal)
 //			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -63,13 +68,13 @@ public class Comptes implements Runnable {
 			// Windows Classic
 //			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel");
 		} catch (ClassNotFoundException e1) {
-			logger.log(Level.CONFIG, "Look&Feel non trouvé", e1);
+			LOGGER.log(Level.CONFIG, "Look&Feel non trouvé", e1);
 		} catch (InstantiationException e1) {
-			logger.log(Level.CONFIG, "Look&Feel impossible à instancier", e1);
+			LOGGER.log(Level.CONFIG, "Look&Feel impossible à instancier", e1);
 		} catch (IllegalAccessException e1) {
-			logger.log(Level.CONFIG, "Accès impossible au Look&Feel", e1);
+			LOGGER.log(Level.CONFIG, "Accès impossible au Look&Feel", e1);
 		} catch (UnsupportedLookAndFeelException e1) {
-			logger.log(Level.CONFIG, "Look&Feel non supporté", e1);
+			LOGGER.log(Level.CONFIG, "Look&Feel non supporté", e1);
 		}
 	}
 
@@ -173,7 +178,24 @@ public class Comptes implements Runnable {
 		String filename = prefs.get(SOURCE_NAME_PROPERTY, "");
 		
 		// S'il y a un nom de fichier spécifié, on l'ouvre
-		if (!filename.isEmpty())
+		if (filename.startsWith("jdbc:mysql:")) {
+			Scanner scanner = new Scanner(filename);
+			scanner.useDelimiter(":");
+			
+			String host = scanner.next();
+			int port = scanner.nextInt();
+			String database = scanner.next();
+			String username = scanner.next();
+			StringBuilder password = new StringBuilder(scanner.next());
+			while (scanner.hasNext()) {
+				password.append(':');
+				password.append(scanner.next());
+			}
+			scanner.close();
+			
+			loadDatabase(host, port, database, username, password.toString());
+			
+		} else if (!filename.isEmpty())
 			loadCsvFile(new File(filename));
 	}
 	
@@ -184,23 +206,31 @@ public class Comptes implements Runnable {
 	 * 
 	 * @param file	Le fichier à charger.
 	 */
-	private boolean loadCsvFile(File file) {
+	private void loadCsvFile(File file) {
 		try {
 			// Essayer de charger le fichier s'il existe
 			if (file.exists()) {
 				DAOFactory.setFactory(
 						new CacheDAOFactory(CsvDAO.newInstance(file)),
 						false);
-				return true;
 			}
 
 		} catch (IOException e) {
 			Logger.getLogger(getClass().getName()).log(Level.SEVERE,
 					"Impossible de charger le fichier " + file, e);
 		}
-		
-		// Arrivée ici, le chargement a échoué
-		return false;
+	}
+	
+	private void loadDatabase(String host, int port, String database,
+			String username, String password) {
+		try {
+			DAOFactory.setFactory(new CacheDAOFactory(
+					new MySqlDAO(host, port, database, username, password)));
+			
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING,
+					"Impossible de réouvrir la base de données", e);
+		}
 	}
 	
 	/**
