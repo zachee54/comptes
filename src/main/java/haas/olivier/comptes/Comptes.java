@@ -4,6 +4,7 @@
 package haas.olivier.comptes;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -17,6 +18,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
+import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
+import haas.olivier.comptes.dao.cache.MultiCacheableDAOFactory;
 import haas.olivier.comptes.dao.csv.CsvDAO;
 import haas.olivier.comptes.dao.mysql.MySqlDAO;
 import haas.olivier.comptes.gui.SimpleGUI;
@@ -158,9 +161,15 @@ public class Comptes implements Runnable {
 		for (String arg : args) {
 			File file = new File(arg);
 			if (file.exists()) { 						// Si fichier existant
-				loadCsvFile(file);						// Charger ce fichier
-				fileInArg = true;
-				break;									// Ignorer args suivants
+				try {
+					loadCacheable(loadCsvFile(file));	// Charger ce fichier
+					fileInArg = true;
+					break;								// Ignorer args suivants
+					
+				} catch (IOException e) {
+					LOGGER.log(Level.WARNING,
+							"Impossible de charger le fichier " + file, e);
+				}
 			}
 		}
 		
@@ -169,17 +178,47 @@ public class Comptes implements Runnable {
 			loadLastFile();
 	}
 	
+	private void loadCacheable(CacheableDAOFactory cacheable) throws IOException {
+		DAOFactory.setFactory(new CacheDAOFactory(cacheable));
+	}
+	
 	/**
 	 * Ouvre le dernier fichier utilisé, d'après les préférences.
 	 */
 	private void loadLastFile() {
 		
 		// Le nom du fichier à charger
-		String filename = prefs.get(SOURCE_NAME_PROPERTY, "");
+		String sourceName = prefs.get(SOURCE_NAME_PROPERTY, "");
 		
-		// S'il y a un nom de fichier spécifié, on l'ouvre
-		if (filename.startsWith("jdbc:mysql:")) {
-			Scanner scanner = new Scanner(filename);
+		try {
+			DAOFactory.setFactory(new CacheDAOFactory(
+					getCacheableFromProperty(sourceName)));
+			
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE,
+					"Impossible de charger les comptes automatiquement", e);
+		}
+	}
+	
+	private CacheableDAOFactory getCacheableFromProperty(String sourceName)
+			throws IOException {
+		if (sourceName.startsWith("[multi]")) {
+			Scanner scanner = new Scanner(sourceName);
+			scanner.useDelimiter("[multi]");
+			
+			CacheableDAOFactory mainDAO = getCacheableFromURI(scanner.next());
+			CacheableDAOFactory backupDAO = getCacheableFromURI(scanner.next());
+			scanner.close();
+			
+			return new MultiCacheableDAOFactory(mainDAO, backupDAO);
+		}
+		
+		return getCacheableFromURI(sourceName);
+	}
+	
+	private CacheableDAOFactory getCacheableFromURI(String uri) throws IOException {
+		if (uri.startsWith("jdbc:mysql:")) {
+			Scanner scanner = new Scanner(uri);
 			scanner.useDelimiter(":");
 			
 			String host = scanner.next();
@@ -193,10 +232,14 @@ public class Comptes implements Runnable {
 			}
 			scanner.close();
 			
-			loadDatabase(host, port, database, username, password.toString());
+			return loadDatabase(
+					host, port, database, username, password.toString());
 			
-		} else if (!filename.isEmpty())
-			loadCsvFile(new File(filename));
+		} else if (!uri.isEmpty()) {
+			return loadCsvFile(new File(uri));
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -205,30 +248,44 @@ public class Comptes implements Runnable {
 	 * Si le fichier n'existe pas, la méthode ne fait rien.
 	 * 
 	 * @param file	Le fichier à charger.
+	 * 
+	 * @throws IOException
 	 */
-	private void loadCsvFile(File file) {
+	private CacheableDAOFactory loadCsvFile(File file) throws IOException {
 		try {
 			// Essayer de charger le fichier s'il existe
 			if (file.exists()) {
-				DAOFactory.setFactory(
-						new CacheDAOFactory(CsvDAO.newInstance(file)),
-						false);
+				return CsvDAO.newInstance(file);
 			}
+			throw new FileNotFoundException(file.getAbsolutePath());
 
 		} catch (IOException e) {
-			Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+			throw new IOException(
 					"Impossible de charger le fichier " + file, e);
 		}
 	}
 	
-	private void loadDatabase(String host, int port, String database,
-			String username, String password) {
+	/**
+	 * Charge les comptes depuis une base de données SQL.
+	 * 
+	 * @param host		L'adresse du serveur.
+	 * @param port		Le numéro de port.
+	 * @param database	Le nom de la base de données.
+	 * @param username	Le nom d'utilisateur de la base de données.
+	 * @param password	Le mot de passe de connexion à la base de données.
+	 * 
+	 * @return			Un <code>CacheableDAOFactory</code> prêt à l'emploi.
+	 * 
+	 * @throws IOException
+	 */
+	private CacheableDAOFactory loadDatabase(String host, int port,
+			String database, String username, String password)
+					throws IOException {
 		try {
-			DAOFactory.setFactory(new CacheDAOFactory(
-					new MySqlDAO(host, port, database, username, password)));
+			return new MySqlDAO(host, port, database, username, password);
 			
 		} catch (IOException e) {
-			LOGGER.log(Level.WARNING,
+			throw new IOException(
 					"Impossible de réouvrir la base de données", e);
 		}
 	}

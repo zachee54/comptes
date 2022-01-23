@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,6 +21,8 @@ import javax.swing.JTextField;
 
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
+import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
+import haas.olivier.comptes.dao.cache.MultiCacheableDAOFactory;
 import haas.olivier.comptes.dao.mysql.MySqlDAO;
 import haas.olivier.comptes.gui.SimpleGUI;
 
@@ -73,6 +76,9 @@ public class SetupSqlDAO {
 	/** Le champ du mot de passe. */
 	private final JTextField passwordField = new JPasswordField();
 	
+	/** L'option pour une copie de secours. */
+	private final JCheckBox backupCheckBox = new JCheckBox("Enregistrer aussi dans la source actuelle");
+	
 	/**
 	 * Construit une boîte dialogue de sélection d'une base de données.
 	 * 
@@ -114,23 +120,25 @@ public class SetupSqlDAO {
 		content.setLayout(groupLayout);
 		groupLayout.setAutoCreateGaps(true);
 		groupLayout.setAutoCreateContainerGaps(true);
-		groupLayout.setHorizontalGroup(groupLayout.createSequentialGroup()
-				.addGroup(groupLayout.createParallelGroup()
-						.addComponent(hostLabel)
-						.addComponent(portLabel)
-						.addComponent(databaseLabel)
-						.addComponent(usernameLabel)
-						.addComponent(passwordLabel))
-				.addGroup(groupLayout.createParallelGroup(
-						Alignment.LEADING, false)
-						.addComponent(hostField)
-						.addComponent(portField,
-								GroupLayout.PREFERRED_SIZE,
-								GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE)
-						.addComponent(databaseField)
-						.addComponent(usernameField)
-						.addComponent(passwordField)));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup()
+				.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createParallelGroup()
+								.addComponent(hostLabel)
+								.addComponent(portLabel)
+								.addComponent(databaseLabel)
+								.addComponent(usernameLabel)
+								.addComponent(passwordLabel))
+						.addGroup(groupLayout.createParallelGroup(
+								Alignment.LEADING, false)
+								.addComponent(hostField)
+								.addComponent(portField,
+										GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)
+								.addComponent(databaseField)
+								.addComponent(usernameField)
+								.addComponent(passwordField)))
+				.addComponent(backupCheckBox));
 		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup()
 				.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(hostLabel)
@@ -146,7 +154,8 @@ public class SetupSqlDAO {
 						.addComponent(usernameField))
 				.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(passwordLabel)
-						.addComponent(passwordField)));
+						.addComponent(passwordField))
+				.addComponent(backupCheckBox));
 		
 		dialog.add(content);
 		
@@ -218,14 +227,23 @@ public class SetupSqlDAO {
 	 */
 	private void toggleFactory(boolean replace) throws IOException {
 		try {
-			DAOFactory.setFactory(
-					new CacheDAOFactory(new MySqlDAO(
-							hostField.getText(),
-							Integer.parseInt(portField.getText()),
-							databaseField.getText(),
-							usernameField.getText(),
-							passwordField.getText())),
-					replace);
+			CacheableDAOFactory dao = new MySqlDAO(
+					hostField.getText(),
+					Integer.parseInt(portField.getText()),
+					databaseField.getText(),
+					usernameField.getText(),
+					passwordField.getText());
+			
+			if (backupCheckBox.isSelected()) {
+				DAOFactory actual = DAOFactory.getFactory();
+				if (actual instanceof CacheDAOFactory) {
+					dao = new MultiCacheableDAOFactory(
+							dao,
+							((CacheDAOFactory) actual).getDelegate());
+				}
+			}
+			
+			DAOFactory.setFactory(new CacheDAOFactory(dao), replace);
 			gui.updateDaoName();
 			
 		} catch (NumberFormatException e) {

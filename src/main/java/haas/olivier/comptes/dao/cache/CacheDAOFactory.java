@@ -105,6 +105,15 @@ public class CacheDAOFactory extends DAOFactory {
 			dao.close();
 		}
 	}
+	
+	/**
+	 * Renvoie la couche inférieure d'accès aux données.
+	 * 
+	 * @return	La couche inférieure d'accès aux données.
+	 */
+	public CacheableDAOFactory getDelegate() {
+		return dao;
+	}
 
 	@Override
 	public BanqueDAO getBanqueDAO() {
