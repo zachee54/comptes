@@ -35,7 +35,7 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 				+ "credit_id INT UNSIGNED NOT NULL,"
 				+ "date DATE NOT NULL,"
 				+ "pointage DATE DEFAULT NULL,"
-				+ "libelle VARCHAR(50) NULL,"
+				+ "libelle VARCHAR(100) NULL,"
 				+ "tiers VARCHAR(50) NULL,"
 				+ "cheque INT UNSIGNED DEFAULT NULL,"
 				+ "montant INT NOT NULL,"
