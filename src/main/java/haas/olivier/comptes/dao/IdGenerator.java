@@ -11,7 +11,7 @@ package haas.olivier.comptes.dao;
 public class IdGenerator {
 
 	/** L'identifiant le plus élevé parmi ceux utilisés. */
-	private int max = -1;
+	private int max = 0;
 	
 	/** Renvoie un nouvel identifiant. */
 	public int getId() {

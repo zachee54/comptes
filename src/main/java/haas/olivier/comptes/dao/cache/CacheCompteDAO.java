@@ -70,7 +70,7 @@ class CacheCompteDAO implements CompteDAO {
 		Set<Integer> ids = instances.stream()
 				.map(Compte::getId)
 				.collect(Collectors.toSet());
-		return IntStream.range(0, Integer.MAX_VALUE)
+		return IntStream.range(1, Integer.MAX_VALUE)
 				.filter(i -> !ids.contains(i))
 				.findFirst().getAsInt();
 	}
