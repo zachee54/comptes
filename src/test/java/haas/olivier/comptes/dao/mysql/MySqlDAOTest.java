@@ -86,7 +86,7 @@ public class MySqlDAOTest {
 		Date date4 = df.parse("25/11/2006");
 		Date date5 = df.parse("29/12/2006");
 		
-		compte1 = new Compte(1, TypeCompte.COMPTE_EPARGNE);
+		compte1 = new Compte(0, TypeCompte.COMPTE_EPARGNE);
 		compte1.setNom("Le compte 1");
 		compte1.setNumero(57931L);
 		compte1.setOuverture(date1);

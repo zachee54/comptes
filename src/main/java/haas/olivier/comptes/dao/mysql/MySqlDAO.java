@@ -212,6 +212,11 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 			statement.execute("DELETE FROM ecritures");
 			statement.execute("DELETE FROM comptes");
+			
+			// Autoriser exceptionnellement les valeurs 0 pour les id
+			// TODO à supprimer s'il n'y a plus de compte avec id=0
+			statement.execute(
+					"SET SESSION sql_mode=CONCAT((SELECT @@SESSION.sql_mode),',NO_AUTO_VALUE_ON_ZERO')");
 
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
 			MySqlEcrituresDAO.save(
