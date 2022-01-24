@@ -46,9 +46,14 @@ public class EcritureDraft {
 	public Date date = null;
 	
 	/**
-	 * La date de pointage.
+	 * La date de pointage du compte débité.
 	 */
-	public Date pointage = null;
+	public Date pointageDebit = null;
+	
+	/**
+	 * La date de pointage du compte crédité.
+	 */
+	public Date pointageCredit = null;
 	
 	/**
 	 * Le nom du tiers.
@@ -104,7 +109,8 @@ public class EcritureDraft {
 			// Récupérer les propriétés de l'écriture
 			id		= e.id;
 			date	= e.date;
-			pointage= e.pointage;
+			pointageDebit= e.pointageDebit;
+			pointageCredit = e.pointageCredit;
 			tiers	= e.tiers;
 			libelle	= e.libelle;
 			cheque	= e.cheque;
@@ -132,7 +138,7 @@ public class EcritureDraft {
 	public Ecriture createEcriture()
 			throws EcritureMissingArgumentException,
 			InconsistentArgumentsException {
-		return new Ecriture(id, date, pointage, debit, credit, montant,
-				libelle, tiers, cheque);
+		return new Ecriture(id, date, pointageDebit, pointageCredit, debit,
+				credit, montant, libelle, tiers, cheque);
 	}
 }

@@ -253,9 +253,9 @@ public class EcritureController {
 		Iterable<Ecriture> journalPointages =
 				ecritureDAO.getPointagesSince(debut);
 		for (Ecriture e : journalPointages) {
-			if (e.pointage != null) {
+			if (e.pointageDebit != null) {
 				// Pointée: mettre à jour les soldes à vue à la date de pointage
-				Month mois = Month.getInstance(e.pointage);
+				Month mois = Month.getInstance(e.pointageDebit);
 				e.debit.addPointages(mois, e.montant.negate());
 				e.credit.addPointages(mois, e.montant);
 			}

@@ -170,7 +170,7 @@ implements DataObserver {
 			for (Ecriture e : source) {
 				
 				// Date à prendre en compte
-				Date date = triPointage ? e.pointage : e.date;
+				Date date = triPointage ? e.pointageDebit : e.date;
 
 				// Vérifier si l'écriture est utile (cf. javadoc)
 				if (
@@ -392,8 +392,8 @@ class EcritureRowModel {
 		switch (type) {
 		case IDENTIFIANT:	return draft.id;
 		case DATE:			return draft.date;
-		case DATE_POINTAGE:	return draft.pointage;
-		case POINTAGE:		return draft.pointage != null;
+		case DATE_POINTAGE:	return draft.pointageDebit;
+		case POINTAGE:		return draft.pointageDebit != null;
 		case LIBELLE:		return draft.libelle;
 		case TIERS:			return draft.tiers;
 		case CHEQUE:		return draft.cheque;
@@ -417,7 +417,7 @@ class EcritureRowModel {
 		case LIBELLE:		draft.libelle	= value.toString();		break;
 		case TIERS:			draft.tiers		= value.toString();		break;
 		case POINTAGE:	// Même effet que DATE_POINTAGE
-		case DATE_POINTAGE:	draft.pointage	= (Date) value;			break;
+		case DATE_POINTAGE:	draft.pointageDebit	= (Date) value;			break;
 		
 		case MONTANT:
 			draft.montant = (inverse == visuBudget)

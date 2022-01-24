@@ -554,8 +554,8 @@ public class FinancialTable extends JTable implements TableCellRenderer,
 					.getEcritureAt(realRowIndex);
 
 			// Mettre dans le tooltip la date de pointage... ou rien
-			toolTip = (ecriture == null || ecriture.pointage == null)
-					? "" : DATE_FORMATTER.format(ecriture.pointage);
+			toolTip = (ecriture == null || ecriture.pointageDebit == null)
+					? "" : DATE_FORMATTER.format(ecriture.pointageDebit);
 
 		} else {										// Autre colonne
 

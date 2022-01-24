@@ -58,7 +58,7 @@ class EcrituresByDay {
 	 * 					d'écriture.
 	 */
 	private void addEcriture(Ecriture e, boolean pointages) {
-		Date date = pointages ? e.pointage : e.date;
+		Date date = pointages ? e.pointageDebit : e.date;
 		if (date == null)
 			return;
 		

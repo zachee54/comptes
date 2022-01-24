@@ -48,15 +48,25 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		@Override
 		public int compare(Ecriture e1, Ecriture e2) {
 			int result;						// Résultat intermédiaire
-			if (e1.pointage == null && e2.pointage != null) {		//1 pointage
+			if (e1.pointageDebit == null && e2.pointageDebit != null) {		//1 pointage
 				return 1;					// Le non pointé après
 
-			} else if (e1.pointage != null && e2.pointage == null) {// l'autre
+			} else if (e1.pointageDebit != null && e2.pointageDebit == null) {// l'autre
 				return -1;					// Le pointé avant
 
-			} else if (e1.pointage != null && e2.pointage != null) {// les deux
+			} else if (e1.pointageDebit != null && e2.pointageDebit != null) {// les deux
 				// Tri croissant par date de pointage. Départage à suivre
-				result = e1.pointage.compareTo(e2.pointage);
+				result = e1.pointageDebit.compareTo(e2.pointageDebit);
+				
+			} else if (e1.pointageCredit == null && e2.pointageCredit != null) {		//1 pointage
+				return 1;					// Le non pointé après
+
+			} else if (e1.pointageCredit != null && e2.pointageCredit == null) {// l'autre
+				return -1;					// Le pointé avant
+
+			} else if (e1.pointageCredit != null && e2.pointageCredit != null) {// les deux
+				// Tri croissant par date de pointage. Départage à suivre
+				result = e1.pointageCredit.compareTo(e2.pointageCredit);
 				
 			} else {												// aucun
 				// null/null -> égalité ! Départage à suivre
@@ -111,8 +121,10 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 	public final String libelle;
 	/** Numéro de chèque. */
 	public final Integer cheque;
-	/** Date de pointage. */
-	public final Date pointage;
+	/** Date de pointage du compte débité. */
+	public final Date pointageDebit;
+	/** Date de pointage du compte crédité. */
+	public final Date pointageCredit;
 
 	// Propriété calculée par le constructeur
 	
@@ -124,7 +136,8 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 	 * 
 	 * @param id		L'identifiant de l'écriture.
 	 * @param date		La date de l'écriture.
-	 * @param pointage	La date de pointage.
+	 * @param pointageDebit		La date de pointage du compte débité.
+	 * @param pointageCredit	La date de pointage du compte crédité.
 	 * @param debit		Le compte débité.
 	 * @param credit	Le compte crédité.
 	 * @param montant	Le montant de l'écriture.
@@ -137,8 +150,9 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 	 * 					ou si la date de pointage est antérieure à la date de
 	 * 					l'écriture.
 	 */
-	private static void checkArguments(Integer id, Date date, Date pointage,
-			Compte debit, Compte credit, BigDecimal montant)
+	private static void checkArguments(Integer id, Date date,
+			Date pointageDebit, Date pointageCredit, Compte debit,
+			Compte credit, BigDecimal montant)
 					throws EcritureMissingArgumentException,
 					InconsistentArgumentsException {
 	
@@ -171,13 +185,15 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		}// if debit et credit
 	
 		// Vérifier que le pointage est postérieur ou égal à la date d'écriture
-		if (pointage != null && pointage.before(date)) {
+		if ((pointageDebit != null && pointageDebit.before(date))
+				|| (pointageCredit != null && pointageCredit.before(date))) {
 			throw new InconsistentArgumentsException(
 					"Une écriture ne peut pas être pointée avant sa propre date");
 		}// if pointage
 	}// checkArguments
-
-	/** Construit une écriture.
+	
+	/** Construit une écriture en retenant la même date de pointage au débit et
+	 * au crédit.
 	 * <p>
 	 * Les paramètres correspondent aux données minimum pour que l'écriture soit
 	 * régulière. Ils ne sont pas modifiables ultérieurement.
@@ -186,7 +202,7 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 	 * 					Un identifiant négatif indique qu'elle n'a pas encore
 	 * 					été enregistrée.
 	 * @param date		La date.
-	 * @param pointage	La date de pointage.
+	 * @param pointage	La date de pointage du compte débité.
 	 * @param debit		Le compte débité.
 	 * @param credit	Le compte crédité.
 	 * @param montant	Le montant.<br>
@@ -210,9 +226,47 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 			Integer cheque)
 					throws EcritureMissingArgumentException,
 					InconsistentArgumentsException {
+		this(id, date, pointage, pointage, debit, credit, montant, libelle,
+				tiers, cheque);
+	}
+
+	/** Construit une écriture.
+	 * <p>
+	 * Les paramètres correspondent aux données minimum pour que l'écriture soit
+	 * régulière. Ils ne sont pas modifiables ultérieurement.
+	 * 
+	 * @param id		Identifiant de l'écriture.<br>
+	 * 					Un identifiant négatif indique qu'elle n'a pas encore
+	 * 					été enregistrée.
+	 * @param date		La date.
+	 * @param pointageDebit		La date de pointage du compte débité.
+	 * @param pointageCredit 	La date de pointage du compte crédité.
+	 * @param debit		Le compte débité.
+	 * @param credit	Le compte crédité.
+	 * @param montant	Le montant.<br>
+	 * 					S'il est négatif, on retient le montant opposé, et le
+	 * 					compte de débit et le compte de crédit sont échangés.
+	 * @param libelle	Le libellé.
+	 * @param tiers		Le tiers.
+	 * @param cheque	Le numéro de chèque.
+	 * 
+	 * @throws EcritureMissingArgumentException
+	 * 					Si l'instanciation de l'écriture a échoué en raison de
+	 * 					l'absence d'un argument nécessaire.
+	 * 
+	 * @throws InconsistentArgumentsException
+	 * 					Si le compte débité est le même que le compte crédité,
+	 * 					ou si la date de pointage est antérieure à la date de
+	 * 					l'écriture.
+	 */
+	public Ecriture(Integer id, Date date, Date pointageDebit,
+			Date pointageCredit, Compte debit, Compte credit,
+			BigDecimal montant, String libelle, String tiers, Integer cheque)
+					throws EcritureMissingArgumentException,
+					InconsistentArgumentsException {
 
 		// Vérifier la cohérence des arguments fournis
-		checkArguments(id, date, pointage, debit, credit, montant);
+		checkArguments(id, date, pointageDebit, pointageCredit, debit, credit, montant);
 		
 		// Si le montant est négatif, on enregistre tout à l'envers
 		if (montant.signum() < 0) {
@@ -225,7 +279,8 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		// Définir les propriétés simples
 		this.id = id;
 		this.date = date;
-		this.pointage = pointage;
+		this.pointageDebit = pointageDebit;
+		this.pointageCredit = pointageCredit;
 		this.debit = debit;
 		this.credit = credit;
 		this.montant = montant;
@@ -275,8 +330,10 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 				+ credit
 				+ " Date: "
 				+ DF.format(date)
-				+ " Pointage le: "
-				+ (pointage == null ? "" : DF.format(pointage))
+				+ " Pointage débit le: "
+				+ (pointageDebit == null ? "" : DF.format(pointageDebit))
+				+ " Pointage crédit le: "
+				+ (pointageCredit == null ? "" : DF.format(pointageCredit))
 				+ " Tiers: "
 				+ tiers
 				+ ", Libellé: "
@@ -332,15 +389,25 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		
 		// Sinon, comparer les pointages
 		if (result == 0) {
-			if (pointage == null && e.pointage != null) {		// 1 pointage
+			if (pointageDebit == null && e.pointageDebit != null) {		// 1 pointage
 				return 1;					// Le non pointé après
 
-			} else if (pointage != null && e.pointage == null) {// l'autre
+			} else if (pointageDebit != null && e.pointageDebit == null) {// l'autre
 				return -1;					// Le pointé avant
 
-			} else if (pointage != null && e.pointage != null) {// les deux
+			} else if (pointageDebit != null && e.pointageDebit != null) {// les deux
 				// Tri par date de pointage. Départage à suivre
-				result = pointage.compareTo(e.pointage);
+				result = pointageDebit.compareTo(e.pointageDebit);
+				
+			} else if (pointageCredit == null && e.pointageCredit != null) {		// 1 pointage
+				return 1;					// Le non pointé après
+
+			} else if (pointageCredit != null && e.pointageCredit == null) {// l'autre
+				return -1;					// Le pointé avant
+
+			} else if (pointageCredit != null && e.pointageCredit != null) {// les deux
+				// Tri par date de pointage. Départage à suivre
+				result = pointageCredit.compareTo(e.pointageCredit);
 
 			} else {												// aucun
 				// null/null -> égalité ! Départage à suivre
@@ -383,7 +450,8 @@ public class Ecriture implements Comparable<Ecriture>, Serializable {
 		int mul = 17;
 		
 		res = mul*res + (id == null ? 0 : id.hashCode());
-		res = mul*res + (pointage == null ? 0 : pointage.hashCode());
+		res = mul*res + (pointageDebit == null ? 0 : pointageDebit.hashCode());
+		res = mul*res + (pointageCredit == null ? 0 : pointageCredit.hashCode());
 		res = mul*res + (cheque == null ? 0 : cheque.hashCode());
 		res = mul*res + (date == null ? 0 : date.hashCode());
 		return res;

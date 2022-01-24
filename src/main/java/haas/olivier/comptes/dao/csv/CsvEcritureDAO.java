@@ -35,9 +35,14 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	private static final String HEADER_DATE = "date";
 	
 	/**
-	 * Le nom du champ CSV contenant la date de pointage.
+	 * Le nom du champ CSV contenant la date de pointage au débit.
 	 */
-	private static final String HEADER_POINTAGE = "pointage";
+	private static final String HEADER_POINTAGE_DEBIT = "pointageDebit";
+	
+	/**
+	 * Le nom du champ CSV contenant la date de pointage au crédit.
+	 */
+	private static final String HEADER_POINTAGE_CREDIT = "pointageCredit";
 	
 	/**
 	 * Le nom du champ CSV contenant l'identifiant du compte débité.
@@ -73,7 +78,7 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	 * La disposition par défaut des colonnes.
 	 */
 	private static final String[] STANDARD_HEADERS =
-		{HEADER_ID, HEADER_DATE, HEADER_POINTAGE, HEADER_DEBIT, HEADER_CREDIT,
+		{HEADER_ID, HEADER_DATE, HEADER_POINTAGE_DEBIT, HEADER_DEBIT, HEADER_CREDIT,
 				HEADER_LIB, HEADER_TIERS, HEADER_CHEQUE, HEADER_MONTANT};
 
 	/**
@@ -129,9 +134,14 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 					value = dateFormat.format(e.date);
 				break;
 				
-			case HEADER_POINTAGE :
-				value = (e.pointage == null
-				? "" : dateFormat.format(e.pointage));
+			case HEADER_POINTAGE_DEBIT :
+				value = (e.pointageDebit == null
+				? "" : dateFormat.format(e.pointageDebit));
+				break;
+				
+			case HEADER_POINTAGE_CREDIT :
+				value = (e.pointageCredit == null
+				? "" : dateFormat.format(e.pointageCredit));
 				break;
 				
 			case HEADER_CHEQUE :
@@ -175,11 +185,9 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 	protected Ecriture readNext(CsvReader reader)
 			throws ParseException, IOException {
 		
-		// Valeur optionnelle : date de pointage
-		String textPointage = reader.get(HEADER_POINTAGE);
-		Date pointage = (textPointage == null || textPointage.isEmpty()
-				? null								// Pas de pointage
-				: dateFormat.parse(textPointage));	// Une date de pointage
+		// Valeur optionnelle : dates de pointage
+		Date pointageDebit = getOptionalDate(reader, HEADER_POINTAGE_DEBIT);
+		Date pointageCredit = getOptionalDate(reader, HEADER_POINTAGE_CREDIT);
 		
 		// Valeur optionnelle : numéro de chèque
 		String textCheque = reader.get(HEADER_CHEQUE);
@@ -192,7 +200,8 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 			return new Ecriture(
 					Integer.parseInt(idText),
 					dateFormat.parse(reader.get(HEADER_DATE)),
-					pointage,
+					pointageDebit,
+					pointageCredit,
 					comptesById.get(
 							Integer.parseInt(reader.get(HEADER_DEBIT))),
 					comptesById.get(
@@ -207,6 +216,14 @@ class CsvEcritureDAO extends AbstractCsvLayer<Ecriture> {
 			throw new IOException(
 					"Impossible d'instancier l'écriture n°" + idText, e);
 		}
+	}
+	
+	private Date getOptionalDate(CsvReader reader, String field)
+			throws ParseException, IOException {
+		String textPointage = reader.get(field);
+		return (textPointage == null || textPointage.isEmpty()
+				? null								// Pas de pointage
+				: dateFormat.parse(textPointage));	// Une date de pointage
 	}
 	
 }

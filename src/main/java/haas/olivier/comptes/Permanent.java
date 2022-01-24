@@ -234,8 +234,10 @@ public class Permanent implements Comparable<Permanent>, Serializable {
 		draft.montant = getMontant(month);
 		draft.libelle = libelle;
 		draft.tiers = tiers;
-		if (pointer)
-			draft.pointage = date;
+		if (pointer) {
+			draft.pointageDebit = date;
+			draft.pointageCredit = date;
+		}
 		
 		return draft.createEcriture();
 	}

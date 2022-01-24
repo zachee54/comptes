@@ -164,8 +164,9 @@ class CacheEcritureDAO implements EcritureDAO {
 			
 			// Attribuer un identifiant et réinstancier l'écriture
 			try {
-				e = new Ecriture(idGen.getId(), e.date, e.pointage, e.debit,
-						e.credit, e.montant, e.libelle, e.tiers, e.cheque);
+				e = new Ecriture(idGen.getId(), e.date, e.pointageDebit,
+						e.pointageCredit, e.debit, e.credit, e.montant,
+						e.libelle, e.tiers, e.cheque);
 				
 			} catch (EcritureMissingArgumentException
 					| InconsistentArgumentsException e1) {
@@ -181,7 +182,7 @@ class CacheEcritureDAO implements EcritureDAO {
 		
 		// Ajouter l'écriture
 		insert(e, ecritures, e.date, false);	// Collection ordre naturel
-		insert(e, pointages, e.pointage, true);	// Collection ordre de pointage
+		insert(e, pointages, e.pointageDebit, true);	// Collection ordre de pointage
 		nums.put(e.id, e);						// Collection par numéros
 		mustBeSaved = true;						// Sauvegarde attendue
 	}
@@ -196,7 +197,7 @@ class CacheEcritureDAO implements EcritureDAO {
 		ecritures.get(Month.getInstance(e.date)).remove(e);
 		
 		// Supprimer de la collection triée par ordre de pointage
-		pointages.get(Month.getInstance(e.pointage)).remove(e);
+		pointages.get(Month.getInstance(e.pointageDebit)).remove(e);
 		
 		// Marquer qu'une sauvegarde est attendue
 		mustBeSaved = true;

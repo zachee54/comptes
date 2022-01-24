@@ -34,7 +34,8 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 				+ "debit_id INT UNSIGNED NOT NULL,"
 				+ "credit_id INT UNSIGNED NOT NULL,"
 				+ "date DATE NOT NULL,"
-				+ "pointage DATE DEFAULT NULL,"
+				+ "pointage_debit DATE DEFAULT NULL,"
+				+ "pointage_credit DATE DEFAULT NULL,"
 				+ "libelle VARCHAR(100) NULL,"
 				+ "tiers VARCHAR(50) NULL,"
 				+ "cheque INT UNSIGNED DEFAULT NULL,"
@@ -57,8 +58,8 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 				PreparedStatement ecritureStatement =
 						connection.prepareStatement(
 								"INSERT INTO ecritures"
-								+ "(id, debit_id, credit_id, date, pointage, libelle, tiers, cheque, montant) "
-								+ "VALUES (?,?,?,?,?,?,?,?,?)")) {
+								+ "(id, debit_id, credit_id, date, pointage_debit, pointage_credit, libelle, tiers, cheque, montant) "
+								+ "VALUES (?,?,?,?,?,?,?,?,?,?)")) {
 			
 			for (Ecriture ecriture : ecritures) {
 				ecritureStatement.setInt(1, ecriture.id);
@@ -66,20 +67,24 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 				ecritureStatement.setInt(3, ecriture.credit.getId());
 				ecritureStatement.setDate(4, new Date(ecriture.date.getTime()));
 				
-				java.util.Date pointage = ecriture.pointage;
+				java.util.Date pointageDebit = ecriture.pointageDebit;
 				ecritureStatement.setDate(5,
-						pointage == null ? null : new Date(pointage.getTime()));
+						pointageDebit == null ? null : new Date(pointageDebit.getTime()));
 				
-				ecritureStatement.setString(6, ecriture.libelle);
-				ecritureStatement.setString(7, ecriture.tiers);
+				java.util.Date pointageCredit = ecriture.pointageDebit;
+				ecritureStatement.setDate(6,
+						pointageCredit == null ? null : new Date(pointageCredit.getTime()));
+				
+				ecritureStatement.setString(7, ecriture.libelle);
+				ecritureStatement.setString(8, ecriture.tiers);
 				
 				if (ecriture.cheque != null) {
-					ecritureStatement.setInt(8, ecriture.cheque);
+					ecritureStatement.setInt(9, ecriture.cheque);
 				} else {
-					ecritureStatement.setNull(8, Types.INTEGER);
+					ecritureStatement.setNull(9, Types.INTEGER);
 				}
 				
-				ecritureStatement.setInt(9, ecriture.montant.movePointRight(2).intValue());
+				ecritureStatement.setInt(10, ecriture.montant.movePointRight(2).intValue());
 				
 				ecritureStatement.execute();
 			}
@@ -146,7 +151,8 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 			return new Ecriture(
 					resultSet.getInt("id"),
 					resultSet.getDate("date"),
-					resultSet.getDate("pointage"),
+					resultSet.getDate("pointage_debit"),
+					resultSet.getDate("pointage_credit"),
 					comptesById.get(resultSet.getInt("debit_id")),
 					comptesById.get(resultSet.getInt("credit_id")),
 					new BigDecimal(resultSet.getInt("montant"))

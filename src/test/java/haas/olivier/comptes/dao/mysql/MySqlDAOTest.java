@@ -352,7 +352,7 @@ public class MySqlDAOTest {
 		Ecriture ecriture = new Ecriture(
 				8,
 				ecriture2.date,
-				ecriture2.pointage,
+				ecriture2.pointageDebit,
 				ecriture2.debit,
 				compte,	// Casse la clé étrangère dans la base
 				ecriture2.montant,
