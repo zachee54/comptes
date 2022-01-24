@@ -156,6 +156,11 @@ public class CacheDAOFactory extends DAOFactory {
 	}
 
 	@Override
+	public boolean canSaveSuivis() {
+		return dao.canSaveSuivis();
+	}
+
+	@Override
 	public boolean canBeSaved() {
 		return dao.canBeSaved();
 	}

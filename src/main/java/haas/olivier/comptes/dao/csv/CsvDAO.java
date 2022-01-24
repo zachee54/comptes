@@ -537,6 +537,11 @@ public class CsvDAO implements CacheableDAOFactory {
 		return file.getAbsolutePath();
 	}
 	
+	@Override
+	public boolean canSaveSuivis() {
+		return true;
+	}
+
 	/**
 	 * @returns	<code>true</code>
 	 */

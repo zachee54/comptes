@@ -439,6 +439,7 @@ public class MySqlDAOTest {
 		// Vérifier que les soldes ont été calculés
 		BigDecimal solde = DAOFactory.getFactory().getHistoriqueDAO().get(
 				compte1, Month.getInstance(2006, 11));
+		assertNotNull(solde);
 		assertEquals(0, new BigDecimal(9).compareTo(solde));
 	}
 

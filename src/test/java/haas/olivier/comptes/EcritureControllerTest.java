@@ -110,6 +110,7 @@ public class EcritureControllerTest {
 		when(dao.getHistoriqueDAO()).thenReturn(hDAO);
 		when(dao.getSoldeAVueDAO()).thenReturn(sDAO);
 		when(dao.getMoyenneDAO()).thenReturn(mDAO);
+		when(dao.canSaveSuivis()).thenReturn(true);
 		
 		// Comportement du mock : liste complète des comptes
 		when(cDAO.getAll()).thenReturn(

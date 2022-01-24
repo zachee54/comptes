@@ -17,8 +17,6 @@ import haas.olivier.comptes.Banque;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
-import haas.olivier.comptes.ctrl.EcritureController;
-import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.cache.CacheDAOFactory;
 import haas.olivier.comptes.dao.cache.CachePermanentDAO;
 import haas.olivier.comptes.dao.cache.CacheableDAOFactory;
@@ -192,6 +190,11 @@ public class MySqlDAO implements CacheableDAOFactory {
 	}
 	
 	@Override
+	public boolean canSaveSuivis() {
+		return false;
+	}
+
+	@Override
 	public boolean canBeSaved() {
 		return true;
 	}
@@ -253,7 +256,6 @@ public class MySqlDAO implements CacheableDAOFactory {
 	@Override
 	public void close() throws IOException {
 		connectionProvider.close();
-		EcritureController.updateSuivis(DAOFactory.getFactory().getDebut());
 	}
 
 }

@@ -122,6 +122,8 @@ public class DAOFactoryTest {
 		when(factory2.getSoldeAVueDAO()).thenReturn(sDAO2);
 		when(factory1.getMoyenneDAO()).thenReturn(mDAO1);
 		when(factory2.getMoyenneDAO()).thenReturn(mDAO2);
+		when(factory1.canSaveSuivis()).thenReturn(true);
+		when(factory2.canSaveSuivis()).thenReturn(true);
 		when(cDAO1.getAll()).thenReturn(comptes);
 		when(eDAO1.getAll()).thenReturn(ecritures);
 		when(pDAO1.getAll()).thenReturn(permanents);
@@ -153,7 +155,7 @@ public class DAOFactoryTest {
 		assertSame(factory1, DAOFactory.getFactory());
 		
 		DAOFactory.setFactory(factory2);
-		verifyZeroInteractions(factory1);
+		verify(factory1, never()).getEcritureDAO();
 		assertSame(factory2, DAOFactory.getFactory());
 	}
 
@@ -166,7 +168,7 @@ public class DAOFactoryTest {
 		assertSame(factory1, DAOFactory.getFactory());
 		
 		DAOFactory.setFactory(factory2);
-		verifyZeroInteractions(factory1);
+		verify(factory1, never()).getEcritureDAO();
 		assertSame(factory2, DAOFactory.getFactory());
 	}
 	
@@ -193,5 +195,16 @@ public class DAOFactoryTest {
 			verify(sDAO2).set(soldes.next());
 			verify(mDAO2).set(soldes.next());
 		}
+	}
+	
+	@Test
+	public void testSetFactoryCannotSaveSuivis() throws IOException {
+		when(factory1.canSaveSuivis()).thenReturn(false);
+		when(factory1.getDebut()).thenReturn(month1);
+		
+		// Méthode testée
+		DAOFactory.setFactory(factory1);
+		
+		verify(factory1, atLeastOnce()).getEcritureDAO();
 	}
 }

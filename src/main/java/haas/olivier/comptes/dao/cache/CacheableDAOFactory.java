@@ -81,6 +81,17 @@ public interface CacheableDAOFactory extends Closeable {
 	CacheablePropertiesDAO getProperties() throws IOException;
 	
 	/**
+	 * Indique si la classe est capable de sauvegarder les suivis.
+	 * 
+	 * Si <code>false</code>, les soldes doivent être recalculés après le
+	 * chargement.
+	 * 
+	 * @return	<code>true</code> si la classe est capable de sauvegarder les
+	 * 			suivis.
+	 */
+	boolean canSaveSuivis();
+	
+	/**
 	 * Sauvegarde les données.
 	 * 
 	 * @param cache	Le cache à sauvegarder.

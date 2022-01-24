@@ -56,6 +56,7 @@ public class CompteTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		
+		when(factory.canSaveSuivis()).thenReturn(true);
 		when(factory.getHistoriqueDAO()).thenReturn(hDAO);
 		when(factory.getSoldeAVueDAO()).thenReturn(sDAO);
 		when(factory.getMoyenneDAO()).thenReturn(mDAO);

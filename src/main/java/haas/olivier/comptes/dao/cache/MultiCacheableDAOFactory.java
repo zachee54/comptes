@@ -126,6 +126,11 @@ public class MultiCacheableDAOFactory implements CacheableDAOFactory {
 	}
 
 	@Override
+	public boolean canSaveSuivis() {
+		return mainDAO.canSaveSuivis();
+	}
+
+	@Override
 	public boolean canBeSaved() {
 		return mainDAO.canBeSaved();
 	}

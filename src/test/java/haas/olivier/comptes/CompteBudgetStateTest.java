@@ -57,6 +57,7 @@ public class CompteBudgetStateTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		when(factory.canSaveSuivis()).thenReturn(true);
 		DAOFactory.setFactory(factory);
 	}
 

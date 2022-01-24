@@ -126,6 +126,11 @@ public class WriteOnlyCacheableDAOFactory implements CacheableDAOFactory {
 	}
 
 	@Override
+	public boolean canSaveSuivis() {
+		return writeFactory.canSaveSuivis();
+	}
+
+	@Override
 	public boolean canBeSaved() {
 		return writeFactory.canBeSaved();
 	}

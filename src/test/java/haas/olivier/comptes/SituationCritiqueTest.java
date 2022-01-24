@@ -84,6 +84,7 @@ public class SituationCritiqueTest {
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
+		when(factory.canSaveSuivis()).thenReturn(true);
 		
 		DAOFactory.setFactory(factory);
 		when(factory.getEcritureDAO()).thenReturn(eDAO);

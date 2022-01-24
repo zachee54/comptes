@@ -140,6 +140,11 @@ public class EmptyCacheableDAOFactory implements CacheableDAOFactory {
 		// Rien à fermer
 	}
 
+	@Override
+	public boolean canSaveSuivis() {
+		return true;
+	}
+
 	/**
 	 * @returns	<code>false</code>
 	 */

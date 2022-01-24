@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import haas.olivier.comptes.Compte;
 import haas.olivier.comptes.Ecriture;
 import haas.olivier.comptes.Permanent;
+import haas.olivier.comptes.ctrl.EcritureController;
 import haas.olivier.comptes.dao.CompteDAO;
 import haas.olivier.comptes.dao.DAOFactory;
 import haas.olivier.comptes.dao.EcritureDAO;
@@ -133,6 +134,10 @@ public abstract class DAOFactory {
 		
 		// Remplacer l'ancienne par la nouvelle
 		factory = newFactory;
+		
+		if (!factory.canSaveSuivis()) {
+			EcritureController.updateSuivis(factory.getDebut());
+		}
 	}
 	
 	/**
@@ -189,6 +194,17 @@ public abstract class DAOFactory {
 	 * données.
 	 */
 	public abstract PropertiesDAO getPropertiesDAO();
+	
+	/**
+	 * Indique si la classe est capable de sauvegarder les suivis.
+	 * 
+	 * Si <code>false</code>, les soldes doivent être recalculés après le
+	 * chargement.
+	 * 
+	 * @return	<code>true</code> si la classe est capable de sauvegarder les
+	 * 			suivis.
+	 */
+	public abstract boolean canSaveSuivis();
 	
 	/**
 	 * Indique si la source peut être sauvegardée en l'état.

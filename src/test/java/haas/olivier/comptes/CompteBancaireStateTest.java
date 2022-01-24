@@ -31,7 +31,9 @@ public class CompteBancaireStateTest {
 
 	@Before
 	public void setUp() throws Exception {
+		when(factory.canSaveSuivis()).thenReturn(true);
 		DAOFactory.setFactory(factory);
+		
 		when(factory.getDebut()).thenReturn(month.getTranslated(-12));
 	}
 

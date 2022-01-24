@@ -91,7 +91,8 @@ public class EcrituresTableModelTest {
 		ecrituresMai.add(e3);
 		ecrituresMai.add(e4);
 
-		// Les mocks DAO sont recrées à chaque test
+		// Les mocks DAO sont recréés à chaque test
+		when(dao.canSaveSuivis()).thenReturn(true);
 		DAOFactory.setFactory(dao, false);
 		when(dao.getEcritureDAO()).thenReturn(eDAO);
 
