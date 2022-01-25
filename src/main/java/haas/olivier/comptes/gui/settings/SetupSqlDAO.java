@@ -59,16 +59,16 @@ public class SetupSqlDAO {
 	private final JDialog dialog;
 
 	/** Le champ du nom de l'hôte. */
-	private final JTextField hostField = new JTextField();
+	private final JTextField hostField = new JTextField("localhost");
 	
 	/** Le champ du numéro de port. */
-	private final JTextField portField = new JTextField();
+	private final JTextField portField = new JTextField("3306");
 	
 	/** Le champ du nom de la base de données. */
-	private final JTextField databaseField = new JTextField();
+	private final JTextField databaseField = new JTextField("comptes");
 	
 	/** Le champ du nom d'utilisateur. */
-	private final JTextField usernameField = new JTextField();
+	private final JTextField usernameField = new JTextField("comptes");
 	
 	/** Le champ du mot de passe. */
 	private final JTextField passwordField = new JPasswordField();
