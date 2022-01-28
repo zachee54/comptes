@@ -94,48 +94,29 @@ public class MySqlDAO implements CacheableDAOFactory {
 	private void createTablesIfNotExist() throws SQLException {
 		try (Connection connection = connectionProvider.getConnection();
 				Statement statement = connection.createStatement()) {
+			createTypesComptesTable(statement);
 			MySqlComptesDAO.createTable(statement);
 			MySqlEcrituresDAO.createTable(statement);
 			MySqlPermanentsDAO.createTables(statement);
 			MySqlPropertiesDAO.createTables(statement);
-			createTypesComptesTable(connection, statement);
 		}
 	}
 	
 	/**
 	 * Crée la table des types de comptes.
 	 * 
-	 * @param connection	Une connexion valide.
 	 * @param statement		Une instruction SQL prête à l'emploi.
 	 * 
 	 * @throws SQLException
 	 */
-	private void createTypesComptesTable(Connection connection,
-			Statement statement) throws SQLException {
-		try (PreparedStatement prepared = connection.prepareStatement(
-				"INSERT INTO types_comptes (id, nom, isEpargne, isBancaire)"
-				+ " VALUES (?,?,?,?)")) {
-			
-			statement.execute(
-					"CREATE TABLE IF NOT EXISTS types_comptes("
-					+ "id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
-					+ "nom VARCHAR(50) NOT NULL,"
-					+ "isEpargne TINYINT(1) NOT NULL DEFAULT 0,"
-					+ "isBancaire TINYINT(1) NOT NULL)");
-			
-			statement.execute("DELETE FROM types_comptes");
-			
-			for (TypeCompte type : TypeCompte.values()) {
-				if (type.id < 0) {
-					continue;
-				}
-				prepared.setInt(1, type.id);
-				prepared.setString(2, type.nom);
-				prepared.setBoolean(3, type.isEpargne());
-				prepared.setBoolean(4, type.isBancaire());
-				prepared.execute();
-			}
-		}
+	private void createTypesComptesTable(Statement statement)
+			throws SQLException {
+		statement.execute(
+				"CREATE TABLE IF NOT EXISTS types_comptes("
+				+ "id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
+				+ "nom VARCHAR(50) NOT NULL,"
+				+ "isEpargne TINYINT(1) NOT NULL DEFAULT 0,"
+				+ "isBancaire TINYINT(1) NOT NULL)");
 	}
 
 	@Override
@@ -254,7 +235,9 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 			statement.execute("DELETE FROM ecritures");
 			statement.execute("DELETE FROM comptes");
+			statement.execute("DELETE FROM types_comptes");
 
+			fillTypesComptesTable(connection);
 			MySqlComptesDAO.save(cache.getCompteDAO().getAll(), connection);
 			MySqlEcrituresDAO.save(
 					cache.getEcritureDAO().getAll(), connection);
@@ -266,6 +249,32 @@ public class MySqlDAO implements CacheableDAOFactory {
 
 		} catch (SQLException e) {
 			throw new IOException(e);
+		}
+	}
+	
+	/**
+	 * Sauvegarde les types de comptes.
+	 * 
+	 * @param connection	Une connexion valide.
+	 * 
+	 * @throws SQLException
+	 */
+	private void fillTypesComptesTable(Connection connection)
+			throws SQLException {
+		try (PreparedStatement prepared = connection.prepareStatement(
+				"REPLACE INTO types_comptes (id, nom, isEpargne, isBancaire)"
+				+ " VALUES (?,?,?,?)")) {
+			
+			for (TypeCompte type : TypeCompte.values()) {
+				if (type.id < 0) {
+					continue;
+				}
+				prepared.setInt(1, type.id);
+				prepared.setString(2, type.nom);
+				prepared.setBoolean(3, type.isEpargne());
+				prepared.setBoolean(4, type.isBancaire());
+				prepared.execute();
+			}
 		}
 	}
 	

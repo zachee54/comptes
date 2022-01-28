@@ -33,7 +33,8 @@ class MySqlComptesDAO implements Iterator<Compte> {
 				+ "numero BIGINT DEFAULT NULL,"
 				+ "ouverture DATE NOT NULL,"
 				+ "cloture DATE DEFAULT NULL,"
-				+ "couleur INT NOT NULL)");
+				+ "couleur INT NOT NULL,"
+				+ "CONSTRAINT FOREIGN KEY (type) REFERENCES types_comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
 	}
 	
 	/**
@@ -55,7 +56,7 @@ class MySqlComptesDAO implements Iterator<Compte> {
 			for (Compte compte : comptes) {
 				statement.setInt(1, compte.getId());
 				statement.setString(2, compte.getNom());
-				statement.setInt(3, compte.getType().ordinal());
+				statement.setInt(3, compte.getType().id);
 				statement.setInt(4, compte.getColor().getRGB());
 				statement.setDate(5,
 						new Date(compte.getOuverture().getTime()));
@@ -122,8 +123,7 @@ class MySqlComptesDAO implements Iterator<Compte> {
 				throw new NoSuchElementException();
 			}
 			
-			TypeCompte[] types = TypeCompte.values();
-			TypeCompte type = types[resultSet.getInt("type")];
+			TypeCompte type = getTypeById(resultSet.getInt("type"));
 			
 			Compte compte = new Compte(resultSet.getInt("id"), type);
 			compte.setNom(resultSet.getString("nom"));
@@ -137,6 +137,21 @@ class MySqlComptesDAO implements Iterator<Compte> {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Renvoie un type de compte à partir de son identifiant.
+	 * 
+	 * @param id	L'identifiant du type de compte.
+	 * @return		Le type compte portant cet identifiant.
+	 */
+	private TypeCompte getTypeById(int id) {
+		for (TypeCompte type : TypeCompte.values()) {
+			if (type.id == id) {
+				return type;
+			}
+		}
+		throw new RuntimeException("Type de compte inconnu");
 	}
 
 }
