@@ -538,6 +538,15 @@ public class CsvDAO implements CacheableDAOFactory {
 	}
 	
 	@Override
+	public String getSourceRelativeName() {
+		return new File("").getAbsoluteFile().toPath()
+				.relativize(
+						file.getAbsoluteFile().toPath())
+				.toString();
+
+	}
+	
+	@Override
 	public boolean canSaveSuivis() {
 		return true;
 	}

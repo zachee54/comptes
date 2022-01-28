@@ -31,9 +31,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -560,9 +558,7 @@ ActionListener, PropertiesController {
 		// Enregistrer dans les préférences
 		if (fullName != null) {
 			prefs.put(Comptes.SOURCE_NAME_PROPERTY,
-					Paths.get(new File("").getAbsolutePath()).relativize(
-							new File(factory.getSourceFullName()).toPath())
-							.toString());
+					factory.getSourceRelativeName());
 		}
 	}
 	
