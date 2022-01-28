@@ -216,7 +216,8 @@ public class Comptes implements Runnable {
 			return new MultiCacheableDAOFactory(mainDAO, backupDAO);
 			
 		} else if (sourceName.startsWith("jdbc:mysql:")) {
-			Scanner scanner = new Scanner(sourceName);
+			String content = sourceName.substring("jdbc:mysql:".length());
+			Scanner scanner = new Scanner(content);
 			scanner.useDelimiter(":");
 			
 			String host = scanner.next();
