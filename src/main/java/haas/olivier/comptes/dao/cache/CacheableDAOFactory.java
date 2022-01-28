@@ -116,6 +116,15 @@ public interface CacheableDAOFactory extends Closeable {
 	String getSourceFullName();
 	
 	/**
+	 * Renvoie le nom relatif de la source.
+	 * 
+	 * Cette implémentation par défaut renvoie {@link #getSourceFullName()}.
+	 */
+	default String getSourceRelativeName() {
+		return getSourceFullName();
+	}
+	
+	/**
 	 * Indique si la source de données peut être sauvegardée en l'état.
 	 */
 	boolean canBeSaved();

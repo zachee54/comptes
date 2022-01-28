@@ -122,7 +122,15 @@ public class MultiCacheableDAOFactory implements CacheableDAOFactory {
 	@Override
 	public String getSourceFullName() {
 		return String.format("[multi]%s[multi]%s",
-				mainDAO.getSourceFullName(), backupDAO.getSourceFullName());
+				mainDAO.getSourceFullName(),
+				backupDAO.getSourceFullName());
+	}
+	
+	@Override
+	public String getSourceRelativeName() {
+		return String.format("[multi]%s[multi]%s",
+				mainDAO.getSourceRelativeName(),
+				backupDAO.getSourceRelativeName());
 	}
 
 	@Override

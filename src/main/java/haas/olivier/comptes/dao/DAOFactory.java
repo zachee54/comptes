@@ -251,4 +251,14 @@ public abstract class DAOFactory {
 	 * fichier).
 	 */
 	public abstract String getSourceFullName();
+	
+	/**
+	 * Renvoie le chemin relatif vers la source (par exemple : le chemin relatif
+	 * du fichier par rapport au répertoire courant).
+	 * 
+	 * Cette implémentation renvoie {@link #getSourceFullName()}.
+	 */
+	public String getSourceRelativeName() {
+		return getSourceFullName();
+	}
 }

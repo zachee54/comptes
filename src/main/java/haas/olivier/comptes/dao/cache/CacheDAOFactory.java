@@ -224,4 +224,12 @@ public class CacheDAOFactory extends DAOFactory {
 	public String getSourceFullName() {
 		return dao.getSourceFullName();
 	}
+	
+	/**
+	 * Renvoie le nom de relatif de la source.
+	 */
+	@Override
+	public String getSourceRelativeName() {
+		return dao.getSourceRelativeName();
+	}
 }
