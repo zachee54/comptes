@@ -206,19 +206,17 @@ public class Comptes implements Runnable {
 			Scanner scanner = new Scanner(sourceName);
 			scanner.useDelimiter("[multi]");
 			
-			CacheableDAOFactory mainDAO = getCacheableFromURI(scanner.next());
-			CacheableDAOFactory backupDAO = getCacheableFromURI(scanner.next());
+			CacheableDAOFactory mainDAO =
+					getCacheableFromProperty(scanner.next());
+			CacheableDAOFactory backupDAO =
+					getCacheableFromProperty(scanner.next());
+			
 			scanner.close();
 			
 			return new MultiCacheableDAOFactory(mainDAO, backupDAO);
-		}
-		
-		return getCacheableFromURI(sourceName);
-	}
-	
-	private CacheableDAOFactory getCacheableFromURI(String uri) throws IOException {
-		if (uri.startsWith("jdbc:mysql:")) {
-			Scanner scanner = new Scanner(uri);
+			
+		} else if (sourceName.startsWith("jdbc:mysql:")) {
+			Scanner scanner = new Scanner(sourceName);
 			scanner.useDelimiter(":");
 			
 			String host = scanner.next();
@@ -235,8 +233,8 @@ public class Comptes implements Runnable {
 			return loadDatabase(
 					host, port, database, username, password.toString());
 			
-		} else if (!uri.isEmpty()) {
-			return loadCsvFile(new File(uri));
+		} else if (!sourceName.isEmpty()) {
+			return loadCsvFile(new File(sourceName));
 		}
 		
 		return null;
