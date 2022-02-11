@@ -39,6 +39,10 @@ class MySqlEcrituresDAO implements Iterator<Ecriture> {
 				+ "tiers VARCHAR(50) NULL,"
 				+ "cheque INT UNSIGNED DEFAULT NULL,"
 				+ "montant INT NOT NULL,"
+				+ "KEY ecritures_debit (debit_id),"
+				+ "KEY ecritures_credit (credit_id),"
+				+ "KEY idx_date (date),"
+				+ "KEY idx_pointage (pointage),"
 				+ "CONSTRAINT FOREIGN KEY ecritures_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
 				+ "CONSTRAINT FOREIGN KEY ecritures_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
 	}
