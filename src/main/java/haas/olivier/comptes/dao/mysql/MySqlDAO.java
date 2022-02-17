@@ -116,7 +116,8 @@ public class MySqlDAO implements CacheableDAOFactory {
 				+ "id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
 				+ "nom VARCHAR(50) NOT NULL,"
 				+ "isEpargne TINYINT(1) NOT NULL DEFAULT 0,"
-				+ "isBancaire TINYINT(1) NOT NULL)");
+				+ "isBancaire TINYINT(1) NOT NULL,"
+				+ "isDepense TINYINT(1) NOT NULL DEFAULT 0)");
 	}
 
 	@Override
@@ -262,8 +263,8 @@ public class MySqlDAO implements CacheableDAOFactory {
 	private void fillTypesComptesTable(Connection connection)
 			throws SQLException {
 		try (PreparedStatement prepared = connection.prepareStatement(
-				"REPLACE INTO types_comptes (id, nom, isEpargne, isBancaire)"
-				+ " VALUES (?,?,?,?)")) {
+				"REPLACE INTO types_comptes (id, nom, isEpargne, isBancaire, isDepense)"
+				+ " VALUES (?,?,?,?,?)")) {
 			
 			for (TypeCompte type : TypeCompte.values()) {
 				if (type.id < 0) {
@@ -273,6 +274,7 @@ public class MySqlDAO implements CacheableDAOFactory {
 				prepared.setString(2, type.nom);
 				prepared.setBoolean(3, type.isEpargne());
 				prepared.setBoolean(4, type.isBancaire());
+				prepared.setBoolean(5, type.isDepense());
 				prepared.execute();
 			}
 		}
