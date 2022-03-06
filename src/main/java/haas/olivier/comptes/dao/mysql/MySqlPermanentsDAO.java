@@ -42,7 +42,7 @@ class MySqlPermanentsDAO implements Iterator<Permanent> {
 				+ "libelle VARCHAR(50),"
 				+ "tiers VARCHAR(50),"
 				+ "dependance_id INT UNSIGNED DEFAULT NULL,"
-				+ "taux INT DEFAULT NULL,"
+				+ "taux DECIMAL(5,2) DEFAULT NULL,"
 				+ "pointer TINYINT(1),"
 				+ "CONSTRAINT FOREIGN KEY permanents_debits (debit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
 				+ "CONSTRAINT FOREIGN KEY permanents_credits (credit_id) REFERENCES comptes(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
@@ -144,8 +144,7 @@ class MySqlPermanentsDAO implements Iterator<Permanent> {
 				if (state instanceof PermanentProport) {
 					PermanentProport proport = (PermanentProport) state;
 					statement.setInt(1, proport.dependance.getId());
-					statement.setInt(2,
-							proport.taux.movePointRight(2).intValue());
+					statement.setBigDecimal(2, proport.taux);
 					statement.setInt(3, permanent.getId());
 					statement.execute();
 				}
