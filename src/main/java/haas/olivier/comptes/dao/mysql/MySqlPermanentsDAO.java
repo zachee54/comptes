@@ -53,7 +53,7 @@ class MySqlPermanentsDAO implements Iterator<Permanent> {
 				+ "year INT UNSIGNED NOT NULL,"
 				+ "month INT UNSIGNED NOT NULL,"
 				+ "jour INT NOT NULL,"
-				+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
+				+ "PRIMARY KEY (permanent_id, year, month),"
 				+ "CONSTRAINT FOREIGN KEY permanents_jours (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
 		
 		statement.execute(
@@ -62,7 +62,7 @@ class MySqlPermanentsDAO implements Iterator<Permanent> {
 				+ "year INT UNSIGNED NOT NULL,"
 				+ "month INT UNSIGNED NOT NULL,"
 				+ "montant INT NOT NULL,"
-				+ "CONSTRAINT UNIQUE INDEX (permanent_id, year, month),"
+				+ "PRIMARY KEY (permanent_id, year, month),"
 				+ "CONSTRAINT FOREIGN KEY permanents_montants (permanent_id) REFERENCES permanents(id) ON UPDATE CASCADE ON DELETE CASCADE)");
 	}
 	
